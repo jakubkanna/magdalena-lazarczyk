@@ -84,7 +84,9 @@ const getBestImagePath = (path: string) => {
   const displayWidth = getDisplayWidth();
   const matchedWidth = responsiveWidths.find((width) => width >= displayWidth);
 
-  return matchedWidth ? responsiveAssetPath(path, matchedWidth) : assetPath(path);
+  return matchedWidth
+    ? responsiveAssetPath(path, matchedWidth)
+    : assetPath(path);
 };
 
 const preloadImage = (path: string) =>
@@ -139,7 +141,7 @@ function FrameSequence({
       ? motionFrameCount - (frameIndex - pauseFrameCount)
       : pingPong && frameIndex >= frames.length
         ? frames.length - 1
-      : frameIndex;
+        : frameIndex;
 
   const visibleFrameIndex = reverse
     ? frames.length - 1 - pingPongFrameIndex
@@ -236,6 +238,10 @@ const frontpageImagePaths = frontpageLayers.flatMap((layer) =>
   layer.frames ? layer.frames : layer.src ? [layer.src] : [],
 );
 
+const currentYear = new Date().getFullYear();
+const minimumLoaderDuration = 1000;
+const loaderExitDuration = 720;
+
 const layerAnimationClass = (layer: FrontpageLayer) =>
   layer.id === 5
     ? " frontpage__layer--contact-motion"
@@ -246,12 +252,19 @@ const layerAnimationClass = (layer: FrontpageLayer) =>
 export default function Home() {
   const [hoveredLayer, setHoveredLayer] = useState<number | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoaderVisible, setIsLoaderVisible] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     let isCancelled = false;
+    const minimumDelay = new Promise<void>((resolve) => {
+      window.setTimeout(resolve, minimumLoaderDuration);
+    });
 
-    Promise.all(frontpageImagePaths.map(preloadImage)).then(() => {
+    Promise.all([
+      Promise.all(frontpageImagePaths.map(preloadImage)),
+      minimumDelay,
+    ]).then(() => {
       if (!isCancelled) {
         setIsLoaded(true);
       }
@@ -262,12 +275,32 @@ export default function Home() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!isLoaded) {
+      document.title = "Loading...";
+      return;
+    }
+
+    document.title = "Magdalena Lazarczyk";
+
+    const loaderTimer = window.setTimeout(() => {
+      setIsLoaderVisible(false);
+    }, loaderExitDuration);
+
+    return () => window.clearTimeout(loaderTimer);
+  }, [isLoaded]);
+
   return (
     <main className="frontpage" aria-label="Magdalena Lazarczyk">
-      {!isLoaded ? (
-        <div className="frontpage__loader" role="status" aria-live="polite">
-          <span>Magdalena Łazarczyk Portfolio</span>
-          <span className="frontpage__spinner" aria-hidden="true" />
+      {isLoaderVisible ? (
+        <div
+          className={`frontpage__loader${
+            isLoaded ? " frontpage__loader--complete" : ""
+          }`}
+          role="status"
+          aria-live="polite"
+        >
+          <span>Magdalena Łazarczyk</span>
         </div>
       ) : null}
       <div
@@ -390,6 +423,16 @@ export default function Home() {
             Portfolio
           </span>
         </div>
+        <p className="frontpage__credit">
+          &copy; {currentYear} - Designed &amp; Developed by{" "}
+          <a
+            href="https://studio.jakubkanna.com"
+            target="_blank"
+            rel="noreferrer"
+          >
+            STUDIO JKN
+          </a>
+        </p>
       </div>
     </main>
   );
