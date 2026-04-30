@@ -7,9 +7,56 @@
 
 html,
 body {
-  @apply bg-white dark:bg-gray-950;
+  @apply bg-white;
+  margin: 0;
+  min-width: 320px;
+  min-height: 100%;
 
   @media (prefers-color-scheme: dark) {
-    color-scheme: dark;
+    color-scheme: light;
   }
+}
+
+body {
+  overflow: hidden;
+}
+
+button,
+img {
+  user-select: none;
+}
+
+.frontpage {
+  position: relative;
+  width: 100vw;
+  min-height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+  background: #fff;
+}
+
+.frontpage__layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.frontpage__frames {
+  object-fit: initial;
+  will-change: auto;
+}
+
+.frontpage__frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
 }
