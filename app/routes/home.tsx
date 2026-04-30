@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  motion,
-  type TargetAndTransition,
-  type Transition,
-} from "framer-motion";
+import type { TargetAndTransition, Transition } from "framer-motion";
 import { useNavigate } from "react-router";
 import type { Route } from "./+types/home";
 
@@ -51,6 +47,63 @@ const catFrames = [
 
 const catFrameDuration = 6;
 const assetPath = (path: string) => `${import.meta.env.BASE_URL}${path}`;
+const responsiveWidths = [1280, 1920, 2560] as const;
+const originalWidth = 3840;
+const frontpageImageSizes = "100vw";
+
+const responsiveAssetPath = (path: string, width: number) => {
+  const lastDotIndex = path.lastIndexOf(".");
+  const extension = lastDotIndex > -1 ? path.slice(lastDotIndex) : "";
+  const pathWithoutExtension =
+    lastDotIndex > -1 ? path.slice(0, lastDotIndex) : path;
+  const optimizedPath = pathWithoutExtension.replace(
+    "frontpage/",
+    "frontpage/optimized/",
+  );
+
+  return assetPath(`${optimizedPath}-${width}w${extension}`);
+};
+
+const imageSrcSet = (path: string) =>
+  [
+    ...responsiveWidths.map(
+      (width) => `${responsiveAssetPath(path, width)} ${width}w`,
+    ),
+    `${assetPath(path)} ${originalWidth}w`,
+  ].join(", ");
+
+const getDisplayWidth = () => {
+  if (typeof window === "undefined") {
+    return originalWidth;
+  }
+
+  return Math.ceil(window.innerWidth * window.devicePixelRatio);
+};
+
+const getBestImagePath = (path: string) => {
+  const displayWidth = getDisplayWidth();
+  const matchedWidth = responsiveWidths.find((width) => width >= displayWidth);
+
+  return matchedWidth ? responsiveAssetPath(path, matchedWidth) : assetPath(path);
+};
+
+const preloadImage = (path: string) =>
+  new Promise<void>((resolve) => {
+    const image = new Image();
+    const finish = () => resolve();
+
+    image.decoding = "async";
+    image.onload = () => {
+      if (typeof image.decode === "function") {
+        image.decode().then(finish).catch(finish);
+        return;
+      }
+
+      finish();
+    };
+    image.onerror = finish;
+    image.src = getBestImagePath(path);
+  });
 
 function FrameSequence({
   frames,
@@ -96,6 +149,8 @@ function FrameSequence({
     <img
       className="frontpage__frame"
       src={assetPath(frames[visibleFrameIndex])}
+      srcSet={imageSrcSet(frames[visibleFrameIndex])}
+      sizes={frontpageImageSizes}
       alt=""
       draggable={false}
     />
@@ -177,93 +232,165 @@ const frontpageLayers: FrontpageLayer[] = [
   },
 ];
 
+const frontpageImagePaths = frontpageLayers.flatMap((layer) =>
+  layer.frames ? layer.frames : layer.src ? [layer.src] : [],
+);
+
+const layerAnimationClass = (layer: FrontpageLayer) =>
+  layer.id === 5
+    ? " frontpage__layer--contact-motion"
+    : layer.id === 7
+      ? " frontpage__layer--rock-motion"
+      : "";
+
 export default function Home() {
   const [hoveredLayer, setHoveredLayer] = useState<number | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    Promise.all(frontpageImagePaths.map(preloadImage)).then(() => {
+      if (!isCancelled) {
+        setIsLoaded(true);
+      }
+    });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
 
   return (
     <main className="frontpage" aria-label="Magdalena Lazarczyk">
-      {frontpageLayers.map((layer) =>
-        layer.frames ? (
-          <div
-            key={layer.id}
-            className={`frontpage__layer frontpage__frames${
-              hoveredLayer === layer.id ? " frontpage__layer--hovered" : ""
-            }`}
-            aria-hidden="true"
-            style={{
-              zIndex: layer.zIndex,
-              transform: layer.offsetX ? `translateX(${layer.offsetX}px)` : undefined,
-            }}
+      {!isLoaded ? (
+        <div className="frontpage__loader" role="status" aria-live="polite">
+          <span>Magdalena Łazarczyk Portfolio</span>
+          <span className="frontpage__spinner" aria-hidden="true" />
+        </div>
+      ) : null}
+      <div
+        className={`frontpage__scene${
+          isLoaded ? " frontpage__scene--loaded" : ""
+        }`}
+        aria-hidden={!isLoaded}
+      >
+        {isLoaded
+          ? frontpageLayers.map((layer) =>
+              layer.frames ? (
+                <div
+                  key={layer.id}
+                  className={`frontpage__layer frontpage__frames${
+                    hoveredLayer === layer.id
+                      ? " frontpage__layer--hovered"
+                      : ""
+                  }`}
+                  aria-hidden="true"
+                  style={{
+                    zIndex: layer.zIndex,
+                    transform: layer.offsetX
+                      ? `translateX(${layer.offsetX}px)`
+                      : undefined,
+                  }}
+                >
+                  <FrameSequence
+                    frames={layer.frames}
+                    duration={layer.frameDuration ?? 2}
+                    pingPong={layer.pingPongFrames}
+                    pingPongPause={layer.pingPongPause}
+                    reverse={layer.reverseFrames}
+                  />
+                </div>
+              ) : (
+                <img
+                  key={layer.id}
+                  className={`frontpage__layer${
+                    hoveredLayer === layer.id
+                      ? " frontpage__layer--hovered"
+                      : ""
+                  }${layerAnimationClass(layer)}`}
+                  src={layer.src ? assetPath(layer.src) : undefined}
+                  srcSet={layer.src ? imageSrcSet(layer.src) : undefined}
+                  sizes={frontpageImageSizes}
+                  alt=""
+                  aria-hidden="true"
+                  draggable={false}
+                  style={{
+                    zIndex: layer.zIndex,
+                    transformOrigin: layer.transformOrigin,
+                  }}
+                />
+              ),
+            )
+          : null}
+        {isLoaded
+          ? frontpageLayers
+              .filter((layer) => layer.hoverable && layer.hoverBox)
+              .map((layer) => (
+                <div
+                  key={`${layer.id}-hover`}
+                  className={`frontpage__hitbox${layerAnimationClass(layer)}`}
+                  aria-label={layer.tooltip}
+                  onMouseEnter={() => setHoveredLayer(layer.id)}
+                  onMouseLeave={() => setHoveredLayer(null)}
+                  onClick={() => {
+                    if (layer.href) {
+                      navigate(layer.href);
+                    }
+                  }}
+                  onKeyDown={(event) => {
+                    if (
+                      layer.href &&
+                      (event.key === "Enter" || event.key === " ")
+                    ) {
+                      event.preventDefault();
+                      navigate(layer.href);
+                    }
+                  }}
+                  role={layer.href ? "link" : undefined}
+                  tabIndex={layer.href ? 0 : undefined}
+                  style={{
+                    zIndex: layer.zIndex + 100,
+                    left: `${layer.hoverBox?.left}%`,
+                    top: `${layer.hoverBox?.top}%`,
+                    width: `${layer.hoverBox?.width}%`,
+                    height: `${layer.hoverBox?.height}%`,
+                    transform: layer.offsetX
+                      ? `translateX(${layer.offsetX}px)`
+                      : undefined,
+                    transformOrigin: layer.transformOrigin,
+                  }}
+                >
+                  {layer.tooltip && hoveredLayer === layer.id ? (
+                    <span className="frontpage__tooltip">{layer.tooltip}</span>
+                  ) : null}
+                </div>
+              ))
+          : null}
+        <div className="frontpage__help" aria-label="Portfolio navigation">
+          <button
+            className="frontpage__help-button"
+            type="button"
+            aria-label="Go to portfolio"
+            onClick={() => navigate("/portfolio")}
           >
-            <FrameSequence
-              frames={layer.frames}
-              duration={layer.frameDuration ?? 2}
-              pingPong={layer.pingPongFrames}
-              pingPongPause={layer.pingPongPause}
-              reverse={layer.reverseFrames}
-            />
-          </div>
-        ) : (
-          <motion.img
-            key={layer.id}
-            className={`frontpage__layer${
-              hoveredLayer === layer.id ? " frontpage__layer--hovered" : ""
-            }`}
-            src={layer.src ? assetPath(layer.src) : undefined}
-            alt=""
-            aria-hidden="true"
-            draggable={false}
-            animate={layer.animate}
-            transition={layer.transition}
-            style={{
-              zIndex: layer.zIndex,
-              transformOrigin: layer.transformOrigin,
-            }}
-          />
-        ),
-      )}
-      {frontpageLayers
-        .filter((layer) => layer.hoverable && layer.hoverBox)
-        .map((layer) => (
-          <motion.div
-            key={`${layer.id}-hover`}
-            className="frontpage__hitbox"
-            aria-label={layer.tooltip}
-            animate={layer.animate}
-            transition={layer.transition}
-            onMouseEnter={() => setHoveredLayer(layer.id)}
-            onMouseLeave={() => setHoveredLayer(null)}
-            onClick={() => {
-              if (layer.href) {
-                navigate(layer.href);
-              }
-            }}
-            onKeyDown={(event) => {
-              if (layer.href && (event.key === "Enter" || event.key === " ")) {
-                event.preventDefault();
-                navigate(layer.href);
-              }
-            }}
-            role={layer.href ? "link" : undefined}
-            tabIndex={layer.href ? 0 : undefined}
-            style={{
-              zIndex: layer.zIndex + 100,
-              left: `${layer.hoverBox?.left}%`,
-              top: `${layer.hoverBox?.top}%`,
-              width: `${layer.hoverBox?.width}%`,
-              height: `${layer.hoverBox?.height}%`,
-              transform: layer.offsetX
-                ? `translateX(${layer.offsetX}px)`
-                : undefined,
-              transformOrigin: layer.transformOrigin,
-            }}
-          >
-            {layer.tooltip && hoveredLayer === layer.id ? (
-              <span className="frontpage__tooltip">{layer.tooltip}</span>
-            ) : null}
-          </motion.div>
-        ))}
+            <svg
+              className="frontpage__help-icon"
+              viewBox="0 0 512 512"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path d="M80 212v236a16 16 0 0016 16h96V328a24 24 0 0124-24h80a24 24 0 0124 24v136h96a16 16 0 0016-16V212" />
+              <path d="M480 256L266.89 52c-5.95-5.67-15.83-5.67-21.78 0L32 256" />
+              <path d="M400 179V64h-48v69" />
+            </svg>
+          </button>
+          <span className="frontpage__help-tooltip" role="tooltip">
+            Portfolio
+          </span>
+        </div>
+      </div>
     </main>
   );
 }

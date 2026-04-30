@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans:
+    "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 html,
@@ -52,6 +53,41 @@ img {
   background: #fff;
 }
 
+.frontpage__loader {
+  position: absolute;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px;
+  color: #111;
+  line-height: 1.1;
+  text-align: center;
+  background: #fff;
+}
+
+.frontpage__spinner {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border: 2px solid rgb(17 17 17 / 0.22);
+  border-top-color: #111;
+  border-radius: 50%;
+  animation: frontpage-spin 0.8s linear infinite;
+}
+
+.frontpage__scene {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.frontpage__scene--loaded {
+  opacity: 1;
+}
+
 .frontpage__layer {
   position: absolute;
   inset: 0;
@@ -67,6 +103,14 @@ img {
   transition: filter 180ms ease;
   filter: drop-shadow(0 0 18px rgb(255 220 0 / 0.9))
     drop-shadow(0 0 36px rgb(255 220 0 / 0.55));
+}
+
+.frontpage__layer--contact-motion {
+  animation: frontpage-contact-slide 10s ease-in-out infinite;
+}
+
+.frontpage__layer--rock-motion {
+  animation: frontpage-rock-shake 5s ease-in-out infinite;
 }
 
 .frontpage__hitbox {
@@ -91,6 +135,74 @@ img {
   white-space: nowrap;
   pointer-events: none;
   box-shadow: 0 8px 22px rgb(0 0 0 / 0.18);
+}
+
+.frontpage__help {
+  position: absolute;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 300;
+}
+
+.frontpage__help-button {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgb(17 17 17 / 0.18);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.88);
+  color: #111;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 0.16);
+  backdrop-filter: blur(8px);
+}
+
+.frontpage__help-icon {
+  width: 23px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 32;
+}
+
+.frontpage__help-button:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 3px;
+}
+
+.frontpage__help-tooltip {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  width: max-content;
+  max-width: min(260px, calc(100vw - 36px));
+  padding: 8px 11px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.95);
+  color: #111;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.25;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+  box-shadow: 0 8px 22px rgb(0 0 0 / 0.18);
+}
+
+.frontpage__help:hover .frontpage__help-tooltip,
+.frontpage__help:focus-within .frontpage__help-tooltip {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .frontpage__frames {
@@ -131,4 +243,54 @@ img {
 
 .page__back:hover {
   color: rgb(194 158 0);
+}
+
+@keyframes frontpage-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes frontpage-contact-slide {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(100px);
+  }
+}
+
+@keyframes frontpage-rock-shake {
+  0%,
+  72%,
+  93%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+
+  75% {
+    transform: translateX(-5px) rotate(-1.2deg);
+  }
+
+  78% {
+    transform: translateX(5px) rotate(1.2deg);
+  }
+
+  81% {
+    transform: translateX(-4px) rotate(-0.9deg);
+  }
+
+  84% {
+    transform: translateX(4px) rotate(0.9deg);
+  }
+
+  87% {
+    transform: translateX(-2px) rotate(-0.4deg);
+  }
+
+  90% {
+    transform: translateX(2px) rotate(0.4deg);
+  }
 }
