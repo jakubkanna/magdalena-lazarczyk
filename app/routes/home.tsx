@@ -4,6 +4,7 @@ import {
   type TargetAndTransition,
   type Transition,
 } from "framer-motion";
+import { useNavigate } from "react-router";
 import type { Route } from "./+types/home";
 
 export function meta({}: Route.MetaArgs) {
@@ -26,29 +27,30 @@ type FrontpageLayer = {
   pingPongFrames?: boolean;
   pingPongPause?: number;
   offsetX?: number;
+  hoverable?: boolean;
+  tooltip?: string;
+  href?: string;
+  hoverBox?: {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+  };
   transformOrigin?: string;
   animate?: TargetAndTransition;
   transition?: Transition;
 };
 
 const catFrames = [
-  "/frontpage/cat/cat_0000_cat---Rotate-Object-Layer-copy-3.png",
-  "/frontpage/cat/cat_0001_cat---Rotate-Object-Layer-copy-2.png",
-  "/frontpage/cat/cat_0002_cat---Rotate-Object-Layer-copy.png",
-  "/frontpage/cat/cat_0003_cat---Rotate-Object-Layer.png",
-  "/frontpage/cat/cat_0004_cat.png",
+  "frontpage/cat/cat_0000_cat---Rotate-Object-Layer-copy-3.png",
+  "frontpage/cat/cat_0001_cat---Rotate-Object-Layer-copy-2.png",
+  "frontpage/cat/cat_0002_cat---Rotate-Object-Layer-copy.png",
+  "frontpage/cat/cat_0003_cat---Rotate-Object-Layer.png",
+  "frontpage/cat/cat_0004_cat.png",
 ];
 
-const catFrameDuration = 4;
-
-const legsFrames = Array.from(
-  { length: 9 },
-  (_, index) =>
-    `/frontpage/legs/mp_%20(1)_${(index + 31).toString().padStart(5, "0")}.png`,
-);
-
-const legsFramesPerSecond = 5;
-const legsFrameDuration = (legsFrames.length * 2 - 2) / legsFramesPerSecond;
+const catFrameDuration = 6;
+const assetPath = (path: string) => `${import.meta.env.BASE_URL}${path}`;
 
 function FrameSequence({
   frames,
@@ -93,7 +95,7 @@ function FrameSequence({
   return (
     <img
       className="frontpage__frame"
-      src={frames[visibleFrameIndex]}
+      src={assetPath(frames[visibleFrameIndex])}
       alt=""
       draggable={false}
     />
@@ -104,19 +106,17 @@ const frontpageLayers: FrontpageLayer[] = [
   {
     id: 6,
     zIndex: 70,
-    src: "/frontpage/kolaz-magdalena-lazarczyk_0000s_0000_Background.png",
+    src: "frontpage/kolaz-magdalena-lazarczyk_0000s_0000_Background.png",
     transformOrigin: "83% 87%",
-    animate: { scale: [1, 1.2, 1] },
-    transition: {
-      duration: 12,
-      ease: "easeInOut",
-      repeat: Infinity,
-    },
   },
   {
     id: 5,
     zIndex: 45,
-    src: "/frontpage/kolaz-magdalena-lazarczyk_0002s_0000_Layer-6.png",
+    src: "frontpage/kolaz-magdalena-lazarczyk_0002s_0000_Layer-6.png",
+    hoverable: true,
+    tooltip: "Contact",
+    href: "/contact",
+    hoverBox: { left: 66.95, top: 35.46, width: 5.6, height: 41.44 },
     animate: { x: [0, 100, 0] },
     transition: {
       duration: 10,
@@ -127,25 +127,42 @@ const frontpageLayers: FrontpageLayer[] = [
   {
     id: 3,
     zIndex: 40,
-    src: "/frontpage/kolaz-magdalena-lazarczyk_0003_3.png",
+    src: "frontpage/kolaz-magdalena-lazarczyk_0003_3.png",
   },
   {
     id: 4,
     zIndex: 65,
-    frames: legsFrames,
-    frameDuration: legsFrameDuration,
-    pingPongFrames: true,
-    pingPongPause: 2,
+    src: "frontpage/legs.png",
   },
   {
     id: 2,
     zIndex: 60,
-    src: "/frontpage/kolaz-magdalena-lazarczyk_0002_2.png",
+    src: "frontpage/kolaz-magdalena-lazarczyk_0002_2.png",
   },
   {
     id: 1,
     zIndex: 70,
-    src: "/frontpage/kolaz-magdalena-lazarczyk_0001_1.png",
+    src: "frontpage/curtain.png",
+  },
+  {
+    id: 7,
+    zIndex: 71,
+    src: "frontpage/rock.png",
+    hoverable: true,
+    tooltip: "Bio",
+    href: "/bio",
+    hoverBox: { left: 25.62, top: 14.58, width: 18.28, height: 28.19 },
+    transformOrigin: "34.76% 28.68%",
+    animate: {
+      x: [0, 0, -5, 5, -4, 4, -2, 2, 0, 0],
+      rotate: [0, 0, -1.2, 1.2, -0.9, 0.9, -0.4, 0.4, 0, 0],
+    },
+    transition: {
+      duration: 5,
+      times: [0, 0.72, 0.75, 0.78, 0.81, 0.84, 0.87, 0.9, 0.93, 1],
+      ease: "easeInOut",
+      repeat: Infinity,
+    },
   },
   {
     id: 0,
@@ -153,17 +170,26 @@ const frontpageLayers: FrontpageLayer[] = [
     frames: catFrames,
     frameDuration: catFrameDuration,
     offsetX: 25,
+    hoverable: true,
+    tooltip: "Portfolio",
+    href: "/portfolio",
+    hoverBox: { left: 43.12, top: 69.91, width: 12.73, height: 19.49 },
   },
 ];
 
 export default function Home() {
+  const [hoveredLayer, setHoveredLayer] = useState<number | null>(null);
+  const navigate = useNavigate();
+
   return (
     <main className="frontpage" aria-label="Magdalena Lazarczyk">
       {frontpageLayers.map((layer) =>
         layer.frames ? (
           <div
             key={layer.id}
-            className="frontpage__layer frontpage__frames"
+            className={`frontpage__layer frontpage__frames${
+              hoveredLayer === layer.id ? " frontpage__layer--hovered" : ""
+            }`}
             aria-hidden="true"
             style={{
               zIndex: layer.zIndex,
@@ -181,8 +207,10 @@ export default function Home() {
         ) : (
           <motion.img
             key={layer.id}
-            className="frontpage__layer"
-            src={layer.src}
+            className={`frontpage__layer${
+              hoveredLayer === layer.id ? " frontpage__layer--hovered" : ""
+            }`}
+            src={layer.src ? assetPath(layer.src) : undefined}
             alt=""
             aria-hidden="true"
             draggable={false}
@@ -195,6 +223,47 @@ export default function Home() {
           />
         ),
       )}
+      {frontpageLayers
+        .filter((layer) => layer.hoverable && layer.hoverBox)
+        .map((layer) => (
+          <motion.div
+            key={`${layer.id}-hover`}
+            className="frontpage__hitbox"
+            aria-label={layer.tooltip}
+            animate={layer.animate}
+            transition={layer.transition}
+            onMouseEnter={() => setHoveredLayer(layer.id)}
+            onMouseLeave={() => setHoveredLayer(null)}
+            onClick={() => {
+              if (layer.href) {
+                navigate(layer.href);
+              }
+            }}
+            onKeyDown={(event) => {
+              if (layer.href && (event.key === "Enter" || event.key === " ")) {
+                event.preventDefault();
+                navigate(layer.href);
+              }
+            }}
+            role={layer.href ? "link" : undefined}
+            tabIndex={layer.href ? 0 : undefined}
+            style={{
+              zIndex: layer.zIndex + 100,
+              left: `${layer.hoverBox?.left}%`,
+              top: `${layer.hoverBox?.top}%`,
+              width: `${layer.hoverBox?.width}%`,
+              height: `${layer.hoverBox?.height}%`,
+              transform: layer.offsetX
+                ? `translateX(${layer.offsetX}px)`
+                : undefined,
+              transformOrigin: layer.transformOrigin,
+            }}
+          >
+            {layer.tooltip && hoveredLayer === layer.id ? (
+              <span className="frontpage__tooltip">{layer.tooltip}</span>
+            ) : null}
+          </motion.div>
+        ))}
     </main>
   );
 }

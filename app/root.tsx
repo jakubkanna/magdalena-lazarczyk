@@ -2,15 +2,33 @@ import {
   isRouteErrorResponse,
   Links,
   Meta,
-  Outlet,
   Scripts,
   ScrollRestoration,
+  useLocation,
+  useOutlet,
 } from "react-router";
+import {
+  AnimatePresence,
+  motion,
+  useIsPresent,
+  useReducedMotion,
+} from "framer-motion";
 
 import type { Route } from "./+types/root";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
+  { rel: "icon", href: `${import.meta.env.BASE_URL}favicon.ico` },
+  {
+    rel: "icon",
+    type: "image/png",
+    sizes: "256x256",
+    href: `${import.meta.env.BASE_URL}favicon.png`,
+  },
+  {
+    rel: "apple-touch-icon",
+    href: `${import.meta.env.BASE_URL}favicon.png`,
+  },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",
@@ -41,8 +59,40 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+function RouteScreen({ children }: { children: React.ReactNode }) {
+  const isPresent = useIsPresent();
+  const shouldReduceMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      className="route-screen"
+      initial={false}
+      animate={{ y: 0 }}
+      exit={shouldReduceMotion ? { opacity: 0 } : { y: "100%" }}
+      transition={{
+        duration: shouldReduceMotion ? 0.18 : 0.72,
+        ease: [0.76, 0, 0.24, 1],
+      }}
+      style={{ zIndex: isPresent ? 1 : 2 }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 export default function App() {
-  return <Outlet />;
+  const location = useLocation();
+  const outlet = useOutlet();
+
+  return (
+    <div className="route-stage">
+      <AnimatePresence initial={false}>
+        <RouteScreen key={location.pathname}>
+          {outlet}
+        </RouteScreen>
+      </AnimatePresence>
+    </div>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
