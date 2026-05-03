@@ -7,10 +7,17 @@ import type { Route } from "./+types/home";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Magdalena Lazarczyk" },
+    { title: "Magdalena Łazarczyk" },
     {
       name: "description",
-      content: "Homepage collage for Magdalena Lazarczyk.",
+      content:
+        "Portfolio Magdaleny Łazarczyk - scenografia, kostiumy, teatr, sztuka i warsztaty.",
+    },
+    { property: "og:title", content: "Magdalena Łazarczyk" },
+    {
+      property: "og:description",
+      content:
+        "Portfolio Magdaleny Łazarczyk - scenografia, kostiumy, teatr, sztuka i warsztaty.",
     },
   ];
 }
@@ -151,14 +158,21 @@ function FrameSequence({
     : pingPongFrameIndex;
 
   return (
-    <img
-      className="frontpage__frame"
-      src={assetPath(frames[visibleFrameIndex])}
-      srcSet={imageSrcSet(frames[visibleFrameIndex])}
-      sizes={frontpageImageSizes}
-      alt=""
-      draggable={false}
-    />
+    <>
+      {frames.map((frame, index) => (
+        <img
+          className={`frontpage__frame${
+            index === visibleFrameIndex ? " frontpage__frame--visible" : ""
+          }`}
+          key={frame}
+          src={assetPath(frame)}
+          srcSet={imageSrcSet(frame)}
+          sizes={frontpageImageSizes}
+          alt=""
+          draggable={false}
+        />
+      ))}
+    </>
   );
 }
 
@@ -258,6 +272,7 @@ const layerAnimationClass = (layer: FrontpageLayer) =>
 export default function Home() {
   const [hoveredLayer, setHoveredLayer] = useState<number | null>(null);
   const [isLoaded, setIsLoaded] = useState(hasShownHomeLoader);
+  const [isSceneRendered, setIsSceneRendered] = useState(hasShownHomeLoader);
   const [isLoaderVisible, setIsLoaderVisible] = useState(!hasShownHomeLoader);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -265,6 +280,7 @@ export default function Home() {
   useEffect(() => {
     if (hasShownHomeLoader) {
       setIsLoaded(true);
+      setIsSceneRendered(true);
       setIsLoaderVisible(false);
       return;
     }
@@ -291,30 +307,54 @@ export default function Home() {
 
   useEffect(() => {
     if (!isLoaded) {
-      document.title = "Loading...";
       return;
     }
 
-    document.title = "Magdalena Lazarczyk";
+    let firstFrame = 0;
+    let secondFrame = 0;
+
+    firstFrame = window.requestAnimationFrame(() => {
+      secondFrame = window.requestAnimationFrame(() => {
+        setIsSceneRendered(true);
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(firstFrame);
+      window.cancelAnimationFrame(secondFrame);
+    };
+  }, [isLoaded]);
+
+  useEffect(() => {
+    if (!isSceneRendered) {
+      document.title = "Ładowanie...";
+      return;
+    }
+
+    document.title = "Magdalena Łazarczyk";
 
     const loaderTimer = window.setTimeout(() => {
       setIsLoaderVisible(false);
     }, loaderExitDuration);
 
     return () => window.clearTimeout(loaderTimer);
-  }, [isLoaded]);
+  }, [isSceneRendered]);
 
   return (
     <main className="frontpage" aria-label="Magdalena Lazarczyk">
       {isLoaderVisible ? (
         <div
           className={`frontpage__loader${
-            isLoaded ? " frontpage__loader--complete" : ""
+            isSceneRendered ? " frontpage__loader--complete" : ""
           }`}
           role="status"
           aria-live="polite"
         >
-          <span className="frontpage__loader-text" aria-label={loaderText}>
+          <span
+            id="logo"
+            className="frontpage__loader-text"
+            aria-label={loaderText}
+          >
             {Array.from(loaderText).map((letter, index) => (
               <span
                 className="frontpage__loader-letter"
@@ -332,7 +372,7 @@ export default function Home() {
         className={`frontpage__scene${
           isLoaded ? " frontpage__scene--loaded" : ""
         }`}
-        aria-hidden={!isLoaded}
+        aria-hidden={!isSceneRendered}
       >
         {isLoaded
           ? frontpageLayers.map((layer) =>

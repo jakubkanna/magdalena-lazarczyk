@@ -9,12 +9,12 @@ type SiteFooterProps = {
 export function SiteFooter({ className }: SiteFooterProps) {
   return (
     <footer
-      className={`flex w-full items-center gap-4 text-[10px] font-medium leading-[1.2] tracking-normal text-[#111]${
+      className={`flex w-full items-center justify-between gap-4 text-[10px] font-medium leading-[1.2] tracking-normal text-[#111]${
         className ? ` ${className}` : ""
       }`}
     >
       <span>&copy; {currentYear}</span>
-      <span className="ml-auto">
+      <span className="text-right">
         Designed &amp; Developed by{" "}
         <a
           className={`text-inherit underline underline-offset-2 ${hoverColorClass}`}

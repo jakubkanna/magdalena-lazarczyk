@@ -1,0 +1,284 @@
+[
+  {
+    "id": 1,
+    "title": "OSKAR I RZECZY",
+    "venue": "Teatr Pleciuga",
+    "place": "Szczecin",
+    "year": "2025",
+    "credits": [
+      "Scenografia (we współpracy z Łukaszem Sosińskim)",
+      "Kostiumy"
+    ],
+    "image": "20 1.png"
+  },
+  {
+    "id": 2,
+    "title": "KRÓL MACIUŚ PIERWSZY",
+    "venue": "Teatr Lalek Banialuka",
+    "place": "Bielsko-Biała",
+    "year": "2024",
+    "credits": ["Scenografia", "Kostiumy"],
+    "image": "58 1.png"
+  },
+  {
+    "id": 3,
+    "title": "SEN NOCY LETNIEJ",
+    "venue": "Teatr im. Juliusza Słowackiego",
+    "place": "Kraków",
+    "year": "2024",
+    "credits": ["Kostiumy"],
+    "image": "20 2.png"
+  },
+  {
+    "id": 4,
+    "title": "NIEWIDZIALNE MIASTA",
+    "venue": "Teatr Polski",
+    "place": "Poznań",
+    "year": "2023",
+    "credits": ["Scenografia"],
+    "image": "2.jpg"
+  },
+  {
+    "id": 5,
+    "title": "ALA MA KOTA",
+    "venue": "Nowy Teatr",
+    "place": "Warszawa",
+    "year": "2023",
+    "credits": ["Scenografia", "Kostiumy"],
+    "image": "5 1.png"
+  },
+  {
+    "id": 6,
+    "title": "PAN TWARDOWSKI",
+    "venue": "Opera na Zamku",
+    "place": "Szczecin",
+    "year": "2022",
+    "credits": ["Kostiumy"],
+    "image": "26 1.png"
+  },
+  {
+    "id": 7,
+    "title": "MIASTO ZE SZKŁA",
+    "venue": "TR Warszawa",
+    "place": "Warszawa",
+    "year": "2022",
+    "credits": ["Scenografia"],
+    "image": "43.jpg"
+  },
+  {
+    "id": 8,
+    "title": "KRAINA SNU",
+    "venue": "Teatr Miniatura",
+    "place": "Gdańsk",
+    "year": "2021",
+    "credits": ["Scenografia", "Kostiumy"],
+    "image": "56.jpg"
+  },
+  {
+    "id": 9,
+    "title": "MAPA NIEBA",
+    "venue": "Teatr Współczesny",
+    "place": "Szczecin",
+    "year": "2021",
+    "credits": ["Scenografia"],
+    "image": "45 1.png"
+  },
+  {
+    "id": 10,
+    "title": "DOM Z PAPIERU",
+    "venue": "Teatr Studio",
+    "place": "Warszawa",
+    "year": "2020",
+    "credits": ["Kostiumy"],
+    "image": "40 2.png"
+  },
+  {
+    "id": 11,
+    "title": "LAS RZECZY",
+    "venue": "Teatr Pinokio",
+    "place": "Łódź",
+    "year": "2020",
+    "credits": ["Scenografia", "Kostiumy"],
+    "image": "23 1.png"
+  },
+  {
+    "id": 12,
+    "title": "BIAŁY POKÓJ",
+    "venue": "Teatr Powszechny",
+    "place": "Warszawa",
+    "year": "2020",
+    "credits": ["Scenografia"],
+    "image": "0 1.png"
+  },
+  {
+    "id": 13,
+    "title": "CZARNA WODA",
+    "venue": "Teatr Wybrzeże",
+    "place": "Gdańsk",
+    "year": "2019",
+    "credits": ["Kostiumy"],
+    "image": "40 1.png"
+  },
+  {
+    "id": 14,
+    "title": "KONIEC ŚWIATA",
+    "venue": "Teatr Zagłębia",
+    "place": "Sosnowiec",
+    "year": "2019",
+    "credits": ["Scenografia", "Kostiumy"],
+    "image": "4 6.png"
+  },
+  {
+    "id": 15,
+    "title": "MAŁE HISTORIE",
+    "venue": "Teatr Lalka",
+    "place": "Warszawa",
+    "year": "2019",
+    "credits": ["Scenografia"],
+    "image": "18 1.png"
+  },
+  {
+    "id": 16,
+    "title": "OGRÓD",
+    "venue": "Teatr Ochoty",
+    "place": "Warszawa",
+    "year": "2018",
+    "credits": ["Kostiumy"],
+    "image": "60 1.png"
+  },
+  {
+    "id": 17,
+    "title": "PUNKT ZERO",
+    "venue": "Komuna Warszawa",
+    "place": "Warszawa",
+    "year": "2018",
+    "credits": ["Scenografia"],
+    "image": "10.jpg"
+  },
+  {
+    "id": 18,
+    "title": "ZA DRZWIAMI",
+    "venue": "Teatr Kana",
+    "place": "Szczecin",
+    "year": "2018",
+    "credits": ["Scenografia", "Kostiumy"],
+    "image": "16 1.png"
+  },
+  {
+    "id": 19,
+    "title": "LATO",
+    "venue": "Teatr Dramatyczny",
+    "place": "Wałbrzych",
+    "year": "2017",
+    "credits": ["Kostiumy"],
+    "image": "14 1.png"
+  },
+  {
+    "id": 20,
+    "title": "TŁO",
+    "venue": "Narodowy Stary Teatr",
+    "place": "Kraków",
+    "year": "2017",
+    "credits": ["Scenografia"],
+    "image": "68 1.png"
+  },
+  {
+    "id": 21,
+    "title": "PRÓBA GENERALNA",
+    "venue": "Teatr Polski",
+    "place": "Wrocław",
+    "year": "2017",
+    "credits": ["Scenografia", "Kostiumy"],
+    "image": "34 1.png"
+  },
+  {
+    "id": 22,
+    "title": "ŚWIATŁO",
+    "venue": "Teatr Nowy",
+    "place": "Poznań",
+    "year": "2016",
+    "credits": ["Kostiumy"],
+    "image": "6 9.png"
+  },
+  {
+    "id": 23,
+    "title": "POLOWANIE",
+    "venue": "Teatr im. Stefana Żeromskiego",
+    "place": "Kielce",
+    "year": "2016",
+    "credits": ["Scenografia"],
+    "image": "15 1.png"
+  },
+  {
+    "id": 24,
+    "title": "NOTATKI Z PODRÓŻY",
+    "venue": "Teatr Barakah",
+    "place": "Kraków",
+    "year": "2016",
+    "credits": ["Scenografia", "Kostiumy"],
+    "image": "66.jpg"
+  },
+  {
+    "id": 25,
+    "title": "OBRAZKI",
+    "venue": "Teatr Maska",
+    "place": "Rzeszów",
+    "year": "2015",
+    "credits": ["Scenografia"],
+    "image": "8.jpg"
+  },
+  {
+    "id": 26,
+    "title": "MATERIA",
+    "venue": "Teatr Animacji",
+    "place": "Poznań",
+    "year": "2015",
+    "credits": ["Kostiumy"],
+    "image": "61.jpg"
+  },
+  {
+    "id": 27,
+    "title": "KONSTRUKCJE",
+    "venue": "Teatr Ludowy",
+    "place": "Kraków",
+    "year": "2015",
+    "credits": ["Scenografia", "Kostiumy"],
+    "image": "37 1.png"
+  },
+  {
+    "id": 28,
+    "title": "CIENIE",
+    "venue": "Teatr Jaracza",
+    "place": "Łódź",
+    "year": "2014",
+    "credits": ["Scenografia"],
+    "image": "13 1.png"
+  },
+  {
+    "id": 29,
+    "title": "PRZEDMIEŚCIE",
+    "venue": "Teatr Modrzejewskiej",
+    "place": "Legnica",
+    "year": "2014",
+    "credits": ["Kostiumy"],
+    "image": "37 2.png"
+  },
+  {
+    "id": 30,
+    "title": "UKŁAD",
+    "venue": "Teatr Polski",
+    "place": "Bydgoszcz",
+    "year": "2014",
+    "credits": ["Scenografia"],
+    "image": "35 1.png"
+  },
+  {
+    "id": 31,
+    "title": "PAMIĘĆ",
+    "venue": "Teatr Nowy",
+    "place": "Łódź",
+    "year": "2013",
+    "credits": ["Scenografia", "Kostiumy"],
+    "image": "13 2.png"
+  }
+]

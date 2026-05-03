@@ -2,10 +2,7 @@ import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router";
 import { SiteFooter } from "./site-footer";
-import {
-  focusHoverColorClass,
-  hoverColorClass,
-} from "./styles";
+import { focusHoverColorClass, hoverColorClass } from "./styles";
 
 type SiteMenuProps = {
   isOpen: boolean;
@@ -13,13 +10,21 @@ type SiteMenuProps = {
 };
 
 const menuLinks = [
-  { label: "Home", to: "/" },
+  { label: "Start", to: "/" },
   { label: "Portfolio", to: "/portfolio" },
   { label: "Bio", to: "/bio", disabled: true },
   { label: "Kontakt", to: "/contact", disabled: true },
 ];
 
 const socialLinks = ["Facebook", "Twitter", "Instagram"];
+
+function MenuLinkLabel({ label }: { label: string }) {
+  if (label === "Portfolio") {
+    return <>Portfolio</>;
+  }
+
+  return label;
+}
 
 export function SiteMenu({ isOpen, onClose }: SiteMenuProps) {
   useEffect(() => {
@@ -54,8 +59,8 @@ export function SiteMenu({ isOpen, onClose }: SiteMenuProps) {
           />
           <motion.nav
             key="site-menu-panel"
-            className="fixed inset-y-0 right-0 z-[1201] box-border flex min-h-svh w-[min(390px,100vw)] flex-col justify-between bg-[#bfbfbf] py-11 pl-10 pr-[22px] text-left text-[#222] shadow-[-28px_0_48px_rgb(0_0_0_/_0.2)]"
-            aria-label="Main navigation"
+            className="fixed inset-y-0 right-0 z-[1201] box-border flex min-h-svh w-[min(390px,100vw)] flex-col justify-between bg-[#bfbfbf] py-11 pl-6 pr-[22px] text-left text-[#222] shadow-[-28px_0_48px_rgb(0_0_0_/_0.2)] sm:pl-9"
+            aria-label="Nawigacja główna"
             initial={{ x: "100%", opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: "100%", opacity: 0 }}
@@ -73,20 +78,20 @@ export function SiteMenu({ isOpen, onClose }: SiteMenuProps) {
               {menuLinks.map((link) =>
                 link.disabled ? (
                   <span
-                    className="cursor-not-allowed text-[clamp(74px,21vw,88px)] font-normal leading-[0.98] text-[#222]/35"
+                    className="font-display max-w-full cursor-not-allowed whitespace-nowrap text-[clamp(54px,18vw,78px)] font-normal leading-[0.9] text-[#222]/35"
                     key={link.to}
                     aria-disabled="true"
                   >
-                    {link.label}
+                    <MenuLinkLabel label={link.label} />
                   </span>
                 ) : (
                   <Link
-                    className={`text-[clamp(74px,21vw,88px)] font-normal leading-[0.98] text-inherit no-underline ${hoverColorClass} ${focusHoverColorClass} focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current`}
+                    className={`font-display max-w-full whitespace-nowrap text-[clamp(54px,18vw,78px)] font-normal leading-[0.9] text-inherit no-underline ${hoverColorClass} ${focusHoverColorClass} focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current`}
                     key={link.to}
                     to={link.to}
                     onClick={onClose}
                   >
-                    {link.label}
+                    <MenuLinkLabel label={link.label} />
                   </Link>
                 ),
               )}
