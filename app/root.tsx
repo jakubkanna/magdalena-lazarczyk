@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import {
   isRouteErrorResponse,
   Links,
@@ -11,9 +12,11 @@ import {
   AnimatePresence,
   motion,
   useIsPresent,
+  usePresenceData,
   useReducedMotion,
 } from "framer-motion";
 
+import { PageHeader } from "./components/page-header";
 import type { Route } from "./+types/root";
 import "./app.css";
 
@@ -37,7 +40,7 @@ export const links: Route.LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Emilys+Candy&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
   },
 ];
 
@@ -61,7 +64,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 function RouteScreen({ children }: { children: React.ReactNode }) {
   const isPresent = useIsPresent();
+  const presenceData = usePresenceData() as { delayExit?: boolean } | undefined;
   const shouldReduceMotion = useReducedMotion();
+  const exitDelay = presenceData?.delayExit ? 0.52 : 0;
 
   return (
     <motion.div
@@ -72,6 +77,7 @@ function RouteScreen({ children }: { children: React.ReactNode }) {
       transition={{
         duration: shouldReduceMotion ? 0.18 : 0.72,
         ease: [0.76, 0, 0.24, 1],
+        delay: exitDelay,
       }}
       style={{ zIndex: isPresent ? 1 : 2 }}
     >
@@ -83,13 +89,38 @@ function RouteScreen({ children }: { children: React.ReactNode }) {
 export default function App() {
   const location = useLocation();
   const outlet = useOutlet();
+  const previousPathname = useRef(location.pathname);
+  const [chromePath, setChromePath] = useState(() =>
+    location.pathname === "/" ? null : location.pathname,
+  );
+  const isRouteChanging = previousPathname.current !== location.pathname;
+  const showSharedChrome = location.pathname !== "/";
+  const delayPageExitForChrome =
+    previousPathname.current !== "/" && isRouteChanging;
+
+  useEffect(() => {
+    if (previousPathname.current !== location.pathname) {
+      setChromePath(null);
+    }
+
+    previousPathname.current = location.pathname;
+  }, [location.pathname]);
 
   return (
     <div className="route-stage">
-      <AnimatePresence initial={false}>
-        <RouteScreen key={location.pathname}>
-          {outlet}
-        </RouteScreen>
+      <AnimatePresence mode="wait">
+        {chromePath ? (
+          <PageHeader key={`shared-chrome-${chromePath}`} />
+        ) : null}
+      </AnimatePresence>
+      <AnimatePresence
+        custom={{ delayExit: delayPageExitForChrome }}
+        initial={false}
+        onExitComplete={() => {
+          setChromePath(showSharedChrome ? location.pathname : null);
+        }}
+      >
+        <RouteScreen key={location.pathname}>{outlet}</RouteScreen>
       </AnimatePresence>
     </div>
   );

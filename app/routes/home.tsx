@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import type { TargetAndTransition, Transition } from "framer-motion";
 import { useNavigate } from "react-router";
+import { MenuButton } from "../components/menu-button";
+import { SiteMenu } from "../components/site-menu";
 import type { Route } from "./+types/home";
 
 export function meta({}: Route.MetaArgs) {
@@ -24,6 +26,7 @@ type FrontpageLayer = {
   pingPongPause?: number;
   offsetX?: number;
   hoverable?: boolean;
+  navigationDisabled?: boolean;
   tooltip?: string;
   href?: string;
   hoverBox?: {
@@ -171,6 +174,7 @@ const frontpageLayers: FrontpageLayer[] = [
     zIndex: 45,
     src: "frontpage/kolaz-magdalena-lazarczyk_0002s_0000_Layer-6.png",
     hoverable: true,
+    navigationDisabled: true,
     tooltip: "Contact",
     href: "/contact",
     hoverBox: { left: 66.95, top: 35.46, width: 5.6, height: 41.44 },
@@ -206,6 +210,7 @@ const frontpageLayers: FrontpageLayer[] = [
     zIndex: 71,
     src: "frontpage/rock.png",
     hoverable: true,
+    navigationDisabled: true,
     tooltip: "Bio",
     href: "/bio",
     hoverBox: { left: 25.62, top: 14.58, width: 18.28, height: 28.19 },
@@ -238,9 +243,10 @@ const frontpageImagePaths = frontpageLayers.flatMap((layer) =>
   layer.frames ? layer.frames : layer.src ? [layer.src] : [],
 );
 
-const currentYear = new Date().getFullYear();
-const minimumLoaderDuration = 1000;
+const loaderText = "Magdalena Łazarczyk";
+const minimumLoaderDuration = 2900;
 const loaderExitDuration = 720;
+let hasShownHomeLoader = false;
 
 const layerAnimationClass = (layer: FrontpageLayer) =>
   layer.id === 5
@@ -251,11 +257,18 @@ const layerAnimationClass = (layer: FrontpageLayer) =>
 
 export default function Home() {
   const [hoveredLayer, setHoveredLayer] = useState<number | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isLoaderVisible, setIsLoaderVisible] = useState(true);
+  const [isLoaded, setIsLoaded] = useState(hasShownHomeLoader);
+  const [isLoaderVisible, setIsLoaderVisible] = useState(!hasShownHomeLoader);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (hasShownHomeLoader) {
+      setIsLoaded(true);
+      setIsLoaderVisible(false);
+      return;
+    }
+
     let isCancelled = false;
     const minimumDelay = new Promise<void>((resolve) => {
       window.setTimeout(resolve, minimumLoaderDuration);
@@ -266,6 +279,7 @@ export default function Home() {
       minimumDelay,
     ]).then(() => {
       if (!isCancelled) {
+        hasShownHomeLoader = true;
         setIsLoaded(true);
       }
     });
@@ -300,7 +314,18 @@ export default function Home() {
           role="status"
           aria-live="polite"
         >
-          <span>Magdalena Łazarczyk</span>
+          <span className="frontpage__loader-text" aria-label={loaderText}>
+            {Array.from(loaderText).map((letter, index) => (
+              <span
+                className="frontpage__loader-letter"
+                key={`${letter}-${index}`}
+                aria-hidden="true"
+                style={{ animationDelay: `${index * 70}ms` }}
+              >
+                {letter === " " ? "\u00a0" : letter}
+              </span>
+            ))}
+          </span>
         </div>
       ) : null}
       <div
@@ -368,21 +393,28 @@ export default function Home() {
                   onMouseEnter={() => setHoveredLayer(layer.id)}
                   onMouseLeave={() => setHoveredLayer(null)}
                   onClick={() => {
-                    if (layer.href) {
+                    if (layer.href && !layer.navigationDisabled) {
                       navigate(layer.href);
                     }
                   }}
                   onKeyDown={(event) => {
                     if (
                       layer.href &&
+                      !layer.navigationDisabled &&
                       (event.key === "Enter" || event.key === " ")
                     ) {
                       event.preventDefault();
                       navigate(layer.href);
                     }
                   }}
-                  role={layer.href ? "link" : undefined}
-                  tabIndex={layer.href ? 0 : undefined}
+                  role={
+                    layer.href && !layer.navigationDisabled
+                      ? "link"
+                      : undefined
+                  }
+                  tabIndex={
+                    layer.href && !layer.navigationDisabled ? 0 : undefined
+                  }
                   style={{
                     zIndex: layer.zIndex + 100,
                     left: `${layer.hoverBox?.left}%`,
@@ -401,38 +433,10 @@ export default function Home() {
                 </div>
               ))
           : null}
-        <div className="frontpage__help" aria-label="Portfolio navigation">
-          <button
-            className="frontpage__help-button"
-            type="button"
-            aria-label="Go to portfolio"
-            onClick={() => navigate("/portfolio")}
-          >
-            <svg
-              className="frontpage__help-icon"
-              viewBox="0 0 512 512"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <path d="M80 212v236a16 16 0 0016 16h96V328a24 24 0 0124-24h80a24 24 0 0124 24v136h96a16 16 0 0016-16V212" />
-              <path d="M480 256L266.89 52c-5.95-5.67-15.83-5.67-21.78 0L32 256" />
-              <path d="M400 179V64h-48v69" />
-            </svg>
-          </button>
-          <span className="frontpage__help-tooltip" role="tooltip">
-            Portfolio
-          </span>
+        <div className="frontpage__help">
+          <MenuButton isOpen={isMenuOpen} onClick={() => setIsMenuOpen(true)} />
         </div>
-        <p className="frontpage__credit">
-          &copy; {currentYear} - Designed &amp; Developed by{" "}
-          <a
-            href="https://studio.jakubkanna.com"
-            target="_blank"
-            rel="noreferrer"
-          >
-            STUDIO JKN
-          </a>
-        </p>
+        <SiteMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
       </div>
     </main>
   );
