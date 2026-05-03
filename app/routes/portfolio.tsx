@@ -71,6 +71,39 @@ async function resolvePortfolioImage(post: PortfolioPostViewModel) {
   return [post.id, src] as const;
 }
 
+function LinkOutlineIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="h-5 w-5"
+      fill="none"
+      viewBox="0 0 512 512"
+    >
+      <path
+        d="M200.66 352H144a96 96 0 0 1 0-192h55.41"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="32"
+      />
+      <path
+        d="M312.59 160H368a96 96 0 0 1 0 192h-56.66"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="32"
+      />
+      <path
+        d="M169.07 256h175.86"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="32"
+      />
+    </svg>
+  );
+}
+
 function PortfolioPostCard({
   post,
   imageSrc,
@@ -89,6 +122,17 @@ function PortfolioPostCard({
           decoding="async"
           draggable={false}
         />
+        {post.externalUrl ? (
+          <a
+            className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center text-[#111] opacity-0 transition-[color,opacity] duration-150 hover:text-[var(--site-hover-color)] group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:text-[var(--site-hover-color)] focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#111]"
+            href={post.externalUrl}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={`Open ${post.title} in a new tab`}
+          >
+            <LinkOutlineIcon />
+          </a>
+        ) : null}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 p-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100 md:p-5">
           <div className="w-[min(76%,760px)] translate-y-3 rounded-3xl bg-white px-5 py-5 text-[#222] transition-transform duration-200 group-hover:translate-y-0 group-focus-within:translate-y-0 md:rounded-[28px] md:px-7 md:py-6">
             <h2 className="font-display text-lg uppercase leading-tight italic">
@@ -277,7 +321,7 @@ export default function Portfolio() {
         aria-hidden={!isPortfolioReady}
       >
         <section
-          className="grid grid-cols-1 gap-3 pb-28 md:grid-cols-2 md:gap-4 md:pb-32 2xl:grid-cols-3 2xl:gap-5"
+          className="grid grid-cols-1 gap-1.5 pb-24 md:grid-cols-2 md:gap-2 md:pb-28 2xl:grid-cols-3 2xl:gap-2.5"
           aria-label="Portfolio posts"
         >
           {renderedPosts.map((post) => (
@@ -298,7 +342,7 @@ export default function Portfolio() {
         </section>
       </main>
       <footer
-        className="fixed bottom-3 left-3 right-8 z-50 flex flex-wrap items-center gap-2"
+        className="fixed bottom-3 left-3 right-3 z-50 flex flex-wrap items-center gap-2 md:right-8"
         aria-label="Portfolio categories"
       >
         <button
@@ -313,13 +357,13 @@ export default function Portfolio() {
         >
           Portfolio
         </button>
-        <div className="ml-auto flex flex-1 flex-wrap justify-between gap-2 md:flex-none md:justify-end md:gap-3">
+        <div className="flex flex-1 flex-wrap justify-between gap-2 md:ml-auto md:flex-none md:justify-end md:gap-3">
           {portfolioCategories.map((category) => (
             <button
-              className={`font-display rounded-full bg-[#fff7f7] leading-none text-[#050505] shadow-[8px_10px_20px_rgb(0_0_0_/_0.24)] transition-[font-size,font-weight,padding,transform] duration-200 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#111] ${
+              className={`font-display rounded-full leading-none text-[#050505] shadow-[8px_10px_20px_rgb(0_0_0_/_0.24)] transition-[background-color,font-size,padding,transform] duration-200 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#111] ${
                 activeCategory === category
-                  ? "font-bold uppercase"
-                  : "font-normal"
+                  ? "bg-[var(--site-hover-color)] font-normal uppercase"
+                  : "bg-[#fff7f7] font-normal"
               } ${
                 scrollDirection === "down"
                   ? "px-3.5 py-1.5 text-[clamp(24px,2.5vw,36px)] md:px-4 md:py-2"

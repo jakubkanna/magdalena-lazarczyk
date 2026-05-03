@@ -9,7 +9,8 @@
       "Scenografia (we współpracy z Łukaszem Sosińskim)",
       "Kostiumy"
     ],
-    "image": "20 1.webp"
+    "image": "20 1.webp",
+    "externalUrl": "https://example.com/oskar-i-rzeczy"
   },
   {
     "id": 2,
@@ -21,7 +22,8 @@
       "Scenografia",
       "Kostiumy"
     ],
-    "image": "58 1.webp"
+    "image": "58 1.webp",
+    "externalUrl": "https://example.com/krol-macius-pierwszy"
   },
   {
     "id": 3,
@@ -32,7 +34,8 @@
     "credits": [
       "Kostiumy"
     ],
-    "image": "20 2.webp"
+    "image": "20 2.webp",
+    "externalUrl": "https://example.com/sen-nocy-letniej"
   },
   {
     "id": 4,

@@ -53,7 +53,9 @@ export function PageHeader() {
   return (
     <>
       <motion.header
-        className="fixed left-3 right-8 top-3 z-500 box-border flex items-center justify-between text-[#111]"
+        className={`fixed top-3 z-500 box-border flex items-center justify-between text-[#111] ${
+          scrollDirection === "down" ? "left-3 right-8" : "left-8 right-12"
+        }`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -61,10 +63,11 @@ export function PageHeader() {
       >
         <Link
           id="logo"
-          className={`font-normal leading-none text-inherit no-underline transition-[font-size] duration-200 ${scrollDirection === "down" ? "text-[20px]" : "text-[clamp(28px,4vw,44px)]"} ${hoverColorClass} ${focusHoverColorClass}`}
+          aria-label="Magdalena Lazarczyk"
+          className={`pl-1 font-normal leading-none text-inherit no-underline transition-[font-size] duration-200 ${scrollDirection === "down" ? "text-[24px]" : "text-[clamp(56px,8vw,88px)]"} ${hoverColorClass} ${focusHoverColorClass}`}
           to="/"
         >
-          Magdalena Łazarczyk
+          M
         </Link>
         <MenuButton isOpen={isMenuOpen} onClick={() => setIsMenuOpen(true)} />
       </motion.header>

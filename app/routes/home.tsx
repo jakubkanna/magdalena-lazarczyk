@@ -257,7 +257,7 @@ const frontpageImagePaths = frontpageLayers.flatMap((layer) =>
   layer.frames ? layer.frames : layer.src ? [layer.src] : [],
 );
 
-const loaderText = "Magdalena Łazarczyk";
+const loaderText = "Magdalena Lazarczyk";
 const minimumLoaderDuration = 2900;
 const loaderExitDuration = 720;
 let hasShownHomeLoader = false;
