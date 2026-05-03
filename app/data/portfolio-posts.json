@@ -9,7 +9,7 @@
       "Scenografia (we współpracy z Łukaszem Sosińskim)",
       "Kostiumy"
     ],
-    "image": "20 1.png"
+    "image": "20 1.webp"
   },
   {
     "id": 2,
@@ -17,8 +17,11 @@
     "venue": "Teatr Lalek Banialuka",
     "place": "Bielsko-Biała",
     "year": "2024",
-    "credits": ["Scenografia", "Kostiumy"],
-    "image": "58 1.png"
+    "credits": [
+      "Scenografia",
+      "Kostiumy"
+    ],
+    "image": "58 1.webp"
   },
   {
     "id": 3,
@@ -26,8 +29,10 @@
     "venue": "Teatr im. Juliusza Słowackiego",
     "place": "Kraków",
     "year": "2024",
-    "credits": ["Kostiumy"],
-    "image": "20 2.png"
+    "credits": [
+      "Kostiumy"
+    ],
+    "image": "20 2.webp"
   },
   {
     "id": 4,
@@ -35,8 +40,10 @@
     "venue": "Teatr Polski",
     "place": "Poznań",
     "year": "2023",
-    "credits": ["Scenografia"],
-    "image": "2.jpg"
+    "credits": [
+      "Scenografia"
+    ],
+    "image": "2.webp"
   },
   {
     "id": 5,
@@ -44,8 +51,11 @@
     "venue": "Nowy Teatr",
     "place": "Warszawa",
     "year": "2023",
-    "credits": ["Scenografia", "Kostiumy"],
-    "image": "5 1.png"
+    "credits": [
+      "Scenografia",
+      "Kostiumy"
+    ],
+    "image": "5 1.webp"
   },
   {
     "id": 6,
@@ -53,8 +63,10 @@
     "venue": "Opera na Zamku",
     "place": "Szczecin",
     "year": "2022",
-    "credits": ["Kostiumy"],
-    "image": "26 1.png"
+    "credits": [
+      "Kostiumy"
+    ],
+    "image": "26 1.webp"
   },
   {
     "id": 7,
@@ -62,8 +74,10 @@
     "venue": "TR Warszawa",
     "place": "Warszawa",
     "year": "2022",
-    "credits": ["Scenografia"],
-    "image": "43.jpg"
+    "credits": [
+      "Scenografia"
+    ],
+    "image": "43.webp"
   },
   {
     "id": 8,
@@ -71,8 +85,11 @@
     "venue": "Teatr Miniatura",
     "place": "Gdańsk",
     "year": "2021",
-    "credits": ["Scenografia", "Kostiumy"],
-    "image": "56.jpg"
+    "credits": [
+      "Scenografia",
+      "Kostiumy"
+    ],
+    "image": "56.webp"
   },
   {
     "id": 9,
@@ -80,8 +97,10 @@
     "venue": "Teatr Współczesny",
     "place": "Szczecin",
     "year": "2021",
-    "credits": ["Scenografia"],
-    "image": "45 1.png"
+    "credits": [
+      "Scenografia"
+    ],
+    "image": "45 1.webp"
   },
   {
     "id": 10,
@@ -89,8 +108,10 @@
     "venue": "Teatr Studio",
     "place": "Warszawa",
     "year": "2020",
-    "credits": ["Kostiumy"],
-    "image": "40 2.png"
+    "credits": [
+      "Kostiumy"
+    ],
+    "image": "40 2.webp"
   },
   {
     "id": 11,
@@ -98,8 +119,11 @@
     "venue": "Teatr Pinokio",
     "place": "Łódź",
     "year": "2020",
-    "credits": ["Scenografia", "Kostiumy"],
-    "image": "23 1.png"
+    "credits": [
+      "Scenografia",
+      "Kostiumy"
+    ],
+    "image": "23 1.webp"
   },
   {
     "id": 12,
@@ -107,8 +131,10 @@
     "venue": "Teatr Powszechny",
     "place": "Warszawa",
     "year": "2020",
-    "credits": ["Scenografia"],
-    "image": "0 1.png"
+    "credits": [
+      "Scenografia"
+    ],
+    "image": "0 1.webp"
   },
   {
     "id": 13,
@@ -116,8 +142,10 @@
     "venue": "Teatr Wybrzeże",
     "place": "Gdańsk",
     "year": "2019",
-    "credits": ["Kostiumy"],
-    "image": "40 1.png"
+    "credits": [
+      "Kostiumy"
+    ],
+    "image": "40 1.webp"
   },
   {
     "id": 14,
@@ -125,8 +153,11 @@
     "venue": "Teatr Zagłębia",
     "place": "Sosnowiec",
     "year": "2019",
-    "credits": ["Scenografia", "Kostiumy"],
-    "image": "4 6.png"
+    "credits": [
+      "Scenografia",
+      "Kostiumy"
+    ],
+    "image": "4 6.webp"
   },
   {
     "id": 15,
@@ -134,8 +165,10 @@
     "venue": "Teatr Lalka",
     "place": "Warszawa",
     "year": "2019",
-    "credits": ["Scenografia"],
-    "image": "18 1.png"
+    "credits": [
+      "Scenografia"
+    ],
+    "image": "18 1.webp"
   },
   {
     "id": 16,
@@ -143,8 +176,10 @@
     "venue": "Teatr Ochoty",
     "place": "Warszawa",
     "year": "2018",
-    "credits": ["Kostiumy"],
-    "image": "60 1.png"
+    "credits": [
+      "Kostiumy"
+    ],
+    "image": "60 1.webp"
   },
   {
     "id": 17,
@@ -152,8 +187,10 @@
     "venue": "Komuna Warszawa",
     "place": "Warszawa",
     "year": "2018",
-    "credits": ["Scenografia"],
-    "image": "10.jpg"
+    "credits": [
+      "Scenografia"
+    ],
+    "image": "10.webp"
   },
   {
     "id": 18,
@@ -161,8 +198,11 @@
     "venue": "Teatr Kana",
     "place": "Szczecin",
     "year": "2018",
-    "credits": ["Scenografia", "Kostiumy"],
-    "image": "16 1.png"
+    "credits": [
+      "Scenografia",
+      "Kostiumy"
+    ],
+    "image": "16 1.webp"
   },
   {
     "id": 19,
@@ -170,8 +210,10 @@
     "venue": "Teatr Dramatyczny",
     "place": "Wałbrzych",
     "year": "2017",
-    "credits": ["Kostiumy"],
-    "image": "14 1.png"
+    "credits": [
+      "Kostiumy"
+    ],
+    "image": "14 1.webp"
   },
   {
     "id": 20,
@@ -179,8 +221,10 @@
     "venue": "Narodowy Stary Teatr",
     "place": "Kraków",
     "year": "2017",
-    "credits": ["Scenografia"],
-    "image": "68 1.png"
+    "credits": [
+      "Scenografia"
+    ],
+    "image": "68 1.webp"
   },
   {
     "id": 21,
@@ -188,8 +232,11 @@
     "venue": "Teatr Polski",
     "place": "Wrocław",
     "year": "2017",
-    "credits": ["Scenografia", "Kostiumy"],
-    "image": "34 1.png"
+    "credits": [
+      "Scenografia",
+      "Kostiumy"
+    ],
+    "image": "34 1.webp"
   },
   {
     "id": 22,
@@ -197,8 +244,10 @@
     "venue": "Teatr Nowy",
     "place": "Poznań",
     "year": "2016",
-    "credits": ["Kostiumy"],
-    "image": "6 9.png"
+    "credits": [
+      "Kostiumy"
+    ],
+    "image": "6 9.webp"
   },
   {
     "id": 23,
@@ -206,8 +255,10 @@
     "venue": "Teatr im. Stefana Żeromskiego",
     "place": "Kielce",
     "year": "2016",
-    "credits": ["Scenografia"],
-    "image": "15 1.png"
+    "credits": [
+      "Scenografia"
+    ],
+    "image": "15 1.webp"
   },
   {
     "id": 24,
@@ -215,8 +266,11 @@
     "venue": "Teatr Barakah",
     "place": "Kraków",
     "year": "2016",
-    "credits": ["Scenografia", "Kostiumy"],
-    "image": "66.jpg"
+    "credits": [
+      "Scenografia",
+      "Kostiumy"
+    ],
+    "image": "66.webp"
   },
   {
     "id": 25,
@@ -224,8 +278,10 @@
     "venue": "Teatr Maska",
     "place": "Rzeszów",
     "year": "2015",
-    "credits": ["Scenografia"],
-    "image": "8.jpg"
+    "credits": [
+      "Scenografia"
+    ],
+    "image": "8.webp"
   },
   {
     "id": 26,
@@ -233,8 +289,10 @@
     "venue": "Teatr Animacji",
     "place": "Poznań",
     "year": "2015",
-    "credits": ["Kostiumy"],
-    "image": "61.jpg"
+    "credits": [
+      "Kostiumy"
+    ],
+    "image": "61.webp"
   },
   {
     "id": 27,
@@ -242,8 +300,11 @@
     "venue": "Teatr Ludowy",
     "place": "Kraków",
     "year": "2015",
-    "credits": ["Scenografia", "Kostiumy"],
-    "image": "37 1.png"
+    "credits": [
+      "Scenografia",
+      "Kostiumy"
+    ],
+    "image": "37 1.webp"
   },
   {
     "id": 28,
@@ -251,8 +312,10 @@
     "venue": "Teatr Jaracza",
     "place": "Łódź",
     "year": "2014",
-    "credits": ["Scenografia"],
-    "image": "13 1.png"
+    "credits": [
+      "Scenografia"
+    ],
+    "image": "13 1.webp"
   },
   {
     "id": 29,
@@ -260,8 +323,10 @@
     "venue": "Teatr Modrzejewskiej",
     "place": "Legnica",
     "year": "2014",
-    "credits": ["Kostiumy"],
-    "image": "37 2.png"
+    "credits": [
+      "Kostiumy"
+    ],
+    "image": "37 2.webp"
   },
   {
     "id": 30,
@@ -269,8 +334,10 @@
     "venue": "Teatr Polski",
     "place": "Bydgoszcz",
     "year": "2014",
-    "credits": ["Scenografia"],
-    "image": "35 1.png"
+    "credits": [
+      "Scenografia"
+    ],
+    "image": "35 1.webp"
   },
   {
     "id": 31,
@@ -278,7 +345,10 @@
     "venue": "Teatr Nowy",
     "place": "Łódź",
     "year": "2013",
-    "credits": ["Scenografia", "Kostiumy"],
-    "image": "13 2.png"
+    "credits": [
+      "Scenografia",
+      "Kostiumy"
+    ],
+    "image": "13 2.webp"
   }
 ]
