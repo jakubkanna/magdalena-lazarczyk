@@ -257,10 +257,18 @@ const frontpageImagePaths = frontpageLayers.flatMap((layer) =>
   layer.frames ? layer.frames : layer.src ? [layer.src] : [],
 );
 
-const loaderText = "Magdalena Lazarczyk";
+const loaderText = "Magdalena Łazarczyk";
 const minimumLoaderDuration = 2900;
 const loaderExitDuration = 720;
 let hasShownHomeLoader = false;
+
+const loadLogoFont = async () => {
+  if (typeof document === "undefined" || !document.fonts) {
+    return;
+  }
+
+  await document.fonts.load(`1em "Oi"`, loaderText);
+};
 
 const layerAnimationClass = (layer: FrontpageLayer) =>
   layer.id === 5
@@ -274,6 +282,7 @@ export default function Home() {
   const [isLoaded, setIsLoaded] = useState(hasShownHomeLoader);
   const [isSceneRendered, setIsSceneRendered] = useState(hasShownHomeLoader);
   const [isLoaderVisible, setIsLoaderVisible] = useState(!hasShownHomeLoader);
+  const [isLogoFontReady, setIsLogoFontReady] = useState(hasShownHomeLoader);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -282,6 +291,7 @@ export default function Home() {
       setIsLoaded(true);
       setIsSceneRendered(true);
       setIsLoaderVisible(false);
+      setIsLogoFontReady(true);
       return;
     }
 
@@ -289,10 +299,16 @@ export default function Home() {
     const minimumDelay = new Promise<void>((resolve) => {
       window.setTimeout(resolve, minimumLoaderDuration);
     });
+    const logoFont = loadLogoFont().then(() => {
+      if (!isCancelled) {
+        setIsLogoFontReady(true);
+      }
+    });
 
     Promise.all([
       Promise.all(frontpageImagePaths.map(preloadImage)),
       minimumDelay,
+      logoFont,
     ]).then(() => {
       if (!isCancelled) {
         hasShownHomeLoader = true;
@@ -355,22 +371,24 @@ export default function Home() {
             className="frontpage__loader-text"
             aria-label={loaderText}
           >
-            {Array.from(loaderText).map((letter, index) => (
-              <span
-                className="frontpage__loader-letter"
-                key={`${letter}-${index}`}
-                aria-hidden="true"
-                style={{ animationDelay: `${index * 70}ms` }}
-              >
-                {letter === " " ? "\u00a0" : letter}
-              </span>
-            ))}
+            {isLogoFontReady
+              ? Array.from(loaderText).map((letter, index) => (
+                  <span
+                    className="frontpage__loader-letter"
+                    key={`${letter}-${index}`}
+                    aria-hidden="true"
+                    style={{ animationDelay: `${index * 70}ms` }}
+                  >
+                    {letter === " " ? "\u00a0" : letter}
+                  </span>
+                ))
+              : null}
           </span>
         </div>
       ) : null}
       <div
         className={`frontpage__scene${
-          isLoaded ? " frontpage__scene--loaded" : ""
+          isSceneRendered ? " frontpage__scene--loaded" : ""
         }`}
         aria-hidden={!isSceneRendered}
       >
@@ -448,9 +466,7 @@ export default function Home() {
                     }
                   }}
                   role={
-                    layer.href && !layer.navigationDisabled
-                      ? "link"
-                      : undefined
+                    layer.href && !layer.navigationDisabled ? "link" : undefined
                   }
                   tabIndex={
                     layer.href && !layer.navigationDisabled ? 0 : undefined
@@ -474,7 +490,11 @@ export default function Home() {
               ))
           : null}
         <div className="frontpage__help">
-          <MenuButton isOpen={isMenuOpen} onClick={() => setIsMenuOpen(true)} />
+          <MenuButton
+            className="text-white"
+            isOpen={isMenuOpen}
+            onClick={() => setIsMenuOpen(true)}
+          />
         </div>
         <SiteMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
       </div>

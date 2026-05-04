@@ -74,23 +74,65 @@ img {
   justify-content: center;
   padding: 24px;
   overflow: hidden;
-  color: #111;
+  color: #5a1714;
   line-height: 1.1;
   text-align: center;
-  background: #fff;
+  background:
+    linear-gradient(
+      90deg,
+      rgb(189 84 76 / 0.16) 0%,
+      rgb(229 130 119 / 0.1) 18%,
+      rgb(244 169 158 / 0.12) 33%,
+      rgb(217 107 98 / 0.1) 50%,
+      rgb(244 169 158 / 0.12) 67%,
+      rgb(229 130 119 / 0.1) 82%,
+      rgb(189 84 76 / 0.16) 100%
+    ),
+    repeating-linear-gradient(
+      90deg,
+      #e58f85 0,
+      #e9968c 5vw,
+      #eba199 9vw,
+      #e48b81 14vw,
+      #e9968c 18vw
+    );
   transform: translateY(0);
   transition: transform 720ms cubic-bezier(0.76, 0, 0.24, 1);
 }
 
+.frontpage__loader::before {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgb(173 68 62 / 0.1) 0%,
+      rgb(221 115 105 / 0.07) 18%,
+      transparent 38%
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgb(255 213 201 / 0.1) 0,
+      transparent 2.4vw,
+      rgb(174 75 68 / 0.08) 5.8vw,
+      transparent 9vw
+    );
+  content: "";
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
 .frontpage__loader-text {
   position: relative;
-  z-index: 1;
-  display: inline-block;
-  max-width: 92vw;
-  font-size: clamp(36px, 8vw, 140px);
-  line-height: 0.82;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: min(100%, calc(100vw - 32px));
+  font-size: clamp(28px, 6.4vw, 112px);
+  line-height: 0.92;
   text-align: center;
-  white-space: nowrap;
+  color: white;
 }
 
 .frontpage__loader-letter {
@@ -267,6 +309,47 @@ img {
 }
 
 #logo {
-  font-family: "Gemini", serif;
-  font-weight: 400;
+  font-family: "Modak", serif;
+}
+
+.header-logo {
+  display: inline-block;
+  width: 0.86em;
+  overflow: hidden;
+  vertical-align: top;
+}
+
+.header-logo__crop {
+  display: block;
+  width: 0.86em;
+  overflow: hidden;
+}
+
+.header-logo__track {
+  display: flex;
+  width: max-content;
+  animation: header-logo-marquee 14s linear infinite;
+  will-change: transform;
+}
+
+.header-logo__text {
+  flex: 0 0 auto;
+  padding-right: 0.35em;
+  white-space: nowrap;
+}
+
+@keyframes header-logo-marquee {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header-logo__track {
+    animation: none;
+  }
 }

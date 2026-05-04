@@ -53,9 +53,7 @@ export function PageHeader() {
   return (
     <>
       <motion.header
-        className={`fixed top-3 z-500 box-border flex items-center justify-between text-[#111] ${
-          scrollDirection === "down" ? "left-3 right-8" : "left-8 right-12"
-        }`}
+        className="fixed left-4 right-4 top-3 z-500 box-border flex items-center justify-between text-[#111]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -63,11 +61,16 @@ export function PageHeader() {
       >
         <Link
           id="logo"
-          aria-label="Magdalena Lazarczyk"
-          className={`pl-1 font-normal leading-none text-inherit no-underline transition-[font-size] duration-200 ${scrollDirection === "down" ? "text-[24px]" : "text-[clamp(56px,8vw,88px)]"} ${hoverColorClass} ${focusHoverColorClass}`}
+          aria-label="Magdalena Łazarczyk"
+          className={`header-logo font-normal leading-none text-inherit no-underline transition-[font-size] duration-200 ${scrollDirection === "down" ? "text-[24px]" : "text-[clamp(56px,8vw,88px)]"} ${hoverColorClass} ${focusHoverColorClass}`}
           to="/"
         >
-          M
+          <span className="header-logo__crop" aria-hidden="true">
+            <span className="header-logo__track">
+              <span className="header-logo__text">Magdalena Łazarczyk</span>
+              <span className="header-logo__text">Magdalena Łazarczyk</span>
+            </span>
+          </span>
         </Link>
         <MenuButton isOpen={isMenuOpen} onClick={() => setIsMenuOpen(true)} />
       </motion.header>

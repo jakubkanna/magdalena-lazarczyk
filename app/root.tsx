@@ -40,7 +40,7 @@ export const links: Route.LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Emilys+Candy&family=Imperial+Script&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Modak",
   },
 ];
 
@@ -109,9 +109,7 @@ export default function App() {
   return (
     <div className="route-stage">
       <AnimatePresence mode="wait">
-        {chromePath ? (
-          <PageHeader key={`shared-chrome-${chromePath}`} />
-        ) : null}
+        {chromePath ? <PageHeader key={`shared-chrome-${chromePath}`} /> : null}
       </AnimatePresence>
       <AnimatePresence
         custom={{ delayExit: delayPageExitForChrome }}

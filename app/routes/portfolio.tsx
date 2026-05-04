@@ -240,6 +240,12 @@ export default function Portfolio() {
     lastScrollTop.current = Math.max(scrollTop, 0);
   };
 
+  const handlePortfolioClick = () => {
+    setActiveCategory(null);
+    scrollRootRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    lastScrollTop.current = 0;
+  };
+
   const visiblePosts = useMemo(
     () =>
       activeCategory
@@ -314,7 +320,7 @@ export default function Portfolio() {
       ) : null}
       <main
         ref={scrollRootRef}
-        className={`h-svh overflow-y-auto bg-white px-4 pb-7 pt-28 text-[#111] transition-opacity duration-200 md:px-6 md:pb-8 xl:px-7 ${
+        className={`h-svh overflow-y-auto bg-white px-4 pb-7 pt-28 text-[#111] transition-opacity duration-200 md:pb-8 ${
           isPortfolioReady ? "opacity-100" : "opacity-0"
         }`}
         onScroll={handlePortfolioScroll}
@@ -342,7 +348,7 @@ export default function Portfolio() {
         </section>
       </main>
       <footer
-        className="fixed bottom-3 left-3 right-3 z-50 flex flex-wrap items-center gap-2 md:right-8"
+        className="fixed bottom-3 left-4 right-4 z-50 flex flex-wrap items-center gap-2"
         aria-label="Portfolio categories"
       >
         <button
@@ -353,7 +359,7 @@ export default function Portfolio() {
           }`}
           type="button"
           aria-pressed={activeCategory === null}
-          onClick={() => setActiveCategory(null)}
+          onClick={handlePortfolioClick}
         >
           Portfolio
         </button>
