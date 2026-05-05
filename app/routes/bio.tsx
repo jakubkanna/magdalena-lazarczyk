@@ -65,7 +65,7 @@ export default function Bio() {
     >
       <div className="mx-auto grid max-w-[1600px] grid-cols-1 gap-y-[100px]">
         <section className="grid grid-cols-1 gap-8 md:mt-[200px] md:grid-cols-2 md:gap-10">
-          <h1 className="font-display text-[clamp(44px,7vw,96px)] font-bold  italic leading-[0.95]">
+          <h1 className="font-display text-[clamp(44px,7vw,96px)] font-bold italic leading-[0.95]">
             Artystka wizualna, scenografka i kostiumografka
           </h1>
           <div className="flex justify-start md:justify-end">
@@ -98,7 +98,7 @@ export default function Bio() {
         </section>
 
         <section className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-10">
-          <h2 className="font-display text-[clamp(34px,5vw,72px)] font-normal  italic leading-[0.95]">
+          <h2 className="font-display text-[clamp(34px,5vw,72px)] font-normal italic leading-[0.95]">
             Wybrane wystawy i prezentacje
           </h2>
           <div className="bio-content">
@@ -113,7 +113,7 @@ export default function Bio() {
           ref={workshopsRef}
           className="grid scroll-mb-16 grid-cols-1 gap-8 pb-12 md:grid-cols-2 md:gap-10"
         >
-          <h2 className="font-display text-[clamp(34px,5vw,72px)] font-normal  italic leading-[0.95]">
+          <h2 className="font-display text-[clamp(34px,5vw,72px)] font-normal italic leading-[0.95]">
             Warsztaty teatralne:
           </h2>
           <div className="bio-content">

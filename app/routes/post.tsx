@@ -161,7 +161,7 @@ export default function Post() {
   if (!post) {
     return (
       <main className="min-h-svh bg-white px-4 pb-10 pt-28 text-[#111] md:px-8">
-        <h1 className="font-display text-[96px] font-normal  italic leading-[0.9]">
+        <h1 className="font-display text-[96px] font-normal italic leading-[0.9]">
           Nie znaleziono
         </h1>
         <Link
@@ -177,7 +177,7 @@ export default function Post() {
   return (
     <main className="h-svh overflow-y-auto bg-white px-4 pb-10 pt-28 text-[#111] md:px-8">
       <article className="mx-auto grid max-w-[1600px] grid-cols-1 gap-y-12">
-        <h1 className="font-display text-[clamp(56px,10vw,96px)] font-bold  italic leading-[0.9] md:mt-[200px]">
+        <h1 className="font-display text-[clamp(56px,10vw,96px)] font-bold italic leading-[0.9] md:mt-[200px]">
           {post.title}
         </h1>
 

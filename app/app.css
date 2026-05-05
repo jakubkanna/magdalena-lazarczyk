@@ -68,15 +68,14 @@ img {
   will-change: transform;
 }
 
-.route-screen--loading {
-  animation: route-screen-loading-pulse 900ms ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .route-screen--loading {
-    animation: none;
-    opacity: 0.82;
-  }
+.route-loading-indicator {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
 }
 
 .frontpage {
@@ -455,17 +454,6 @@ img {
   }
 }
 
-@keyframes route-screen-loading-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.68;
-  }
-}
-
 @keyframes frontpage-loader-letter-fade {
   0% {
     opacity: 0;
@@ -534,7 +522,7 @@ img {
 
 #logo {
   font-family: "Parisienne", serif;
-  font-weight: 100;
+  font-weight: 400;
 }
 
 .header-logo {
