@@ -12,7 +12,21 @@ const portfolioCategories: PortfolioCategory[] = [
   "Sztuka",
   "Warsztaty",
 ];
+const portfolioBackgroundClassByCategory: Record<
+  PortfolioCategory | "all",
+  string
+> = {
+  all: "bg-sky-400",
+  Teatr: "bg-[#171717]",
+  Sztuka: "bg-white",
+  Warsztaty: "bg-pink-300",
+};
 const postBatchSize = 10;
+const portfolioImageSrcCache = new Map<number, string>();
+const portfolioImageLoadPromiseCache = new Map<
+  number,
+  Promise<readonly [number, string]>
+>();
 type ScrollDirection = "up" | "down";
 
 export function meta({}: Route.MetaArgs) {
@@ -66,9 +80,40 @@ function preloadPortfolioImage(src: string) {
 }
 
 async function resolvePortfolioImage(post: PortfolioPostViewModel) {
-  const src = await loadPortfolioImageSrc(post.image);
-  await preloadPortfolioImage(src);
-  return [post.id, src] as const;
+  const cachedSrc = portfolioImageSrcCache.get(post.id);
+
+  if (cachedSrc) {
+    return [post.id, cachedSrc] as const;
+  }
+
+  const cachedPromise = portfolioImageLoadPromiseCache.get(post.id);
+
+  if (cachedPromise) {
+    return cachedPromise;
+  }
+
+  const loadPromise = loadPortfolioImageSrc(post.image).then(async (src) => {
+    await preloadPortfolioImage(src);
+
+    if (src) {
+      portfolioImageSrcCache.set(post.id, src);
+    }
+
+    portfolioImageLoadPromiseCache.delete(post.id);
+    return [post.id, src] as const;
+  });
+
+  portfolioImageLoadPromiseCache.set(post.id, loadPromise);
+  return loadPromise;
+}
+
+async function resolvePortfolioImages(posts: PortfolioPostViewModel[]) {
+  if (!posts.length) {
+    return {};
+  }
+
+  const loadedImages = await Promise.all(posts.map(resolvePortfolioImage));
+  return Object.fromEntries(loadedImages);
 }
 
 function LinkOutlineIcon() {
@@ -109,20 +154,27 @@ function PortfolioPostCard({
   imageSrc,
 }: {
   post: PortfolioPostViewModel;
-  imageSrc: string;
+  imageSrc?: string;
 }) {
   return (
     <article className="group">
       <div className="relative overflow-hidden">
-        <img
-          className="block h-auto w-full"
-          src={imageSrc}
-          alt={post.title}
-          loading="lazy"
-          decoding="async"
-          draggable={false}
-        />
-        {post.externalUrl ? (
+        {imageSrc ? (
+          <img
+            className="block h-auto w-full"
+            src={imageSrc}
+            alt={post.title}
+            loading="lazy"
+            decoding="async"
+            draggable={false}
+          />
+        ) : (
+          <div
+            className="portfolio-post-skeleton aspect-[4/3] w-full"
+            aria-hidden="true"
+          />
+        )}
+        {imageSrc && post.externalUrl ? (
           <a
             className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center text-[#111] opacity-0 transition-[color,opacity] duration-150 hover:text-[var(--site-hover-color)] group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:text-[var(--site-hover-color)] focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#111]"
             href={post.externalUrl}
@@ -133,21 +185,23 @@ function PortfolioPostCard({
             <LinkOutlineIcon />
           </a>
         ) : null}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 p-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100 md:p-5">
-          <div className="w-[min(76%,760px)] translate-y-3 rounded-3xl bg-white px-5 py-5 text-[#222] transition-transform duration-200 group-hover:translate-y-0 group-focus-within:translate-y-0 md:rounded-[28px] md:px-7 md:py-6">
-            <h2 className="font-display text-lg uppercase leading-tight italic">
-              {post.title}
-            </h2>
-            <div className="font-display mt-6 font-normal leading-[1.16]">
-              <p>
-                {post.venue}, {post.place}, {post.year}
-              </p>
-              {post.credits.map((credit) => (
-                <p key={credit}>{credit}</p>
-              ))}
+        {imageSrc ? (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 p-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100 md:p-5">
+            <div className="w-[min(76%,760px)] translate-y-3 rounded-3xl bg-white px-5 py-5 text-[#222] shadow-[10px_14px_34px_rgb(0_0_0_/_0.24)] transition-transform duration-200 group-hover:translate-y-0 group-focus-within:translate-y-0 md:rounded-[28px] md:px-7 md:py-6">
+              <h2 className="font-display text-lg uppercase leading-tight italic">
+                {post.title}
+              </h2>
+              <div className="font-display mt-6 font-normal leading-[1.16]">
+                <p>
+                  {post.venue}, {post.place}, {post.year}
+                </p>
+                {post.credits.map((credit) => (
+                  <p key={credit}>{credit}</p>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        ) : null}
       </div>
     </article>
   );
@@ -164,6 +218,8 @@ export default function Portfolio() {
     Record<number, string>
   >({});
   const [isInitialRenderReady, setIsInitialRenderReady] = useState(false);
+  const [hasShownPortfolioContent, setHasShownPortfolioContent] =
+    useState(false);
   const [isLoadingMorePosts, setIsLoadingMorePosts] = useState(false);
   const lastScrollTop = useRef(0);
   const scrollRootRef = useRef<HTMLElement | null>(null);
@@ -180,13 +236,11 @@ export default function Portfolio() {
         return;
       }
 
-      const loadedImages = await Promise.all(
-        unloadedPosts.map(resolvePortfolioImage),
-      );
+      const loadedImages = await resolvePortfolioImages(unloadedPosts);
 
       setImageSrcByPostId((currentImages) => ({
         ...currentImages,
-        ...Object.fromEntries(loadedImages),
+        ...loadedImages,
       }));
     },
     [imageSrcByPostId],
@@ -197,13 +251,11 @@ export default function Portfolio() {
 
     fetchPortfolioPosts().then(async (portfolioPosts) => {
       const initialPosts = portfolioPosts.slice(0, postBatchSize);
-      const loadedImages = await Promise.all(
-        initialPosts.map(resolvePortfolioImage),
-      );
+      const loadedImages = await resolvePortfolioImages(initialPosts);
 
       if (isMounted) {
         setPosts(portfolioPosts);
-        setImageSrcByPostId(Object.fromEntries(loadedImages));
+        setImageSrcByPostId(loadedImages);
         window.requestAnimationFrame(() => {
           window.requestAnimationFrame(() => {
             if (isMounted) {
@@ -310,24 +362,49 @@ export default function Portfolio() {
   const isPortfolioReady =
     isInitialRenderReady &&
     renderedPosts.every((post) => imageSrcByPostId[post.id]);
+  const shouldShowPortfolioContent = hasShownPortfolioContent || isPortfolioReady;
+  const portfolioBackgroundClass =
+    portfolioBackgroundClassByCategory[activeCategory ?? "all"];
+  const portfolioTextClass =
+    activeCategory === "Teatr" ? "text-white" : "text-[#111]";
+  const portfolioChromeColor = activeCategory === "Teatr" ? "#fff" : "#111";
+
+  useEffect(() => {
+    document.documentElement.style.setProperty(
+      "--site-chrome-color",
+      portfolioChromeColor,
+    );
+
+    return () => {
+      document.documentElement.style.removeProperty("--site-chrome-color");
+    };
+  }, [portfolioChromeColor]);
+
+  useEffect(() => {
+    if (isPortfolioReady) {
+      setHasShownPortfolioContent(true);
+    }
+  }, [isPortfolioReady]);
 
   return (
     <>
-      {!isPortfolioReady ? (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-white">
+      {!shouldShowPortfolioContent ? (
+        <div
+          className={`fixed inset-0 z-60 flex items-center justify-center transition-[background-color,color] duration-500 ease-in-out ${portfolioBackgroundClass} ${portfolioTextClass}`}
+        >
           <LoadingSpinner />
         </div>
       ) : null}
       <main
         ref={scrollRootRef}
-        className={`h-svh overflow-y-auto bg-white px-4 pb-7 pt-28 text-[#111] transition-opacity duration-200 md:pb-8 ${
-          isPortfolioReady ? "opacity-100" : "opacity-0"
+        className={`h-svh overflow-y-auto px-4 pb-7 pt-28 transition-[background-color,color,opacity] duration-500 ease-in-out md:pb-8 ${portfolioBackgroundClass} ${portfolioTextClass} ${
+          shouldShowPortfolioContent ? "opacity-100" : "opacity-0"
         }`}
         onScroll={handlePortfolioScroll}
-        aria-hidden={!isPortfolioReady}
+        aria-hidden={!shouldShowPortfolioContent}
       >
         <section
-          className="grid grid-cols-1 gap-1.5 pb-24 md:grid-cols-2 md:gap-2 md:pb-28 2xl:grid-cols-3 2xl:gap-2.5"
+          className="grid grid-cols-1 gap-1.5 pb-24 md:grid-cols-2 md:gap-4 md:pb-28 2xl:grid-cols-3 2xl:gap-4"
           aria-label="Portfolio posts"
         >
           {renderedPosts.map((post) => (
@@ -352,7 +429,7 @@ export default function Portfolio() {
         aria-label="Portfolio categories"
       >
         <button
-          className={`font-display hidden border-0 bg-transparent p-0 font-normal leading-none text-[#050505] transition-[font-size] duration-200 hover:text-[var(--site-hover-color)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#111] md:block ${
+          className={`font-display hidden border-0 bg-transparent p-0 font-normal leading-none transition-[color,font-size] duration-500 ease-in-out hover:text-[var(--site-hover-color)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current md:block ${portfolioTextClass} ${
             scrollDirection === "down"
               ? "text-[clamp(24px,2.5vw,36px)]"
               : "text-[20px]"
@@ -368,7 +445,7 @@ export default function Portfolio() {
             <button
               className={`font-display rounded-full leading-none text-[#050505] shadow-[8px_10px_20px_rgb(0_0_0_/_0.24)] transition-[background-color,font-size,padding,transform] duration-200 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#111] ${
                 activeCategory === category
-                  ? "bg-[var(--site-hover-color)] font-normal uppercase"
+                  ? "bg-[var(--site-hover-color)] font-normal text-white"
                   : "bg-[#fff7f7] font-normal"
               } ${
                 scrollDirection === "down"

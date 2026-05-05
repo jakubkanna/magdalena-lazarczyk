@@ -17,9 +17,12 @@ const menuLinks = [
 ];
 
 const socialLinks = [
-  { label: "Phone", value: "" },
+  { label: "Phone", value: "+48 504 439 128" },
   { label: "Email", value: "magdalena.lazarczyk@gmail.com" },
-  { label: "Instagram", href: "https://www.instagram.com/magdalena_lazarczyk/" },
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/magdalena_lazarczyk/",
+  },
 ];
 
 function MenuLinkLabel({ label }: { label: string }) {
@@ -93,7 +96,7 @@ export function SiteMenu({ isOpen, onClose }: SiteMenuProps) {
           />
           <motion.nav
             key="site-menu-panel"
-            className="fixed inset-y-0 right-0 z-[1201] box-border flex min-h-svh w-fit max-w-full flex-col justify-between bg-[#bfbfbf] py-11 pl-6 pr-[22px] text-left text-[#222] shadow-[-28px_0_48px_rgb(0_0_0_/_0.2)] sm:pl-9"
+            className="fixed inset-y-0 right-0 z-[1201] box-border flex min-h-svh w-fit max-w-full flex-col justify-between bg-[#8f8f8f] py-11 pl-6 pr-[22px] text-left text-[#222] shadow-[-28px_0_48px_rgb(0_0_0_/_0.2)] sm:pl-9"
             aria-label="Nawigacja główna"
             initial={{ x: "100%", opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}

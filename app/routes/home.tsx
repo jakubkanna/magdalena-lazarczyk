@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { TargetAndTransition, Transition } from "framer-motion";
 import { useNavigate } from "react-router";
 import { MenuButton } from "../components/menu-button";
@@ -123,12 +123,14 @@ function FrameSequence({
   pingPong = false,
   pingPongPause = 0,
   reverse = false,
+  onFrameLoad,
 }: {
   frames: string[];
   duration: number;
   pingPong?: boolean;
   pingPongPause?: number;
   reverse?: boolean;
+  onFrameLoad: (frame: string) => void;
 }) {
   const [frameIndex, setFrameIndex] = useState(0);
   const motionFrameCount = pingPong ? frames.length * 2 - 2 : frames.length;
@@ -170,6 +172,8 @@ function FrameSequence({
           sizes={frontpageImageSizes}
           alt=""
           draggable={false}
+          onLoad={() => onFrameLoad(frame)}
+          onError={() => onFrameLoad(frame)}
         />
       ))}
     </>
@@ -258,6 +262,7 @@ const frontpageImagePaths = frontpageLayers.flatMap((layer) =>
 );
 
 const loaderText = "Magdalena Łazarczyk";
+const loaderMarqueeItems = Array.from({ length: 6 }, () => loaderText);
 const minimumLoaderDuration = 2900;
 const loaderExitDuration = 720;
 let hasShownHomeLoader = false;
@@ -267,7 +272,7 @@ const loadLogoFont = async () => {
     return;
   }
 
-  await document.fonts.load(`1em "Oi"`, loaderText);
+  await document.fonts.load(`1em "Parisienne"`, loaderText);
 };
 
 const layerAnimationClass = (layer: FrontpageLayer) =>
@@ -280,17 +285,30 @@ const layerAnimationClass = (layer: FrontpageLayer) =>
 export default function Home() {
   const [hoveredLayer, setHoveredLayer] = useState<number | null>(null);
   const [isLoaded, setIsLoaded] = useState(hasShownHomeLoader);
-  const [isSceneRendered, setIsSceneRendered] = useState(hasShownHomeLoader);
-  const [isLoaderVisible, setIsLoaderVisible] = useState(!hasShownHomeLoader);
+  const [isSceneRendered, setIsSceneRendered] = useState(false);
+  const [isLoaderVisible, setIsLoaderVisible] = useState(true);
   const [isLogoFontReady, setIsLogoFontReady] = useState(hasShownHomeLoader);
+  const [renderedImagePaths, setRenderedImagePaths] = useState<Set<string>>(
+    () => new Set(),
+  );
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
+
+  const handleRenderedImageLoad = useCallback((path: string) => {
+    setRenderedImagePaths((currentPaths) => {
+      if (currentPaths.has(path)) {
+        return currentPaths;
+      }
+
+      const nextPaths = new Set(currentPaths);
+      nextPaths.add(path);
+      return nextPaths;
+    });
+  }, []);
 
   useEffect(() => {
     if (hasShownHomeLoader) {
       setIsLoaded(true);
-      setIsSceneRendered(true);
-      setIsLoaderVisible(false);
       setIsLogoFontReady(true);
       return;
     }
@@ -322,7 +340,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (!isLoaded) {
+    if (!isLoaded || renderedImagePaths.size < frontpageImagePaths.length) {
       return;
     }
 
@@ -339,7 +357,7 @@ export default function Home() {
       window.cancelAnimationFrame(firstFrame);
       window.cancelAnimationFrame(secondFrame);
     };
-  }, [isLoaded]);
+  }, [isLoaded, renderedImagePaths.size]);
 
   useEffect(() => {
     if (!isSceneRendered) {
@@ -366,24 +384,39 @@ export default function Home() {
           role="status"
           aria-live="polite"
         >
-          <span
-            id="logo"
-            className="frontpage__loader-text"
-            aria-label={loaderText}
-          >
-            {isLogoFontReady
-              ? Array.from(loaderText).map((letter, index) => (
-                  <span
-                    className="frontpage__loader-letter"
-                    key={`${letter}-${index}`}
-                    aria-hidden="true"
-                    style={{ animationDelay: `${index * 70}ms` }}
-                  >
-                    {letter === " " ? "\u00a0" : letter}
-                  </span>
-                ))
-              : null}
-          </span>
+          <span className="sr-only">{loaderText}</span>
+          {isLogoFontReady ? (
+            <>
+              <div className="frontpage__loader-marquee frontpage__loader-marquee--top">
+                <div className="frontpage__loader-marquee-track">
+                  {[...loaderMarqueeItems, ...loaderMarqueeItems].map(
+                    (item, index) => (
+                      <span
+                        className="frontpage__loader-marquee-item"
+                        key={`top-${item}-${index}`}
+                      >
+                        {item}
+                      </span>
+                    ),
+                  )}
+                </div>
+              </div>
+              <div className="frontpage__loader-marquee frontpage__loader-marquee--bottom">
+                <div className="frontpage__loader-marquee-track">
+                  {[...loaderMarqueeItems, ...loaderMarqueeItems].map(
+                    (item, index) => (
+                      <span
+                        className="frontpage__loader-marquee-item"
+                        key={`bottom-${item}-${index}`}
+                      >
+                        {item}
+                      </span>
+                    ),
+                  )}
+                </div>
+              </div>
+            </>
+          ) : null}
         </div>
       ) : null}
       <div
@@ -416,6 +449,7 @@ export default function Home() {
                     pingPong={layer.pingPongFrames}
                     pingPongPause={layer.pingPongPause}
                     reverse={layer.reverseFrames}
+                    onFrameLoad={handleRenderedImageLoad}
                   />
                 </div>
               ) : (
@@ -432,6 +466,16 @@ export default function Home() {
                   alt=""
                   aria-hidden="true"
                   draggable={false}
+                  onLoad={() => {
+                    if (layer.src) {
+                      handleRenderedImageLoad(layer.src);
+                    }
+                  }}
+                  onError={() => {
+                    if (layer.src) {
+                      handleRenderedImageLoad(layer.src);
+                    }
+                  }}
                   style={{
                     zIndex: layer.zIndex,
                     transformOrigin: layer.transformOrigin,

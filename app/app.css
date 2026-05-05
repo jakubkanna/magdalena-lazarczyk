@@ -29,6 +29,7 @@ body {
 }
 
 body {
+  font-family: var(--font-sans);
   overflow: hidden;
 }
 
@@ -39,7 +40,7 @@ img {
 }
 
 .route-stage {
-  --site-hover-color: #39ff14;
+  --site-hover-color: #7dd3fc;
   position: relative;
   width: 100vw;
   min-height: 100svh;
@@ -66,6 +67,8 @@ img {
 }
 
 .frontpage__loader {
+  --frontpage-loader-strap-height: clamp(52px, 5.4vw, 106px);
+
   position: absolute;
   inset: 0;
   z-index: 1000;
@@ -74,7 +77,7 @@ img {
   justify-content: center;
   padding: 24px;
   overflow: hidden;
-  color: #5a1714;
+  color: #666;
   line-height: 1.1;
   text-align: center;
   background:
@@ -103,6 +106,7 @@ img {
 .frontpage__loader::before {
   position: absolute;
   inset: 0;
+  z-index: 1;
   background:
     linear-gradient(
       180deg,
@@ -132,7 +136,7 @@ img {
   font-size: clamp(28px, 6.4vw, 112px);
   line-height: 0.92;
   text-align: center;
-  color: white;
+  color: #666;
 }
 
 .frontpage__loader-letter {
@@ -140,6 +144,45 @@ img {
   opacity: 0;
   transform: translateY(0.16em);
   animation: frontpage-loader-letter-fade 650ms ease forwards;
+}
+
+.frontpage__loader-marquee {
+  position: absolute;
+  left: 0;
+  z-index: 2;
+  width: 100%;
+  min-height: var(--frontpage-loader-strap-height);
+  overflow: hidden;
+  background: rgb(232 129 119 / 0.72);
+  color: #666;
+  font-family: "Parisienne", serif;
+  font-size: clamp(54px, 5.7vw, 112px);
+  line-height: 0.95;
+  white-space: nowrap;
+}
+
+.frontpage__loader-marquee--top {
+  top: 0;
+}
+
+.frontpage__loader-marquee--bottom {
+  bottom: 0;
+}
+
+.frontpage__loader-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: frontpage-loader-marquee 24s linear infinite;
+  will-change: transform;
+}
+
+.frontpage__loader-marquee--bottom .frontpage__loader-marquee-track {
+  animation-direction: reverse;
+}
+
+.frontpage__loader-marquee-item {
+  flex: 0 0 auto;
+  padding-right: 1.1em;
 }
 
 .frontpage__loader--complete {
@@ -196,13 +239,13 @@ img {
 .frontpage__tooltip {
   position: absolute;
   left: 50%;
-  bottom: calc(100% + 10px);
+  bottom: calc(100% + 14px);
   transform: translateX(-50%);
-  padding: 6px 10px;
+  padding: 9px 14px;
   border-radius: 999px;
   background: #fff;
   color: #111;
-  font-size: 13px;
+  font-size: 18px;
   font-weight: 400;
   line-height: 1;
   white-space: nowrap;
@@ -246,9 +289,32 @@ img {
   animation: portfolio-spinner-rotate 720ms linear infinite;
 }
 
+.portfolio-post-skeleton {
+  background:
+    linear-gradient(
+      90deg,
+      rgb(255 255 255 / 0.18) 0%,
+      rgb(255 255 255 / 0.42) 42%,
+      rgb(255 255 255 / 0.18) 78%
+    ),
+    rgb(17 17 17 / 0.12);
+  background-size: 220% 100%;
+  animation: portfolio-skeleton-shimmer 1.2s ease-in-out infinite;
+}
+
 @keyframes portfolio-spinner-rotate {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes portfolio-skeleton-shimmer {
+  0% {
+    background-position: 120% 0;
+  }
+
+  100% {
+    background-position: -120% 0;
   }
 }
 
@@ -261,6 +327,16 @@ img {
   100% {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes frontpage-loader-marquee {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
   }
 }
 
@@ -309,47 +385,30 @@ img {
 }
 
 #logo {
-  font-family: "Modak", serif;
+  font-family: "Parisienne", serif;
 }
 
 .header-logo {
   display: inline-block;
-  width: 0.86em;
-  overflow: hidden;
+  width: 1.35em;
+  height: 1em;
+  position: relative;
   vertical-align: top;
 }
 
 .header-logo__crop {
   display: block;
-  width: 0.86em;
-  overflow: hidden;
+  position: relative;
+  width: 100%;
+  height: 1em;
+  text-align: center;
 }
 
-.header-logo__track {
-  display: flex;
-  width: max-content;
-  animation: header-logo-marquee 14s linear infinite;
-  will-change: transform;
-}
-
-.header-logo__text {
-  flex: 0 0 auto;
-  padding-right: 0.35em;
-  white-space: nowrap;
-}
-
-@keyframes header-logo-marquee {
-  0% {
-    transform: translateX(0);
-  }
-
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .header-logo__track {
-    animation: none;
-  }
+.header-logo__letter {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: block;
+  line-height: 1;
+  transform: translate(-50%, -50%);
 }

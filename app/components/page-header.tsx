@@ -6,11 +6,14 @@ import { SiteMenu } from "./site-menu";
 import { focusHoverColorClass, hoverColorClass } from "./styles";
 
 type ScrollDirection = "up" | "down";
+const logoLetters = Array.from("MagdalenaŁazarczyk");
+const logoSpellInterval = 1000;
 
 export function PageHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrollDirection, setScrollDirection] =
     useState<ScrollDirection | null>(null);
+  const [logoLetterIndex, setLogoLetterIndex] = useState(0);
   const lastScrollTop = useRef(0);
 
   useEffect(() => {
@@ -50,10 +53,20 @@ export function PageHeader() {
     };
   }, []);
 
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setLogoLetterIndex((currentIndex) =>
+        currentIndex === logoLetters.length - 1 ? 0 : currentIndex + 1,
+      );
+    }, logoSpellInterval);
+
+    return () => window.clearInterval(interval);
+  }, []);
+
   return (
     <>
       <motion.header
-        className="fixed left-4 right-4 top-3 z-500 box-border flex items-center justify-between text-[#111]"
+        className="fixed left-4 right-4 top-3 z-500 box-border flex items-center justify-between text-[var(--site-chrome-color,#111)] transition-colors duration-500 ease-in-out"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -62,14 +75,13 @@ export function PageHeader() {
         <Link
           id="logo"
           aria-label="Magdalena Łazarczyk"
-          className={`header-logo font-normal leading-none text-inherit no-underline transition-[font-size] duration-200 ${scrollDirection === "down" ? "text-[24px]" : "text-[clamp(56px,8vw,88px)]"} ${hoverColorClass} ${focusHoverColorClass}`}
+          className={`header-logo font-normal leading-none text-inherit no-underline transition-[font-size] duration-200 ${scrollDirection === "down" ? "text-[24px]" : "text-[clamp(44px,6.5vw,72px)]"} ${hoverColorClass} ${focusHoverColorClass}`}
           to="/"
         >
           <span className="header-logo__crop" aria-hidden="true">
-            <span className="header-logo__track">
-              <span className="header-logo__text">Magdalena Łazarczyk</span>
-              <span className="header-logo__text">Magdalena Łazarczyk</span>
-            </span>
+            {logoLetters[logoLetterIndex] === " "
+              ? "\u00a0"
+              : logoLetters[logoLetterIndex]}
           </span>
         </Link>
         <MenuButton isOpen={isMenuOpen} onClick={() => setIsMenuOpen(true)} />
