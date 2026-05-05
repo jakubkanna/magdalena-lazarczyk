@@ -6,6 +6,7 @@ import {
   Scripts,
   ScrollRestoration,
   useLocation,
+  useNavigation,
   useOutlet,
 } from "react-router";
 import {
@@ -62,7 +63,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-function RouteScreen({ children }: { children: React.ReactNode }) {
+function RouteScreen({
+  children,
+  isNavigationPending,
+}: {
+  children: React.ReactNode;
+  isNavigationPending: boolean;
+}) {
   const isPresent = useIsPresent();
   const presenceData = usePresenceData() as { delayExit?: boolean } | undefined;
   const shouldReduceMotion = useReducedMotion();
@@ -70,7 +77,9 @@ function RouteScreen({ children }: { children: React.ReactNode }) {
 
   return (
     <motion.div
-      className="route-screen"
+      className={`route-screen${
+        isNavigationPending ? " route-screen--loading" : ""
+      }`}
       initial={false}
       animate={{ y: 0 }}
       exit={shouldReduceMotion ? { opacity: 0 } : { y: "100%" }}
@@ -88,12 +97,14 @@ function RouteScreen({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const location = useLocation();
+  const navigation = useNavigation();
   const outlet = useOutlet();
   const previousPathname = useRef(location.pathname);
   const [chromePath, setChromePath] = useState(() =>
     location.pathname === "/" ? null : location.pathname,
   );
   const isRouteChanging = previousPathname.current !== location.pathname;
+  const isNavigationPending = navigation.state !== "idle";
   const showSharedChrome = location.pathname !== "/";
   const delayPageExitForChrome =
     previousPathname.current !== "/" && isRouteChanging;
@@ -118,7 +129,12 @@ export default function App() {
           setChromePath(showSharedChrome ? location.pathname : null);
         }}
       >
-        <RouteScreen key={location.pathname}>{outlet}</RouteScreen>
+        <RouteScreen
+          key={location.pathname}
+          isNavigationPending={isNavigationPending}
+        >
+          {outlet}
+        </RouteScreen>
       </AnimatePresence>
     </div>
   );

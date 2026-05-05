@@ -68,6 +68,17 @@ img {
   will-change: transform;
 }
 
+.route-screen--loading {
+  animation: route-screen-loading-pulse 900ms ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-screen--loading {
+    animation: none;
+    opacity: 0.82;
+  }
+}
+
 .frontpage {
   position: relative;
   width: 100vw;
@@ -441,6 +452,17 @@ img {
 
   100% {
     background-position: -120% 0;
+  }
+}
+
+@keyframes route-screen-loading-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.68;
   }
 }
 
