@@ -9,6 +9,7 @@ export type PortfolioPost = {
   credits: string[];
   image: string;
   category?: PortfolioCategory;
+  content?: string;
   externalUrl?: string;
 };
 

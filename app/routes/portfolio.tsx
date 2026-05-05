@@ -1,5 +1,6 @@
 import type { Route } from "./+types/portfolio";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router";
 import {
   fetchPortfolioPosts,
   loadPortfolioImageSrc,
@@ -160,14 +161,20 @@ function PortfolioPostCard({
     <article className="group">
       <div className="relative overflow-hidden">
         {imageSrc ? (
-          <img
-            className="block h-auto w-full"
-            src={imageSrc}
-            alt={post.title}
-            loading="lazy"
-            decoding="async"
-            draggable={false}
-          />
+          <Link
+            className="block text-inherit no-underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#111]"
+            to={`/post/${post.id}`}
+            aria-label={`Otwórz post ${post.title}`}
+          >
+            <img
+              className="block h-auto w-full"
+              src={imageSrc}
+              alt={post.title}
+              loading="lazy"
+              decoding="async"
+              draggable={false}
+            />
+          </Link>
         ) : (
           <div
             className="portfolio-post-skeleton aspect-[4/3] w-full"
@@ -188,7 +195,7 @@ function PortfolioPostCard({
         {imageSrc ? (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 p-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100 md:p-5">
             <div className="w-[min(76%,760px)] translate-y-3 rounded-3xl bg-white px-5 py-5 text-[#222] shadow-[10px_14px_34px_rgb(0_0_0_/_0.24)] transition-transform duration-200 group-hover:translate-y-0 group-focus-within:translate-y-0 md:rounded-[28px] md:px-7 md:py-6">
-              <h2 className="font-display text-lg uppercase leading-tight italic">
+              <h2 className="font-display text-lg  leading-tight italic">
                 {post.title}
               </h2>
               <div className="font-display mt-6 font-normal leading-[1.16]">
@@ -362,7 +369,8 @@ export default function Portfolio() {
   const isPortfolioReady =
     isInitialRenderReady &&
     renderedPosts.every((post) => imageSrcByPostId[post.id]);
-  const shouldShowPortfolioContent = hasShownPortfolioContent || isPortfolioReady;
+  const shouldShowPortfolioContent =
+    hasShownPortfolioContent || isPortfolioReady;
   const portfolioBackgroundClass =
     portfolioBackgroundClassByCategory[activeCategory ?? "all"];
   const portfolioTextClass =

@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { Link } from "react-router";
 import { MenuButton } from "./menu-button";
 import { SiteMenu } from "./site-menu";
-import { SoundLevelButton } from "./sound-level-button";
 import { focusHoverColorClass, hoverColorClass } from "./styles";
 
 type ScrollDirection = "up" | "down";
@@ -106,7 +105,6 @@ export function PageHeader() {
           </span>
         </Link>
         <div className="flex items-center gap-2">
-          <SoundLevelButton />
           <MenuButton isOpen={isMenuOpen} onClick={() => setIsMenuOpen(true)} />
         </div>
       </motion.header>

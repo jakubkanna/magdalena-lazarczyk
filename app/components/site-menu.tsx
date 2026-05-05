@@ -9,11 +9,17 @@ type SiteMenuProps = {
   onClose: () => void;
 };
 
-const menuLinks = [
+type MenuLink = {
+  label: string;
+  to: string;
+  disabled?: boolean;
+};
+
+const menuLinks: MenuLink[] = [
   { label: "Start", to: "/" },
   { label: "Portfolio", to: "/portfolio" },
-  { label: "Bio", to: "/bio", disabled: true },
-  { label: "Warsztaty", to: "/contact", disabled: true },
+  { label: "Bio", to: "/bio" },
+  { label: "Warsztaty", to: "/bio#warsztaty" },
 ];
 
 const socialLinks = [

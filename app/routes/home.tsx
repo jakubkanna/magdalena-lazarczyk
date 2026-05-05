@@ -3,8 +3,6 @@ import type { TargetAndTransition, Transition } from "framer-motion";
 import { useNavigate } from "react-router";
 import { MenuButton } from "../components/menu-button";
 import { SiteMenu } from "../components/site-menu";
-import { SoundLevelButton } from "../components/sound-level-button";
-import { useMusicConsent } from "../components/music-consent";
 import type { Route } from "./+types/home";
 
 export function meta({}: Route.MetaArgs) {
@@ -194,9 +192,8 @@ const frontpageLayers: FrontpageLayer[] = [
     zIndex: 45,
     src: "frontpage/kolaz-magdalena-lazarczyk_0002s_0000_Layer-6.png",
     hoverable: true,
-    navigationDisabled: true,
-    tooltip: "Contact",
-    href: "/contact",
+    tooltip: "Kontakt",
+    href: "/bio#warsztaty",
     hoverBox: { left: 66.95, top: 35.46, width: 5.6, height: 41.44 },
     animate: { x: [0, 100, 0] },
     transition: {
@@ -230,7 +227,6 @@ const frontpageLayers: FrontpageLayer[] = [
     zIndex: 71,
     src: "frontpage/rock.png",
     hoverable: true,
-    navigationDisabled: true,
     tooltip: "Bio",
     href: "/bio",
     hoverBox: { left: 25.62, top: 14.58, width: 18.28, height: 28.19 },
@@ -300,7 +296,6 @@ export default function Home() {
     () => new Set(),
   );
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { hasAnswered, setConsent } = useMusicConsent();
   const navigate = useNavigate();
 
   const handleRenderedImageLoad = useCallback((path: string) => {
@@ -349,10 +344,10 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (areHomeAssetsReady && hasAnswered) {
+    if (areHomeAssetsReady) {
       setIsLoaded(true);
     }
-  }, [areHomeAssetsReady, hasAnswered]);
+  }, [areHomeAssetsReady]);
 
   useEffect(() => {
     if (!isLoaded || renderedImagePaths.size < frontpageImagePaths.length) {
@@ -431,31 +426,6 @@ export default function Home() {
                 </div>
               </div>
             </>
-          ) : null}
-          {!hasAnswered ? (
-            <div
-              className="frontpage__music-modal"
-              role="dialog"
-              aria-modal="true"
-            >
-              <p>Odtwarzać muzykę pod czas przeglądania?</p>
-              <div className="frontpage__music-modal-actions">
-                <button
-                  className="filter-button filter-button--compact"
-                  type="button"
-                  onClick={() => setConsent("yes")}
-                >
-                  Tak
-                </button>
-                <button
-                  className="filter-button filter-button--compact"
-                  type="button"
-                  onClick={() => setConsent("no")}
-                >
-                  Nie
-                </button>
-              </div>
-            </div>
           ) : null}
         </div>
       ) : null}
@@ -579,7 +549,6 @@ export default function Home() {
               ))
           : null}
         <div className="frontpage__help">
-          <SoundLevelButton className="text-white" />
           <MenuButton
             className="text-white"
             isOpen={isMenuOpen}
