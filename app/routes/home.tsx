@@ -3,6 +3,8 @@ import type { TargetAndTransition, Transition } from "framer-motion";
 import { useNavigate } from "react-router";
 import { MenuButton } from "../components/menu-button";
 import { SiteMenu } from "../components/site-menu";
+import { SoundLevelButton } from "../components/sound-level-button";
+import { useMusicConsent } from "../components/music-consent";
 import type { Route } from "./+types/home";
 
 export function meta({}: Route.MetaArgs) {
@@ -275,6 +277,10 @@ const loadLogoFont = async () => {
   await document.fonts.load(`1em "Parisienne"`, loaderText);
 };
 
+const showUnavailableAlert = () => {
+  window.alert("Coming soon.");
+};
+
 const layerAnimationClass = (layer: FrontpageLayer) =>
   layer.id === 5
     ? " frontpage__layer--contact-motion"
@@ -284,6 +290,8 @@ const layerAnimationClass = (layer: FrontpageLayer) =>
 
 export default function Home() {
   const [hoveredLayer, setHoveredLayer] = useState<number | null>(null);
+  const [areHomeAssetsReady, setAreHomeAssetsReady] =
+    useState(hasShownHomeLoader);
   const [isLoaded, setIsLoaded] = useState(hasShownHomeLoader);
   const [isSceneRendered, setIsSceneRendered] = useState(false);
   const [isLoaderVisible, setIsLoaderVisible] = useState(true);
@@ -292,6 +300,7 @@ export default function Home() {
     () => new Set(),
   );
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { hasAnswered, setConsent } = useMusicConsent();
   const navigate = useNavigate();
 
   const handleRenderedImageLoad = useCallback((path: string) => {
@@ -330,7 +339,7 @@ export default function Home() {
     ]).then(() => {
       if (!isCancelled) {
         hasShownHomeLoader = true;
-        setIsLoaded(true);
+        setAreHomeAssetsReady(true);
       }
     });
 
@@ -338,6 +347,12 @@ export default function Home() {
       isCancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (areHomeAssetsReady && hasAnswered) {
+      setIsLoaded(true);
+    }
+  }, [areHomeAssetsReady, hasAnswered]);
 
   useEffect(() => {
     if (!isLoaded || renderedImagePaths.size < frontpageImagePaths.length) {
@@ -417,6 +432,31 @@ export default function Home() {
               </div>
             </>
           ) : null}
+          {!hasAnswered ? (
+            <div
+              className="frontpage__music-modal"
+              role="dialog"
+              aria-modal="true"
+            >
+              <p>Odtwarzać muzykę pod czas przeglądania?</p>
+              <div className="frontpage__music-modal-actions">
+                <button
+                  className="filter-button filter-button--compact"
+                  type="button"
+                  onClick={() => setConsent("yes")}
+                >
+                  Tak
+                </button>
+                <button
+                  className="filter-button filter-button--compact"
+                  type="button"
+                  onClick={() => setConsent("no")}
+                >
+                  Nie
+                </button>
+              </div>
+            </div>
+          ) : null}
         </div>
       ) : null}
       <div
@@ -495,26 +535,31 @@ export default function Home() {
                   onMouseEnter={() => setHoveredLayer(layer.id)}
                   onMouseLeave={() => setHoveredLayer(null)}
                   onClick={() => {
-                    if (layer.href && !layer.navigationDisabled) {
+                    if (layer.navigationDisabled) {
+                      showUnavailableAlert();
+                      return;
+                    }
+
+                    if (layer.href) {
                       navigate(layer.href);
                     }
                   }}
                   onKeyDown={(event) => {
                     if (
                       layer.href &&
-                      !layer.navigationDisabled &&
                       (event.key === "Enter" || event.key === " ")
                     ) {
                       event.preventDefault();
+                      if (layer.navigationDisabled) {
+                        showUnavailableAlert();
+                        return;
+                      }
+
                       navigate(layer.href);
                     }
                   }}
-                  role={
-                    layer.href && !layer.navigationDisabled ? "link" : undefined
-                  }
-                  tabIndex={
-                    layer.href && !layer.navigationDisabled ? 0 : undefined
-                  }
+                  role={layer.href ? "link" : undefined}
+                  tabIndex={layer.href ? 0 : undefined}
                   style={{
                     zIndex: layer.zIndex + 100,
                     left: `${layer.hoverBox?.left}%`,
@@ -534,6 +579,7 @@ export default function Home() {
               ))
           : null}
         <div className="frontpage__help">
+          <SoundLevelButton className="text-white" />
           <MenuButton
             className="text-white"
             isOpen={isMenuOpen}

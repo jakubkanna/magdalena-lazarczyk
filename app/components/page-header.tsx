@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router";
 import { MenuButton } from "./menu-button";
 import { SiteMenu } from "./site-menu";
+import { SoundLevelButton } from "./sound-level-button";
 import { focusHoverColorClass, hoverColorClass } from "./styles";
 
 type ScrollDirection = "up" | "down";
@@ -13,6 +14,7 @@ export function PageHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrollDirection, setScrollDirection] =
     useState<ScrollDirection | null>(null);
+  const [isLogoAnimating, setIsLogoAnimating] = useState(false);
   const [logoLetterIndex, setLogoLetterIndex] = useState(0);
   const lastScrollTop = useRef(0);
 
@@ -54,6 +56,11 @@ export function PageHeader() {
   }, []);
 
   useEffect(() => {
+    if (!isLogoAnimating) {
+      setLogoLetterIndex(0);
+      return;
+    }
+
     const interval = window.setInterval(() => {
       setLogoLetterIndex((currentIndex) =>
         currentIndex === logoLetters.length - 1 ? 0 : currentIndex + 1,
@@ -61,7 +68,7 @@ export function PageHeader() {
     }, logoSpellInterval);
 
     return () => window.clearInterval(interval);
-  }, []);
+  }, [isLogoAnimating]);
 
   return (
     <>
@@ -77,14 +84,31 @@ export function PageHeader() {
           aria-label="Magdalena Łazarczyk"
           className={`header-logo font-normal leading-none text-inherit no-underline transition-[font-size] duration-200 ${scrollDirection === "down" ? "text-[24px]" : "text-[clamp(44px,6.5vw,72px)]"} ${hoverColorClass} ${focusHoverColorClass}`}
           to="/"
+          onBlur={() => setIsLogoAnimating(false)}
+          onFocus={() => setIsLogoAnimating(true)}
+          onMouseEnter={() => setIsLogoAnimating(true)}
+          onMouseLeave={() => setIsLogoAnimating(false)}
         >
           <span className="header-logo__crop" aria-hidden="true">
-            {logoLetters[logoLetterIndex] === " "
-              ? "\u00a0"
-              : logoLetters[logoLetterIndex]}
+            {isLogoAnimating ? (
+              <motion.span
+                key={logoLetterIndex}
+                className="header-logo__letter"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.22, ease: "easeOut" }}
+              >
+                {logoLetters[logoLetterIndex]}
+              </motion.span>
+            ) : (
+              <span className="header-logo__letter">M</span>
+            )}
           </span>
         </Link>
-        <MenuButton isOpen={isMenuOpen} onClick={() => setIsMenuOpen(true)} />
+        <div className="flex items-center gap-2">
+          <SoundLevelButton />
+          <MenuButton isOpen={isMenuOpen} onClick={() => setIsMenuOpen(true)} />
+        </div>
       </motion.header>
       <SiteMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
     </>

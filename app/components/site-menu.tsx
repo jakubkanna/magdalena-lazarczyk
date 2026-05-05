@@ -33,6 +33,10 @@ function MenuLinkLabel({ label }: { label: string }) {
   return label;
 }
 
+const showUnavailableAlert = () => {
+  window.alert("Coming soon.");
+};
+
 export function SiteMenu({ isOpen, onClose }: SiteMenuProps) {
   const [activeSocialTooltip, setActiveSocialTooltip] = useState<string | null>(
     null,
@@ -114,13 +118,15 @@ export function SiteMenu({ isOpen, onClose }: SiteMenuProps) {
             <div className="flex flex-col gap-6">
               {menuLinks.map((link) =>
                 link.disabled ? (
-                  <span
-                    className="font-display max-w-full cursor-not-allowed whitespace-nowrap text-[clamp(54px,18vw,78px)] font-normal leading-[0.9] text-[#222]/35"
+                  <button
+                    className="font-display max-w-full cursor-pointer border-0 bg-transparent p-0 text-left whitespace-nowrap text-[clamp(54px,18vw,78px)] font-normal leading-[0.9] text-[#222]/35"
                     key={link.to}
                     aria-disabled="true"
+                    type="button"
+                    onClick={showUnavailableAlert}
                   >
                     <MenuLinkLabel label={link.label} />
-                  </span>
+                  </button>
                 ) : (
                   <Link
                     className={`font-display max-w-full whitespace-nowrap text-[clamp(54px,18vw,78px)] font-normal leading-[0.9] text-inherit no-underline ${hoverColorClass} ${focusHoverColorClass} focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current`}

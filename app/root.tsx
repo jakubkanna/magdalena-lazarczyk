@@ -17,6 +17,7 @@ import {
 } from "framer-motion";
 
 import { PageHeader } from "./components/page-header";
+import { MusicConsentProvider } from "./components/music-consent";
 import type { Route } from "./+types/root";
 import "./app.css";
 
@@ -107,7 +108,8 @@ export default function App() {
   }, [location.pathname]);
 
   return (
-    <div className="route-stage">
+    <MusicConsentProvider>
+      <div className="route-stage">
       <AnimatePresence mode="wait">
         {chromePath ? <PageHeader key={`shared-chrome-${chromePath}`} /> : null}
       </AnimatePresence>
@@ -120,7 +122,8 @@ export default function App() {
       >
         <RouteScreen key={location.pathname}>{outlet}</RouteScreen>
       </AnimatePresence>
-    </div>
+      </div>
+    </MusicConsentProvider>
   );
 }
 

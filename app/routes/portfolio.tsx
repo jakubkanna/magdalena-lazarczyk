@@ -443,14 +443,12 @@ export default function Portfolio() {
         <div className="flex flex-1 flex-wrap justify-between gap-2 md:ml-auto md:flex-none md:justify-end md:gap-3">
           {portfolioCategories.map((category) => (
             <button
-              className={`font-display rounded-full leading-none text-[#050505] shadow-[8px_10px_20px_rgb(0_0_0_/_0.24)] transition-[background-color,font-size,padding,transform] duration-200 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#111] ${
-                activeCategory === category
-                  ? "bg-[var(--site-hover-color)] font-normal text-white"
-                  : "bg-[#fff7f7] font-normal"
+              className={`filter-button ${
+                activeCategory === category ? "filter-button--active" : ""
               } ${
                 scrollDirection === "down"
-                  ? "px-3.5 py-1.5 text-[clamp(24px,2.5vw,36px)] md:px-4 md:py-2"
-                  : "px-3 py-1 text-[20px] md:px-3 md:py-1.5"
+                  ? "filter-button--large"
+                  : "filter-button--compact"
               }`}
               key={category}
               type="button"
