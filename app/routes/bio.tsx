@@ -139,7 +139,7 @@ export default function Bio() {
               <br />
               Sobota: 10:00-14:00
             </p>
-            <p>
+            <p className="bio-content__workshop-signup">
               Zapisy na warsztaty
               <br />
               Aby zapisać się na warsztaty, wyślij do nas wiadomość e-mail.

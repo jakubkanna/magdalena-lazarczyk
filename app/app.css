@@ -387,6 +387,10 @@ img {
   margin-block: 0 1.05em;
 }
 
+.bio-content__workshop-signup {
+  font-size: 16px;
+}
+
 .filter-button {
   border: 0;
   border-radius: 999px;

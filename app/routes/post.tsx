@@ -39,10 +39,10 @@ export function meta({}: Route.MetaArgs) {
 function PostDetails({ post }: { post: PortfolioPostViewModel }) {
   return (
     <div className="font-display flex h-full flex-col justify-end self-stretch text-left text-[#222]">
-      <p className="text-[clamp(18px,1.8vw,26px)] font-normal  italic leading-[1]">
+      <p className="text-[16px] font-normal  italic leading-[1]">
         {post.venue}
       </p>
-      <div className="mt-4 text-[clamp(15px,1.35vw,20px)] leading-[1.16]">
+      <div className="mt-4 text-[clamp(15px,1.35vw,16px)] leading-[1.16]">
         <p>
           {post.place}, {post.year}
         </p>
