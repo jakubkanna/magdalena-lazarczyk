@@ -65,7 +65,7 @@ export default function Bio() {
     >
       <div className="mx-auto grid max-w-[1600px] grid-cols-1 gap-y-[100px]">
         <section className="grid grid-cols-1 gap-8 md:mt-[200px] md:grid-cols-2 md:gap-10">
-          <h1 className="font-display text-[clamp(44px,7vw,96px)] font-bold italic leading-[0.95]">
+          <h1 className="font-display text-[clamp(42px,12vw,72px)] font-bold italic leading-[0.95] md:text-[clamp(76px,11vw,160px)]">
             Artystka wizualna, scenografka i kostiumografka
           </h1>
           <div className="flex justify-start md:justify-end">
