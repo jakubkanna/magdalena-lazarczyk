@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 
 type SidebarVariant = "default" | "minimized";
 
@@ -69,6 +69,15 @@ export function Sidebar({
   onCategorySelect,
   onExpand,
 }: SidebarProps) {
+  const [showCredit, setShowCredit] = useState(false);
+  const currentYear = new Date().getFullYear();
+
+  useEffect(() => {
+    if (showCredit) return;
+    const timer = window.setTimeout(() => setShowCredit(true), 3000);
+    return () => window.clearTimeout(timer);
+  }, [showCredit]);
+
   return (
     <aside
       className={`relative z-[5] h-full shrink-0 overflow-x-hidden overflow-y-auto bg-[#e8dfd0] transition-[width] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] max-md:min-h-[170px] max-md:w-full ${
@@ -78,7 +87,20 @@ export function Sidebar({
     >
       {variant === "minimized" ? (
         <div className="flex h-full flex-col p-2.5">
-          <div className="flex h-5 w-5 items-center justify-center">
+          <div className="flex w-5 flex-col items-center gap-2">
+            <button
+              type="button"
+              className="flex size-5 cursor-pointer appearance-none items-center justify-center border-0 bg-transparent p-0 text-[#202020]"
+              onClick={onHomeClick}
+              aria-label="Strona główna"
+            >
+              <img
+                className="block size-4"
+                src={`${import.meta.env.BASE_URL}home-outline.svg`}
+                alt=""
+                aria-hidden="true"
+              />
+            </button>
             {showSpinner ? (
               <span
                 className="block size-4 animate-spin rounded-full border-2 border-[#202020]/25 border-t-[#202020]"
@@ -87,11 +109,16 @@ export function Sidebar({
             ) : (
               <button
                 type="button"
-                className="cursor-pointer appearance-none border-0 bg-transparent p-0 text-lg leading-none text-[#202020]"
+                className="flex size-5 cursor-pointer appearance-none items-center justify-center border-0 bg-transparent p-0"
                 onClick={onExpand}
                 aria-label="Rozwiń sidebar"
               >
-                →
+                <img
+                  className="block size-4"
+                  src={`${import.meta.env.BASE_URL}arrow-forward-outline.svg`}
+                  alt=""
+                  aria-hidden="true"
+                />
               </button>
             )}
           </div>
@@ -145,6 +172,28 @@ export function Sidebar({
             onCategoryHover={onCategoryHover}
             onCategorySelect={onCategorySelect}
           />
+          <div className="sidebar-credit-container mt-4 text-[11px] leading-none text-[#202020]">
+            {showCredit ? (
+              <a
+                className="sidebar-credit-fade sidebar-credit-marquee block text-[#202020] no-underline"
+                href="https://jakubkanna.com"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <span
+                  onAnimationEnd={(event) => {
+                    if (event.animationName === "sidebar-credit-marquee") {
+                      setShowCredit(false);
+                    }
+                  }}
+                >
+                  Designed &amp; Developed by Jakub Kanna
+                </span>
+              </a>
+            ) : (
+              <span className="sidebar-credit-fade block">© {currentYear}</span>
+            )}
+          </div>
         </div>
       )}
     </aside>

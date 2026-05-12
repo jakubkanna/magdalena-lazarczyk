@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { CategoryGrid } from "../components/category-grid";
 import { Sidebar } from "../components/sidebar";
+import { bioExhibitionColumns, bioParagraphs } from "../data/bio";
 import {
   fetchPortfolioPosts,
   loadPortfolioImageSrc,
@@ -60,12 +61,6 @@ const cornerCards = [
     category: "Sztuka",
   },
 ] as const;
-
-const bioParagraphs = [
-  "W swojej twórczości łączy doświadczenia z obszarów fotografii, kolażu, instalacji i działań site-specific z praktyką teatralną. Tworzy scenografie, kostiumy i lalki, których forma wynika z eksperymentów wizualnych oraz poszukiwań formalnych.",
-  "Jej prace charakteryzuje unikalne podejście do przestrzeni i obrazu scenicznego. Projekty scenograficzne i kostiumowe traktuje jako rozszerzenie indywidualnego języka wizualnego, a teatr jako pole współdziałania, dialogu i kolektywnego tworzenia. Często pracuje w duecie artystycznym z Łukaszem Sosińskim.",
-  "Jest absolwentką kulturoznawstwa na Uniwersytecie im. Adama Mickiewicza w Poznaniu (2010), fotografii na Uniwersytecie Artystycznym w Poznaniu (2013) oraz sztuki mediów na Akademii Sztuk Pięknych w Warszawie (2015), gdzie obroniła dyplom w Pracowni Działań Przestrzennych prof. Mirosława Bałki.",
-];
 
 export default function Home() {
   const params = useParams();
@@ -357,19 +352,46 @@ export default function Home() {
               {!bioExpanded ? (
                 <button
                   type="button"
-                  className="ml-auto mt-2 text-base leading-none text-[#1f1f1f] underline"
+                  className="ml-auto mt-2 cursor-pointer text-base leading-none text-[#1f1f1f] underline"
                   onClick={() => setBioExpanded(true)}
                 >
                   czytaj dalej
                 </button>
               ) : null}
               {bioExpanded ? (
-                <div className="mt-2 overflow-y-auto pr-2 text-[15px] leading-[1.3] text-[#2a2a2a] [scrollbar-color:#9a9a9a_transparent] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-[#e8dfd0] [&::-webkit-scrollbar-thumb]:bg-[#9a9a9a] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-2.5">
-                  {bioParagraphs.map((paragraph) => (
-                    <p key={paragraph.slice(0, 20)} className="mb-3 mt-0">
-                      {paragraph}
-                    </p>
-                  ))}
+                <div className="bio-scroll-fade mt-2 overflow-y-auto pb-12 pr-2 text-[15px] leading-[1.3] text-[#2a2a2a] [scrollbar-color:#9a9a9a_transparent] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-[#e8dfd0] [&::-webkit-scrollbar-thumb]:bg-[#9a9a9a] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-2.5">
+                  <div className="grid grid-cols-[minmax(0,1fr)_calc(100vw/12)] gap-5 max-md:grid-cols-1">
+                    <div className="columns-2 gap-5 max-lg:columns-1">
+                      {bioParagraphs.map((paragraph) => (
+                        <p key={paragraph.slice(0, 20)} className="mb-3 mt-0 break-inside-avoid">
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+                    <img
+                      className="block h-auto w-full self-start object-cover"
+                      src={`${import.meta.env.BASE_URL}image 1.png`}
+                      alt="Magdalena Łazarczyk"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                  <div className="mt-5 grid grid-cols-3 gap-5 border-t border-[#2a2a2a]/20 pt-4 max-md:grid-cols-1">
+                    {bioExhibitionColumns.map((column) => (
+                      <section key={column.title}>
+                        <h2 className="mb-2 mt-0 text-[13px] font-semibold uppercase tracking-[0.08em] text-[#1f1f1f]">
+                          {column.title}
+                        </h2>
+                        <ul className="m-0 list-none p-0">
+                          {column.items.map((item) => (
+                            <li key={item} className="mb-2">
+                              {item}
+                            </li>
+                          ))}
+                        </ul>
+                      </section>
+                    ))}
+                  </div>
                 </div>
               ) : null}
             </div>
