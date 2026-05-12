@@ -8,9 +8,11 @@ type SidebarProps = {
   hoveredCategory: string | null;
   categories: readonly string[];
   bioOpen: boolean;
+  contactOpen: boolean;
   showSpinner: boolean;
   onHomeClick: () => void;
   onBioClick: () => void;
+  onContactClick: () => void;
   onCategoryHover: (category: string | null) => void;
   onCategorySelect: (category: string) => void;
   onExpand: () => void;
@@ -45,7 +47,7 @@ function CategoryList({
           key={section}
           type="button"
           onClick={() => onCategorySelect(section)}
-          className={`relative cursor-pointer transition-transform duration-200  ${compact ? "self-center text-[11px]" : "self-end text-sm"} appearance-none border-0 bg-transparent p-0 leading-none text-[#1f1f1f] [writing-mode:vertical-rl] [transform:rotate(180deg)] ${compact ? "" : "max-md:[writing-mode:horizontal-tb] max-md:[transform:none]"} ${
+          className={`relative cursor-pointer transition-[color,transform] duration-200  ${compact ? "self-center text-[11px]" : "self-end text-sm"} appearance-none border-0 bg-transparent p-0 leading-none text-black/75 hover:text-black [writing-mode:vertical-rl] [transform:rotate(180deg)] ${compact ? "" : "max-md:[writing-mode:horizontal-tb] max-md:[transform:none]"} ${
             hoveredCategory === section ? "translate-x-[10px]" : "translate-x-0"
           } ${activeCategory === section ? "font-semibold" : "font-normal"}`}
         >
@@ -62,9 +64,11 @@ export function Sidebar({
   hoveredCategory,
   categories,
   bioOpen,
+  contactOpen,
   showSpinner,
   onHomeClick,
   onBioClick,
+  onContactClick,
   onCategoryHover,
   onCategorySelect,
   onExpand,
@@ -90,7 +94,7 @@ export function Sidebar({
           <div className="flex w-5 flex-col items-center gap-2">
             <button
               type="button"
-              className="flex size-5 cursor-pointer appearance-none items-center justify-center border-0 bg-transparent p-0 text-[#202020]"
+              className="flex size-5 cursor-pointer appearance-none items-center justify-center border-0 bg-transparent p-0 text-black/75 transition-colors duration-200 hover:text-black"
               onClick={onHomeClick}
               aria-label="Strona główna"
             >
@@ -136,7 +140,7 @@ export function Sidebar({
           <h1 className="m-0 mb-24">
             <button
               type="button"
-              className="cursor-pointer appearance-none border-0 bg-transparent p-0 text-left font-sans text-lg leading-[0.9] font-normal text-[#202020]"
+              className="cursor-pointer appearance-none border-0 bg-transparent p-0 text-left font-sans text-lg leading-[0.9] font-normal text-black/75 transition-colors duration-200 hover:text-black"
               onClick={onHomeClick}
             >
               Magdalena Łazarczyk
@@ -145,16 +149,23 @@ export function Sidebar({
           <div className="mt-2 flex gap-2">
             <button
               type="button"
-              className={`cursor-pointer rounded-full px-2 py-1 text-base leading-none text-[#212121] shadow-[0_2px_8px_rgba(0,0,0,0.2)] ${
-                bioOpen ? "bg-[#dfd5c6]" : "bg-[#eee4d5]"
+              className={`cursor-pointer rounded-full px-2 py-1 text-base leading-none text-black/75 shadow-[0_2px_8px_rgba(0,0,0,0.2)] transition-[background-color,color] duration-200 hover:text-black ${
+                bioOpen
+                  ? "bg-[#dfd5c6] hover:bg-[#d2c7b8]"
+                  : "bg-[#eee4d5] hover:bg-[#e0d6c7]"
               }`}
               onClick={onBioClick}
             >
               Bio
             </button>
-            <a
-              className="inline-flex cursor-pointer items-center justify-center rounded-full bg-[#eee4d5] p-1 text-base leading-none text-[#212121] shadow-[0_2px_8px_rgba(0,0,0,0.2)]"
-              href="tel:+48600000000"
+            <button
+              type="button"
+              className={`inline-flex cursor-pointer items-center justify-center rounded-full p-1 text-base leading-none text-black/75 shadow-[0_2px_8px_rgba(0,0,0,0.2)] transition-[background-color,color] duration-200 hover:text-black ${
+                contactOpen
+                  ? "bg-[#dfd5c6] hover:bg-[#d2c7b8]"
+                  : "bg-[#eee4d5] hover:bg-[#e0d6c7]"
+              }`}
+              onClick={onContactClick}
               aria-label="Kontakt"
             >
               <img
@@ -163,7 +174,7 @@ export function Sidebar({
                 alt=""
                 aria-hidden="true"
               />
-            </a>
+            </button>
           </div>
           <CategoryList
             categories={categories}
@@ -172,10 +183,10 @@ export function Sidebar({
             onCategoryHover={onCategoryHover}
             onCategorySelect={onCategorySelect}
           />
-          <div className="sidebar-credit-container mt-4 text-[11px] leading-none text-[#202020]">
+          <div className="sidebar-credit-container mt-4 text-[11px] leading-none text-black/75">
             {showCredit ? (
               <a
-                className="sidebar-credit-fade sidebar-credit-marquee block text-[#202020] no-underline"
+                className="sidebar-credit-fade sidebar-credit-marquee block text-black/75 no-underline transition-colors duration-200 hover:text-black"
                 href="https://jakubkanna.com"
                 target="_blank"
                 rel="noreferrer"
@@ -191,7 +202,14 @@ export function Sidebar({
                 </span>
               </a>
             ) : (
-              <span className="sidebar-credit-fade block">© {currentYear}</span>
+              <a
+                className="sidebar-credit-fade block text-black/75 no-underline transition-colors duration-200 hover:text-black"
+                href="https://jakubkanna.com"
+                target="_blank"
+                rel="noreferrer"
+              >
+                © {currentYear}
+              </a>
             )}
           </div>
         </div>

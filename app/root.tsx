@@ -4,12 +4,21 @@ import {
   Meta,
   Scripts,
   ScrollRestoration,
+  useNavigate,
   useNavigation,
   useOutlet,
 } from "react-router";
 
 import type { Route } from "./+types/root";
+import { Sidebar } from "./components/sidebar";
 import "./app.css";
+
+const sections = ["Warsztaty", "Teatr", "Sztuka"] as const;
+const categoryToSlug: Record<(typeof sections)[number], string> = {
+  Warsztaty: "warsztaty",
+  Teatr: "teatr",
+  Sztuka: "sztuka",
+};
 
 export const links: Route.LinksFunction = () => [
   { rel: "icon", href: `${import.meta.env.BASE_URL}favicon.ico` },
@@ -54,7 +63,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 function RouteScreen({ children }: { children: React.ReactNode }) {
-  return <div className="absolute inset-0 min-h-svh w-full bg-white">{children}</div>;
+  return (
+    <div className="absolute inset-0 min-h-svh w-full bg-white">{children}</div>
+  );
 }
 
 export default function App() {
@@ -82,15 +93,16 @@ export default function App() {
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  let message = "Oops!";
-  let details = "An unexpected error occurred.";
+  const navigate = useNavigate();
+  let message = "Błąd";
+  let details = "Wystąpił nieoczekiwany błąd.";
   let stack: string | undefined;
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? "404" : "Error";
+    message = error.status === 404 ? "404" : "Błąd";
     details =
       error.status === 404
-        ? "The requested page could not be found."
+        ? "Nie znaleziono żądanej strony."
         : error.statusText || details;
   } else if (import.meta.env.DEV && error && error instanceof Error) {
     details = error.message;
@@ -98,14 +110,54 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
-      {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
-          <code>{stack}</code>
-        </pre>
-      )}
+    <main
+      className="relative isolate h-svh min-h-svh w-screen overflow-hidden bg-[#e8dfd0]"
+      aria-label="Błąd strony"
+    >
+      <div className="flex h-full min-h-0 w-screen max-md:block">
+        <Sidebar
+          variant="default"
+          activeCategory={null}
+          hoveredCategory={null}
+          categories={sections}
+          bioOpen={false}
+          contactOpen={false}
+          showSpinner={false}
+          onHomeClick={() => navigate("/")}
+          onBioClick={() => navigate("/#bio")}
+          onContactClick={() => navigate("/#contact")}
+          onCategoryHover={() => undefined}
+          onCategorySelect={(category) =>
+            navigate(
+              `/${categoryToSlug[category as (typeof sections)[number]]}`,
+            )
+          }
+          onExpand={() => undefined}
+        />
+
+        <section className="relative z-[6] flex h-full min-h-0 min-w-0 flex-1 items-center justify-center overflow-hidden bg-[#7eaed8] p-6 shadow-[-12px_0_18px_rgba(0,0,0,0.22)]">
+          <div className="max-w-xl text-center text-black/75">
+            <h1 className="m-0 text-[clamp(72px,18vw,220px)] leading-none font-normal">
+              {message}
+            </h1>
+            <p className="mx-auto mt-4 max-w-md text-lg leading-tight">
+              {details}
+            </p>
+            <button
+              type="button"
+              className="mt-8 cursor-pointer rounded-full bg-[#eee4d5] px-4 py-2 text-base leading-none text-black/75 shadow-[0_2px_8px_rgba(0,0,0,0.2)] transition-[background-color,color] duration-200 hover:bg-[#e0d6c7] hover:text-black"
+              onClick={() => navigate("/")}
+            >
+              Wróć na stronę główną
+            </button>
+            {stack ? (
+              <pre className="mt-6 max-h-52 w-full overflow-auto rounded bg-white/40 p-4 text-left text-xs">
+                <code>{stack}</code>
+              </pre>
+            ) : null}
+          </div>
+        </section>
+      </div>
     </main>
   );
 }

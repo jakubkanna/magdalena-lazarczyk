@@ -21,7 +21,10 @@ export function CategoryGrid({ posts, imageSrcByPostId }: CategoryGridProps) {
   const [isLoadingRow, setIsLoadingRow] = useState(false);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const timerRef = useRef<number | null>(null);
-  const postsKey = useMemo(() => posts.map((post) => post.id).join(","), [posts]);
+  const postsKey = useMemo(
+    () => posts.map((post) => post.id).join(","),
+    [posts],
+  );
 
   useEffect(() => {
     const onResize = () => setColumns(getColumns());
@@ -39,7 +42,10 @@ export function CategoryGrid({ posts, imageSrcByPostId }: CategoryGridProps) {
   }, [postsKey]);
 
   const visibleCount = Math.min(posts.length, visibleRows * columns);
-  const visiblePosts = useMemo(() => posts.slice(0, visibleCount), [posts, visibleCount]);
+  const visiblePosts = useMemo(
+    () => posts.slice(0, visibleCount),
+    [posts, visibleCount],
+  );
   const remaining = posts.length - visibleCount;
   const hasMore = remaining > 0;
   const skeletonCount = isLoadingRow ? Math.min(columns, remaining) : 0;
@@ -77,7 +83,7 @@ export function CategoryGrid({ posts, imageSrcByPostId }: CategoryGridProps) {
   }, []);
 
   return (
-    <div className="p-2 pb-8">
+    <div className="p-2">
       <div className="grid grid-cols-3 gap-1 max-md:grid-cols-2">
         {visiblePosts.map((post) => (
           <ProjectCard
@@ -94,7 +100,9 @@ export function CategoryGrid({ posts, imageSrcByPostId }: CategoryGridProps) {
           />
         ))}
       </div>
-      {hasMore ? <div ref={sentinelRef} className="h-1 w-full" aria-hidden="true" /> : null}
+      {hasMore ? (
+        <div ref={sentinelRef} className="h-1 w-full" aria-hidden="true" />
+      ) : null}
     </div>
   );
 }

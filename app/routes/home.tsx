@@ -67,6 +67,7 @@ export default function Home() {
   const routeCategory = getCategoryFromSlug(params.category);
   const [origin, setOrigin] = useState<{ x: number; y: number } | null>(null);
   const [paperScope, animatePaper] = useAnimate();
+  const contentPanelRef = useRef<HTMLDivElement | null>(null);
   const pendingPanelRef = useRef<HTMLDivElement | null>(null);
 
   const [activeCategory, setActiveCategory] = useState<
@@ -86,6 +87,10 @@ export default function Home() {
   );
   const [bioOpen, setBioOpen] = useState(false);
   const [bioExpanded, setBioExpanded] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
+  const [copiedContact, setCopiedContact] = useState<"email" | "phone" | null>(
+    null,
+  );
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [pendingCategory, setPendingCategory] = useState<
     (typeof sections)[number] | null | undefined
@@ -103,6 +108,9 @@ export default function Home() {
       setOrigin({ x: window.innerWidth, y: window.innerHeight });
       if (window.location.hash === "#bio") {
         setBioOpen(true);
+      }
+      if (window.location.hash === "#contact") {
+        setContactOpen(true);
       }
     });
     return () => cancelAnimationFrame(id);
@@ -146,6 +154,10 @@ export default function Home() {
     });
   }, [activeCategory, animatePaper, origin, paperScope]);
 
+  useLayoutEffect(() => {
+    contentPanelRef.current?.scrollTo({ top: 0, left: 0 });
+  }, [activeCategory]);
+
   useEffect(() => {
     let mounted = true;
     fetchPortfolioPosts().then(async (portfolioPosts) => {
@@ -167,13 +179,23 @@ export default function Home() {
 
   useEffect(() => {
     const { pathname, search } = window.location;
-    const hash = bioOpen ? "#bio" : "";
+    const hash = bioOpen ? "#bio" : contactOpen ? "#contact" : "";
     window.history.replaceState(null, "", `${pathname}${search}${hash}`);
-  }, [bioOpen]);
+  }, [bioOpen, contactOpen]);
 
   const closeBio = () => {
     setBioOpen(false);
     setBioExpanded(false);
+  };
+
+  const closeContact = () => {
+    setContactOpen(false);
+    setCopiedContact(null);
+  };
+
+  const closeInfoPanels = () => {
+    closeBio();
+    closeContact();
   };
 
   const waitFrames = (count: number) =>
@@ -199,7 +221,10 @@ export default function Home() {
   ) =>
     new Promise<void>((resolve) => {
       const animation = element.animate(
-        [{ transform: `translateY(${from})` }, { transform: `translateY(${to})` }],
+        [
+          { transform: `translateY(${from})` },
+          { transform: `translateY(${to})` },
+        ],
         { duration, easing, fill: "forwards" },
       );
       animation.onfinish = () => resolve();
@@ -212,7 +237,7 @@ export default function Home() {
   ) => {
     if (isTransitioning || activeCategory === category) return;
     setIsTransitioning(true);
-    closeBio();
+    closeInfoPanels();
     setHoveredCategory(null);
     setPendingCategory(category);
     await waitFrames(2);
@@ -252,6 +277,27 @@ export default function Home() {
 
   const getContainerColor = (category: (typeof sections)[number] | null) =>
     category ? categoryColors[category] : "#7eaed8";
+
+  const copyContactValue = async (value: string, key: "email" | "phone") => {
+    try {
+      await navigator.clipboard.writeText(value);
+    } catch {
+      const textarea = document.createElement("textarea");
+      textarea.value = value;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+    }
+
+    setCopiedContact(key);
+    window.setTimeout(() => {
+      setCopiedContact((current) => (current === key ? null : current));
+    }, 1400);
+  };
 
   const renderMainContent = (
     category: (typeof sections)[number] | null,
@@ -316,14 +362,24 @@ export default function Home() {
           hoveredCategory={hoveredCategory}
           categories={sections}
           bioOpen={bioOpen}
+          contactOpen={contactOpen}
           showSpinner={isTransitioning}
           onHomeClick={() => void goHome()}
           onBioClick={() => {
             if (bioOpen) {
               closeBio();
             } else {
+              closeContact();
               setBioOpen(true);
               setBioExpanded(false);
+            }
+          }}
+          onContactClick={() => {
+            if (contactOpen) {
+              closeContact();
+            } else {
+              closeBio();
+              setContactOpen(true);
             }
           }}
           onCategoryHover={setHoveredCategory}
@@ -333,10 +389,10 @@ export default function Home() {
           onExpand={() => setSidebarVariant("default")}
         />
 
-        <div className="relative z-2 h-full min-h-0 min-w-0 flex flex-1 flex-col bg-[#e8dfd0]">
+        <div className="relative z-[6] h-full min-h-0 min-w-0 flex flex-1 flex-col bg-[#e8dfd0] shadow-[-12px_0_18px_rgba(0,0,0,0.22)]">
           <section
             className={`overflow-hidden bg-[#e8dfd0] px-2.5 transition-all duration-500 ease-out ${
-              bioOpen
+              bioOpen || contactOpen
                 ? bioExpanded
                   ? "h-[50svh] py-2.5"
                   : "h-29.5 py-2.5"
@@ -344,26 +400,39 @@ export default function Home() {
             }`}
           >
             <div className="flex h-full flex-col p-4">
-              {!bioExpanded ? (
-                <p className="m-0 text-[15px] leading-tight text-[#2a2a2a]">
-                  {bioParagraphs[0]}
-                </p>
-              ) : null}
-              {!bioExpanded ? (
-                <button
-                  type="button"
-                  className="ml-auto mt-2 cursor-pointer text-base leading-none text-[#1f1f1f] underline"
-                  onClick={() => setBioExpanded(true)}
+              {bioOpen && !bioExpanded ? (
+                <div
+                  key="bio-preview"
+                  className="info-panel-fade flex h-full flex-col"
                 >
-                  czytaj dalej
-                </button>
+                  <p className="m-0 text-[15px] leading-tight text-black/90">
+                    {bioParagraphs[0]}
+                  </p>
+                  <button
+                    type="button"
+                    className="mb-0 ml-auto mt-auto cursor-pointer text-base leading-none text-black/90 underline transition-colors duration-200 hover:text-black"
+                    onClick={() => setBioExpanded(true)}
+                  >
+                    czytaj dalej
+                  </button>
+                </div>
               ) : null}
               {bioExpanded ? (
-                <div className="bio-scroll-fade mt-2 overflow-y-auto pb-12 pr-2 text-[15px] leading-[1.3] text-[#2a2a2a] [scrollbar-color:#9a9a9a_transparent] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-[#e8dfd0] [&::-webkit-scrollbar-thumb]:bg-[#9a9a9a] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-2.5">
+                <div
+                  key="bio-expanded"
+                  className="info-panel-fade bio-scroll-fade mt-2 overflow-y-auto pb-12 pr-2 text-[15px] leading-[1.3] text-black/90 [scrollbar-color:#9a9a9a_transparent] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-[#e8dfd0] [&::-webkit-scrollbar-thumb]:bg-[#9a9a9a] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-2.5"
+                >
                   <div className="grid grid-cols-[minmax(0,1fr)_calc(100vw/12)] gap-5 max-md:grid-cols-1">
                     <div className="columns-2 gap-5 max-lg:columns-1">
+                      {" "}
+                      <h2 className="mb-2 mt-0 text-[13px] font-bold uppercase text-black/90">
+                        Bio
+                      </h2>
                       {bioParagraphs.map((paragraph) => (
-                        <p key={paragraph.slice(0, 20)} className="mb-3 mt-0 break-inside-avoid">
+                        <p
+                          key={paragraph.slice(0, 20)}
+                          className="mb-3 mt-0 break-inside-avoid"
+                        >
                           {paragraph}
                         </p>
                       ))}
@@ -379,7 +448,7 @@ export default function Home() {
                   <div className="mt-5 grid grid-cols-3 gap-5 border-t border-[#2a2a2a]/20 pt-4 max-md:grid-cols-1">
                     {bioExhibitionColumns.map((column) => (
                       <section key={column.title}>
-                        <h2 className="mb-2 mt-0 text-[13px] font-semibold uppercase tracking-[0.08em] text-[#1f1f1f]">
+                        <h2 className="mb-2 mt-0 text-[13px] font-bold uppercase text-black/90">
                           {column.title}
                         </h2>
                         <ul className="m-0 list-none p-0">
@@ -394,11 +463,61 @@ export default function Home() {
                   </div>
                 </div>
               ) : null}
+              {contactOpen ? (
+                <div
+                  key="contact"
+                  className="info-panel-fade flex h-full flex-col items-end justify-center gap-1 text-right text-[15px] leading-tight text-black/90"
+                >
+                  <h2 className="mb-2 mt-0 text-[13px] font-bold uppercase text-black/90">
+                    Kontakt
+                  </h2>
+                  <button
+                    type="button"
+                    className="relative w-fit cursor-pointer appearance-none border-0 bg-transparent p-0 text-right text-black/90 underline transition-colors duration-200 hover:text-black"
+                    onClick={() =>
+                      void copyContactValue(
+                        "magdalena.lazarczyk@gmail.com",
+                        "email",
+                      )
+                    }
+                  >
+                    magdalena.lazarczyk@gmail.com
+                    {copiedContact === "email" ? (
+                      <span className="absolute right-0 top-full z-[9999] mt-1 rounded-full bg-[#eee4d5] px-2 py-1 text-[11px] leading-none text-black/90 shadow-[0_2px_8px_rgba(0,0,0,0.16)]">
+                        skopiowano
+                      </span>
+                    ) : null}
+                  </button>
+                  <button
+                    type="button"
+                    className="relative w-fit cursor-pointer appearance-none border-0 bg-transparent p-0 text-right text-black/90 underline transition-colors duration-200 hover:text-black"
+                    onClick={() =>
+                      void copyContactValue("+48 504439128", "phone")
+                    }
+                  >
+                    +48 504439128
+                    {copiedContact === "phone" ? (
+                      <span className="absolute right-0 top-full z-[9999] mt-1 rounded-full bg-[#eee4d5] px-2 py-1 text-[11px] leading-none text-black/90 shadow-[0_2px_8px_rgba(0,0,0,0.16)]">
+                        skopiowano
+                      </span>
+                    ) : null}
+                  </button>
+                  <a
+                    className="w-fit text-black/90 underline transition-colors duration-200 hover:text-black"
+                    href="https://www.instagram.com/magdalena_lazarczyk/"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    instagram
+                  </a>
+                </div>
+              ) : null}
             </div>
           </section>
 
-          <section className="relative min-h-0 flex-1 overflow-hidden shadow-[-12px_0_18px_rgba(0,0,0,0.22)]">
+          <section className="relative min-h-0 flex-1 overflow-hidden">
             <div
+              ref={contentPanelRef}
               className={`absolute inset-0 overflow-x-hidden ${
                 activeCategory ? "overflow-y-auto" : "overflow-y-hidden"
               }`}
