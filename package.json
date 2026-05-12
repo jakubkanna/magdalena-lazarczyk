@@ -1,7 +1,10 @@
 {
-  "name": "",
+  "name": "magdalena-lazarczyk-portfolio",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "build": "react-router build && node scripts/prepare-github-pages.mjs",
     "dev": "react-router dev",
