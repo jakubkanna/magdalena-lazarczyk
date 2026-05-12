@@ -4,7 +4,6 @@ import {
   Meta,
   Scripts,
   ScrollRestoration,
-  useLocation,
   useNavigation,
   useOutlet,
 } from "react-router";
@@ -59,14 +58,13 @@ function RouteScreen({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const location = useLocation();
   const navigation = useNavigation();
   const outlet = useOutlet();
   const isNavigationPending = navigation.state !== "idle";
 
   return (
     <div className="relative min-h-svh w-screen overflow-hidden bg-white">
-      <RouteScreen key={location.pathname}>{outlet}</RouteScreen>
+      <RouteScreen>{outlet}</RouteScreen>
       {isNavigationPending ? (
         <div
           className="pointer-events-none fixed inset-0 z-[1500] flex items-center justify-center"

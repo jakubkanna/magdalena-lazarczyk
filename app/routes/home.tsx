@@ -1,6 +1,6 @@
 import type { Route } from "./+types/home";
 import { useAnimate } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { CategoryGrid } from "../components/category-grid";
 import { Sidebar } from "../components/sidebar";
@@ -40,6 +40,9 @@ const slugToCategory: Record<string, (typeof sections)[number]> = {
 };
 const SIDEBAR_VARIANT_STORAGE_KEY = "ml.sidebar.variant";
 
+const getCategoryFromSlug = (slug?: string) =>
+  slug ? (slugToCategory[slug.toLowerCase()] ?? null) : null;
+
 const cornerCards = [
   {
     src: `${import.meta.env.BASE_URL}frontpage/3.jpg`,
@@ -65,13 +68,15 @@ const bioParagraphs = [
 ];
 
 export default function Home() {
+  const params = useParams();
+  const routeCategory = getCategoryFromSlug(params.category);
   const [origin, setOrigin] = useState<{ x: number; y: number } | null>(null);
   const [paperScope, animatePaper] = useAnimate();
   const pendingPanelRef = useRef<HTMLDivElement | null>(null);
 
   const [activeCategory, setActiveCategory] = useState<
     (typeof sections)[number] | null
-  >(null);
+  >(() => routeCategory);
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [sidebarVariant, setSidebarVariant] = useState<"default" | "minimized">(
     () => {
@@ -96,7 +101,6 @@ export default function Home() {
     Record<number, string>
   >({});
 
-  const params = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -109,10 +113,9 @@ export default function Home() {
     return () => cancelAnimationFrame(id);
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isTransitioning) return;
-    const slug = (params.category ?? "").toLowerCase();
-    const categoryFromRoute = slugToCategory[slug];
+    const categoryFromRoute = getCategoryFromSlug(params.category);
     if (categoryFromRoute) {
       setActiveCategory(categoryFromRoute);
       setPendingCategory(undefined);
@@ -128,11 +131,13 @@ export default function Home() {
 
   useEffect(() => {
     if (!origin) return;
+    if (activeCategory !== null) return;
     const paperRoot = paperScope.current as HTMLElement | null;
     if (!paperRoot) return;
 
     const cards = Array.from(paperRoot.querySelectorAll("[data-fly-card]"));
     cards.forEach((card, index) => {
+      card.getAnimations().forEach((animation) => animation.cancel());
       animatePaper(
         card,
         {
@@ -144,7 +149,7 @@ export default function Home() {
         { duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: index * 0.5 },
       );
     });
-  }, [animatePaper, origin, paperScope]);
+  }, [activeCategory, animatePaper, origin, paperScope]);
 
   useEffect(() => {
     let mounted = true;
@@ -230,9 +235,11 @@ export default function Home() {
       );
     }
 
-    setActiveCategory(category);
-    setPendingCategory(undefined);
     navigate(path);
+    setActiveCategory(category);
+    await waitFrames(2);
+    await new Promise<void>((resolve) => setTimeout(resolve, 40));
+    setPendingCategory(undefined);
     setIsTransitioning(false);
   };
 
