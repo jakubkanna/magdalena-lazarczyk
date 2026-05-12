@@ -1,9 +1,15 @@
-import { useCallback, useEffect, useState } from "react";
-import type { TargetAndTransition, Transition } from "framer-motion";
-import { useNavigate } from "react-router";
-import { MenuButton } from "../components/menu-button";
-import { SiteMenu } from "../components/site-menu";
 import type { Route } from "./+types/home";
+import { useAnimate } from "motion/react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router";
+import { CategoryGrid } from "../components/category-grid";
+import { Sidebar } from "../components/sidebar";
+import {
+  fetchPortfolioPosts,
+  loadPortfolioImageSrc,
+  type PortfolioCategory,
+  type PortfolioPostViewModel,
+} from "../data/portfolio-api";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -13,549 +19,382 @@ export function meta({}: Route.MetaArgs) {
       content:
         "Portfolio Magdaleny Łazarczyk - scenografia, kostiumy, teatr, sztuka i warsztaty.",
     },
-    { property: "og:title", content: "Magdalena Łazarczyk" },
-    {
-      property: "og:description",
-      content:
-        "Portfolio Magdaleny Łazarczyk - scenografia, kostiumy, teatr, sztuka i warsztaty.",
-    },
   ];
 }
 
-type FrontpageLayer = {
-  id: number;
-  zIndex: number;
-  src?: string;
-  frames?: string[];
-  frameDuration?: number;
-  reverseFrames?: boolean;
-  pingPongFrames?: boolean;
-  pingPongPause?: number;
-  offsetX?: number;
-  hoverable?: boolean;
-  navigationDisabled?: boolean;
-  tooltip?: string;
-  href?: string;
-  hoverBox?: {
-    left: number;
-    top: number;
-    width: number;
-    height: number;
-  };
-  transformOrigin?: string;
-  animate?: TargetAndTransition;
-  transition?: Transition;
+const sections = ["Warsztaty", "Teatr", "Sztuka"] as const;
+const categoryColors: Record<(typeof sections)[number], string> = {
+  Warsztaty: "#F2621C",
+  Sztuka: "#D4FC85",
+  Teatr: "#0011FF",
 };
+const categoryToSlug: Record<(typeof sections)[number], string> = {
+  Warsztaty: "warsztaty",
+  Teatr: "teatr",
+  Sztuka: "sztuka",
+};
+const slugToCategory: Record<string, (typeof sections)[number]> = {
+  warsztaty: "Warsztaty",
+  teatr: "Teatr",
+  sztuka: "Sztuka",
+};
+const SIDEBAR_VARIANT_STORAGE_KEY = "ml.sidebar.variant";
 
-const catFrames = [
-  "frontpage/cat/cat_0000_cat---Rotate-Object-Layer-copy-3.png",
-  "frontpage/cat/cat_0001_cat---Rotate-Object-Layer-copy-2.png",
-  "frontpage/cat/cat_0002_cat---Rotate-Object-Layer-copy.png",
-  "frontpage/cat/cat_0003_cat---Rotate-Object-Layer.png",
-  "frontpage/cat/cat_0004_cat.png",
+const cornerCards = [
+  {
+    src: `${import.meta.env.BASE_URL}frontpage/3.jpg`,
+    alt: "Kolaż portretowy 1",
+    category: "Warsztaty",
+  },
+  {
+    src: `${import.meta.env.BASE_URL}frontpage/blu insta new.jpg`,
+    alt: "Kolaż portretowy 2",
+    category: "Teatr",
+  },
+  {
+    src: `${import.meta.env.BASE_URL}frontpage/ig29.jpgmm.jpg`,
+    alt: "Kolaż portretowy 3",
+    category: "Sztuka",
+  },
+] as const;
+
+const bioParagraphs = [
+  "W swojej twórczości łączy doświadczenia z obszarów fotografii, kolażu, instalacji i działań site-specific z praktyką teatralną. Tworzy scenografie, kostiumy i lalki, których forma wynika z eksperymentów wizualnych oraz poszukiwań formalnych.",
+  "Jej prace charakteryzuje unikalne podejście do przestrzeni i obrazu scenicznego. Projekty scenograficzne i kostiumowe traktuje jako rozszerzenie indywidualnego języka wizualnego, a teatr jako pole współdziałania, dialogu i kolektywnego tworzenia. Często pracuje w duecie artystycznym z Łukaszem Sosińskim.",
+  "Jest absolwentką kulturoznawstwa na Uniwersytecie im. Adama Mickiewicza w Poznaniu (2010), fotografii na Uniwersytecie Artystycznym w Poznaniu (2013) oraz sztuki mediów na Akademii Sztuk Pięknych w Warszawie (2015), gdzie obroniła dyplom w Pracowni Działań Przestrzennych prof. Mirosława Bałki.",
 ];
-
-const catFrameDuration = 6;
-const assetPath = (path: string) => `${import.meta.env.BASE_URL}${path}`;
-const responsiveWidths = [1280, 1920, 2560] as const;
-const originalWidth = 3840;
-const frontpageImageSizes = "100vw";
-
-const responsiveAssetPath = (path: string, width: number) => {
-  const lastDotIndex = path.lastIndexOf(".");
-  const extension = lastDotIndex > -1 ? path.slice(lastDotIndex) : "";
-  const pathWithoutExtension =
-    lastDotIndex > -1 ? path.slice(0, lastDotIndex) : path;
-  const optimizedPath = pathWithoutExtension.replace(
-    "frontpage/",
-    "frontpage/optimized/",
-  );
-
-  return assetPath(`${optimizedPath}-${width}w${extension}`);
-};
-
-const imageSrcSet = (path: string) =>
-  [
-    ...responsiveWidths.map(
-      (width) => `${responsiveAssetPath(path, width)} ${width}w`,
-    ),
-    `${assetPath(path)} ${originalWidth}w`,
-  ].join(", ");
-
-const getDisplayWidth = () => {
-  if (typeof window === "undefined") {
-    return originalWidth;
-  }
-
-  return Math.ceil(window.innerWidth * window.devicePixelRatio);
-};
-
-const getBestImagePath = (path: string) => {
-  const displayWidth = getDisplayWidth();
-  const matchedWidth = responsiveWidths.find((width) => width >= displayWidth);
-
-  return matchedWidth
-    ? responsiveAssetPath(path, matchedWidth)
-    : assetPath(path);
-};
-
-const preloadImage = (path: string) =>
-  new Promise<void>((resolve) => {
-    const image = new Image();
-    const finish = () => resolve();
-
-    image.decoding = "async";
-    image.onload = () => {
-      if (typeof image.decode === "function") {
-        image.decode().then(finish).catch(finish);
-        return;
-      }
-
-      finish();
-    };
-    image.onerror = finish;
-    image.src = getBestImagePath(path);
-  });
-
-function FrameSequence({
-  frames,
-  duration,
-  pingPong = false,
-  pingPongPause = 0,
-  reverse = false,
-  onFrameLoad,
-}: {
-  frames: string[];
-  duration: number;
-  pingPong?: boolean;
-  pingPongPause?: number;
-  reverse?: boolean;
-  onFrameLoad: (frame: string) => void;
-}) {
-  const [frameIndex, setFrameIndex] = useState(0);
-  const motionFrameCount = pingPong ? frames.length * 2 - 2 : frames.length;
-  const intervalDuration = (duration * 1000) / motionFrameCount;
-  const pauseFrameCount = pingPong
-    ? Math.round((pingPongPause * 1000) / intervalDuration)
-    : 0;
-  const frameCount = motionFrameCount + pauseFrameCount;
-
-  useEffect(() => {
-    const interval = window.setInterval(() => {
-      setFrameIndex((currentFrame) => (currentFrame + 1) % frameCount);
-    }, intervalDuration);
-
-    return () => window.clearInterval(interval);
-  }, [frameCount, intervalDuration]);
-
-  const pingPongFrameIndex =
-    pingPong && frameIndex >= frames.length + pauseFrameCount
-      ? motionFrameCount - (frameIndex - pauseFrameCount)
-      : pingPong && frameIndex >= frames.length
-        ? frames.length - 1
-        : frameIndex;
-
-  const visibleFrameIndex = reverse
-    ? frames.length - 1 - pingPongFrameIndex
-    : pingPongFrameIndex;
-
-  return (
-    <>
-      {frames.map((frame, index) => (
-        <img
-          className={`frontpage__frame${
-            index === visibleFrameIndex ? " frontpage__frame--visible" : ""
-          }`}
-          key={frame}
-          src={assetPath(frame)}
-          srcSet={imageSrcSet(frame)}
-          sizes={frontpageImageSizes}
-          alt=""
-          draggable={false}
-          onLoad={() => onFrameLoad(frame)}
-          onError={() => onFrameLoad(frame)}
-        />
-      ))}
-    </>
-  );
-}
-
-const frontpageLayers: FrontpageLayer[] = [
-  {
-    id: 6,
-    zIndex: 70,
-    src: "frontpage/kolaz-magdalena-lazarczyk_0000s_0000_Background.png",
-    transformOrigin: "83% 87%",
-  },
-  {
-    id: 5,
-    zIndex: 45,
-    src: "frontpage/kolaz-magdalena-lazarczyk_0002s_0000_Layer-6.png",
-    hoverable: true,
-    tooltip: "Kontakt",
-    href: "/bio#warsztaty",
-    hoverBox: { left: 66.95, top: 35.46, width: 5.6, height: 41.44 },
-    animate: { x: [0, 100, 0] },
-    transition: {
-      duration: 10,
-      ease: "easeInOut",
-      repeat: Infinity,
-    },
-  },
-  {
-    id: 3,
-    zIndex: 40,
-    src: "frontpage/kolaz-magdalena-lazarczyk_0003_3.png",
-  },
-  {
-    id: 4,
-    zIndex: 65,
-    src: "frontpage/legs.png",
-  },
-  {
-    id: 2,
-    zIndex: 60,
-    src: "frontpage/kolaz-magdalena-lazarczyk_0002_2.png",
-  },
-  {
-    id: 1,
-    zIndex: 70,
-    src: "frontpage/curtain.png",
-  },
-  {
-    id: 7,
-    zIndex: 71,
-    src: "frontpage/rock.png",
-    hoverable: true,
-    tooltip: "Bio",
-    href: "/bio",
-    hoverBox: { left: 25.62, top: 14.58, width: 18.28, height: 28.19 },
-    transformOrigin: "34.76% 28.68%",
-    animate: {
-      x: [0, 0, -5, 5, -4, 4, -2, 2, 0, 0],
-      rotate: [0, 0, -1.2, 1.2, -0.9, 0.9, -0.4, 0.4, 0, 0],
-    },
-    transition: {
-      duration: 5,
-      times: [0, 0.72, 0.75, 0.78, 0.81, 0.84, 0.87, 0.9, 0.93, 1],
-      ease: "easeInOut",
-      repeat: Infinity,
-    },
-  },
-  {
-    id: 0,
-    zIndex: 70,
-    frames: catFrames,
-    frameDuration: catFrameDuration,
-    offsetX: 25,
-    hoverable: true,
-    tooltip: "Portfolio",
-    href: "/portfolio",
-    hoverBox: { left: 43.12, top: 69.91, width: 12.73, height: 19.49 },
-  },
-];
-
-const frontpageImagePaths = frontpageLayers.flatMap((layer) =>
-  layer.frames ? layer.frames : layer.src ? [layer.src] : [],
-);
-
-const loaderText = "Magdalena Łazarczyk";
-const loaderMarqueeItems = Array.from({ length: 6 }, () => loaderText);
-const minimumLoaderDuration = 2900;
-const loaderExitDuration = 720;
-let hasShownHomeLoader = false;
-
-const loadLogoFont = async () => {
-  if (typeof document === "undefined" || !document.fonts) {
-    return;
-  }
-
-  await document.fonts.load(`1em "Parisienne"`, loaderText);
-};
-
-const showUnavailableAlert = () => {
-  window.alert("Coming soon.");
-};
-
-const layerAnimationClass = (layer: FrontpageLayer) =>
-  layer.id === 5
-    ? " frontpage__layer--contact-motion"
-    : layer.id === 7
-      ? " frontpage__layer--rock-motion"
-      : "";
 
 export default function Home() {
-  const [hoveredLayer, setHoveredLayer] = useState<number | null>(null);
-  const [areHomeAssetsReady, setAreHomeAssetsReady] =
-    useState(hasShownHomeLoader);
-  const [isLoaded, setIsLoaded] = useState(hasShownHomeLoader);
-  const [isSceneRendered, setIsSceneRendered] = useState(false);
-  const [isLoaderVisible, setIsLoaderVisible] = useState(true);
-  const [isLogoFontReady, setIsLogoFontReady] = useState(hasShownHomeLoader);
-  const [renderedImagePaths, setRenderedImagePaths] = useState<Set<string>>(
-    () => new Set(),
+  const [origin, setOrigin] = useState<{ x: number; y: number } | null>(null);
+  const [paperScope, animatePaper] = useAnimate();
+  const pendingPanelRef = useRef<HTMLDivElement | null>(null);
+
+  const [activeCategory, setActiveCategory] = useState<
+    (typeof sections)[number] | null
+  >(null);
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+  const [sidebarVariant, setSidebarVariant] = useState<"default" | "minimized">(
+    () => {
+      if (typeof window === "undefined") return "default";
+      const stored = window.localStorage.getItem(SIDEBAR_VARIANT_STORAGE_KEY);
+      if (stored === "default" || stored === "minimized") return stored;
+
+      const slug =
+        window.location.pathname.split("/").at(-1)?.toLowerCase() ?? "";
+      return slugToCategory[slug] ? "minimized" : "default";
+    },
   );
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [bioOpen, setBioOpen] = useState(false);
+  const [bioExpanded, setBioExpanded] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [pendingCategory, setPendingCategory] = useState<
+    (typeof sections)[number] | null | undefined
+  >(undefined);
+
+  const [posts, setPosts] = useState<PortfolioPostViewModel[]>([]);
+  const [imageSrcByPostId, setImageSrcByPostId] = useState<
+    Record<number, string>
+  >({});
+
+  const params = useParams();
   const navigate = useNavigate();
 
-  const handleRenderedImageLoad = useCallback((path: string) => {
-    setRenderedImagePaths((currentPaths) => {
-      if (currentPaths.has(path)) {
-        return currentPaths;
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      setOrigin({ x: window.innerWidth, y: window.innerHeight });
+      if (window.location.hash === "#bio") {
+        setBioOpen(true);
       }
-
-      const nextPaths = new Set(currentPaths);
-      nextPaths.add(path);
-      return nextPaths;
     });
+    return () => cancelAnimationFrame(id);
   }, []);
 
   useEffect(() => {
-    if (hasShownHomeLoader) {
-      setIsLoaded(true);
-      setIsLogoFontReady(true);
+    if (isTransitioning) return;
+    const slug = (params.category ?? "").toLowerCase();
+    const categoryFromRoute = slugToCategory[slug];
+    if (categoryFromRoute) {
+      setActiveCategory(categoryFromRoute);
+      setPendingCategory(undefined);
       return;
     }
+    setActiveCategory(null);
+    setPendingCategory(undefined);
+  }, [isTransitioning, params.category]);
 
-    let isCancelled = false;
-    const minimumDelay = new Promise<void>((resolve) => {
-      window.setTimeout(resolve, minimumLoaderDuration);
-    });
-    const logoFont = loadLogoFont().then(() => {
-      if (!isCancelled) {
-        setIsLogoFontReady(true);
-      }
-    });
+  useEffect(() => {
+    window.localStorage.setItem(SIDEBAR_VARIANT_STORAGE_KEY, sidebarVariant);
+  }, [sidebarVariant]);
 
-    Promise.all([
-      Promise.all(frontpageImagePaths.map(preloadImage)),
-      minimumDelay,
-      logoFont,
-    ]).then(() => {
-      if (!isCancelled) {
-        hasShownHomeLoader = true;
-        setAreHomeAssetsReady(true);
-      }
-    });
+  useEffect(() => {
+    if (!origin) return;
+    const paperRoot = paperScope.current as HTMLElement | null;
+    if (!paperRoot) return;
 
+    const cards = Array.from(paperRoot.querySelectorAll("[data-fly-card]"));
+    cards.forEach((card, index) => {
+      animatePaper(
+        card,
+        {
+          x: [origin.x, 0],
+          y: [origin.y, 0],
+          opacity: [0, 1],
+          scale: [0.94, 1],
+        },
+        { duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: index * 0.5 },
+      );
+    });
+  }, [animatePaper, origin, paperScope]);
+
+  useEffect(() => {
+    let mounted = true;
+    fetchPortfolioPosts().then(async (portfolioPosts) => {
+      if (!mounted) return;
+      setPosts(portfolioPosts);
+      const images = await Promise.all(
+        portfolioPosts.map(
+          async (post) =>
+            [post.id, await loadPortfolioImageSrc(post.image)] as const,
+        ),
+      );
+      if (!mounted) return;
+      setImageSrcByPostId(Object.fromEntries(images));
+    });
     return () => {
-      isCancelled = true;
+      mounted = false;
     };
   }, []);
 
   useEffect(() => {
-    if (areHomeAssetsReady) {
-      setIsLoaded(true);
-    }
-  }, [areHomeAssetsReady]);
+    const { pathname, search } = window.location;
+    const hash = bioOpen ? "#bio" : "";
+    window.history.replaceState(null, "", `${pathname}${search}${hash}`);
+  }, [bioOpen]);
 
-  useEffect(() => {
-    if (!isLoaded || renderedImagePaths.size < frontpageImagePaths.length) {
-      return;
-    }
+  const closeBio = () => {
+    setBioOpen(false);
+    setBioExpanded(false);
+  };
 
-    let firstFrame = 0;
-    let secondFrame = 0;
-
-    firstFrame = window.requestAnimationFrame(() => {
-      secondFrame = window.requestAnimationFrame(() => {
-        setIsSceneRendered(true);
-      });
+  const waitFrames = (count: number) =>
+    new Promise<void>((resolve) => {
+      let remaining = count;
+      const step = () => {
+        remaining -= 1;
+        if (remaining <= 0) {
+          resolve();
+          return;
+        }
+        requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
     });
 
-    return () => {
-      window.cancelAnimationFrame(firstFrame);
-      window.cancelAnimationFrame(secondFrame);
-    };
-  }, [isLoaded, renderedImagePaths.size]);
+  const animatePanelY = (
+    element: HTMLElement,
+    from: string,
+    to: string,
+    duration: number,
+    easing: string,
+  ) =>
+    new Promise<void>((resolve) => {
+      const animation = element.animate(
+        [{ transform: `translateY(${from})` }, { transform: `translateY(${to})` }],
+        { duration, easing, fill: "forwards" },
+      );
+      animation.onfinish = () => resolve();
+      animation.oncancel = () => resolve();
+    });
 
-  useEffect(() => {
-    if (!isSceneRendered) {
-      document.title = "Ładowanie...";
-      return;
+  const runContentTransition = async (
+    category: (typeof sections)[number] | null,
+    path: string,
+  ) => {
+    if (isTransitioning || activeCategory === category) return;
+    setIsTransitioning(true);
+    closeBio();
+    setHoveredCategory(null);
+    setPendingCategory(category);
+    await waitFrames(2);
+
+    const pendingPanel = pendingPanelRef.current;
+    if (pendingPanel) {
+      pendingPanel.style.transform = "translateY(112%)";
+      pendingPanel.getBoundingClientRect();
+      await animatePanelY(
+        pendingPanel,
+        "112%",
+        "0%",
+        520,
+        "cubic-bezier(0.22, 1, 0.36, 1)",
+      );
     }
 
-    document.title = "Magdalena Łazarczyk";
+    setActiveCategory(category);
+    setPendingCategory(undefined);
+    navigate(path);
+    setIsTransitioning(false);
+  };
 
-    const loaderTimer = window.setTimeout(() => {
-      setIsLoaderVisible(false);
-    }, loaderExitDuration);
+  const goHome = async () => {
+    await runContentTransition(null, "/");
+  };
 
-    return () => window.clearTimeout(loaderTimer);
-  }, [isSceneRendered]);
+  const selectCategory = async (category: (typeof sections)[number]) => {
+    setSidebarVariant("minimized");
+    await runContentTransition(category, `/${categoryToSlug[category]}`);
+  };
+
+  const getCategoryPosts = (category: (typeof sections)[number]) =>
+    posts.filter((post) => post.category === (category as PortfolioCategory));
+
+  const getContainerColor = (category: (typeof sections)[number] | null) =>
+    category ? categoryColors[category] : "#7eaed8";
+
+  const renderMainContent = (
+    category: (typeof sections)[number] | null,
+    overlay = false,
+  ) => {
+    if (!category) {
+      if (overlay) {
+        return null;
+      }
+      return (
+        <div
+          ref={paperScope}
+          className="absolute right-2.5 bottom-2.5 flex items-end gap-2.5"
+        >
+          {(origin ? cornerCards : []).map((card) => (
+            <div
+              key={`base-${card.src}`}
+              data-fly-card
+              className="h-[min(42svh,560px)] w-[calc(100vw/12*2)] cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.24)] transition-transform duration-200 hover:scale-[1.05] max-md:h-[min(34svh,380px)] max-md:w-[min(38vw,240px)]"
+              style={
+                origin
+                  ? {
+                      transform: `translate(${origin.x}px, ${origin.y}px) scale(0.94)`,
+                      opacity: 0,
+                    }
+                  : undefined
+              }
+              onMouseEnter={() => setHoveredCategory(card.category)}
+              onMouseLeave={() => setHoveredCategory(null)}
+              onClick={() => void selectCategory(card.category)}
+            >
+              <img
+                className="block h-full w-full object-cover"
+                src={card.src}
+                alt={card.alt}
+                loading={overlay ? "lazy" : "eager"}
+                decoding="async"
+              />
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    return (
+      <CategoryGrid
+        posts={getCategoryPosts(category)}
+        imageSrcByPostId={imageSrcByPostId}
+      />
+    );
+  };
 
   return (
-    <main className="frontpage" aria-label="Magdalena Lazarczyk">
-      {isLoaderVisible ? (
-        <div
-          className={`frontpage__loader${
-            isSceneRendered ? " frontpage__loader--complete" : ""
-          }`}
-          role="status"
-          aria-live="polite"
-        >
-          <span className="sr-only">{loaderText}</span>
-          {isLogoFontReady ? (
-            <>
-              <div className="frontpage__loader-marquee frontpage__loader-marquee--top">
-                <div className="frontpage__loader-marquee-track">
-                  {[...loaderMarqueeItems, ...loaderMarqueeItems].map(
-                    (item, index) => (
-                      <span
-                        className="frontpage__loader-marquee-item"
-                        key={`top-${item}-${index}`}
-                      >
-                        {item}
-                      </span>
-                    ),
-                  )}
-                </div>
-              </div>
-              <div className="frontpage__loader-marquee frontpage__loader-marquee--bottom">
-                <div className="frontpage__loader-marquee-track">
-                  {[...loaderMarqueeItems, ...loaderMarqueeItems].map(
-                    (item, index) => (
-                      <span
-                        className="frontpage__loader-marquee-item"
-                        key={`bottom-${item}-${index}`}
-                      >
-                        {item}
-                      </span>
-                    ),
-                  )}
-                </div>
-              </div>
-            </>
-          ) : null}
-        </div>
-      ) : null}
-      <div
-        className={`frontpage__scene${
-          isSceneRendered ? " frontpage__scene--loaded" : ""
-        }`}
-        aria-hidden={!isSceneRendered}
-      >
-        {isLoaded
-          ? frontpageLayers.map((layer) =>
-              layer.frames ? (
-                <div
-                  key={layer.id}
-                  className={`frontpage__layer frontpage__frames${
-                    hoveredLayer === layer.id
-                      ? " frontpage__layer--hovered"
-                      : ""
-                  }`}
-                  aria-hidden="true"
-                  style={{
-                    zIndex: layer.zIndex,
-                    transform: layer.offsetX
-                      ? `translateX(${layer.offsetX}px)`
-                      : undefined,
-                  }}
-                >
-                  <FrameSequence
-                    frames={layer.frames}
-                    duration={layer.frameDuration ?? 2}
-                    pingPong={layer.pingPongFrames}
-                    pingPongPause={layer.pingPongPause}
-                    reverse={layer.reverseFrames}
-                    onFrameLoad={handleRenderedImageLoad}
-                  />
-                </div>
-              ) : (
-                <img
-                  key={layer.id}
-                  className={`frontpage__layer${
-                    hoveredLayer === layer.id
-                      ? " frontpage__layer--hovered"
-                      : ""
-                  }${layerAnimationClass(layer)}`}
-                  src={layer.src ? assetPath(layer.src) : undefined}
-                  srcSet={layer.src ? imageSrcSet(layer.src) : undefined}
-                  sizes={frontpageImageSizes}
-                  alt=""
-                  aria-hidden="true"
-                  draggable={false}
-                  onLoad={() => {
-                    if (layer.src) {
-                      handleRenderedImageLoad(layer.src);
-                    }
-                  }}
-                  onError={() => {
-                    if (layer.src) {
-                      handleRenderedImageLoad(layer.src);
-                    }
-                  }}
-                  style={{
-                    zIndex: layer.zIndex,
-                    transformOrigin: layer.transformOrigin,
-                  }}
-                />
-              ),
-            )
-          : null}
-        {isLoaded
-          ? frontpageLayers
-              .filter((layer) => layer.hoverable && layer.hoverBox)
-              .map((layer) => (
-                <div
-                  key={`${layer.id}-hover`}
-                  className={`frontpage__hitbox${layerAnimationClass(layer)}`}
-                  aria-label={layer.tooltip}
-                  onMouseEnter={() => setHoveredLayer(layer.id)}
-                  onMouseLeave={() => setHoveredLayer(null)}
-                  onClick={() => {
-                    if (layer.navigationDisabled) {
-                      showUnavailableAlert();
-                      return;
-                    }
+    <main
+      className="relative isolate h-svh min-h-svh w-screen overflow-hidden bg-[#e8dfd0]"
+      aria-label="Magdalena Łazarczyk"
+    >
+      <div className="flex h-full min-h-0 w-screen max-md:block">
+        <Sidebar
+          variant={sidebarVariant}
+          activeCategory={activeCategory}
+          hoveredCategory={hoveredCategory}
+          categories={sections}
+          bioOpen={bioOpen}
+          showSpinner={isTransitioning}
+          onHomeClick={() => void goHome()}
+          onBioClick={() => {
+            if (bioOpen) {
+              closeBio();
+            } else {
+              setBioOpen(true);
+              setBioExpanded(false);
+            }
+          }}
+          onCategoryHover={setHoveredCategory}
+          onCategorySelect={(category) =>
+            void selectCategory(category as (typeof sections)[number])
+          }
+          onExpand={() => setSidebarVariant("default")}
+        />
 
-                    if (layer.href) {
-                      navigate(layer.href);
-                    }
-                  }}
-                  onKeyDown={(event) => {
-                    if (
-                      layer.href &&
-                      (event.key === "Enter" || event.key === " ")
-                    ) {
-                      event.preventDefault();
-                      if (layer.navigationDisabled) {
-                        showUnavailableAlert();
-                        return;
-                      }
-
-                      navigate(layer.href);
-                    }
-                  }}
-                  role={layer.href ? "link" : undefined}
-                  tabIndex={layer.href ? 0 : undefined}
-                  style={{
-                    zIndex: layer.zIndex + 100,
-                    left: `${layer.hoverBox?.left}%`,
-                    top: `${layer.hoverBox?.top}%`,
-                    width: `${layer.hoverBox?.width}%`,
-                    height: `${layer.hoverBox?.height}%`,
-                    transform: layer.offsetX
-                      ? `translateX(${layer.offsetX}px)`
-                      : undefined,
-                    transformOrigin: layer.transformOrigin,
-                  }}
+        <div className="relative z-2 h-full min-h-0 min-w-0 flex flex-1 flex-col bg-[#e8dfd0]">
+          <section
+            className={`overflow-hidden bg-[#e8dfd0] px-2.5 transition-all duration-500 ease-out ${
+              bioOpen
+                ? bioExpanded
+                  ? "h-[50svh] py-2.5"
+                  : "h-29.5 py-2.5"
+                : "h-0 py-0"
+            }`}
+          >
+            <div className="flex h-full flex-col p-4">
+              {!bioExpanded ? (
+                <p className="m-0 text-[15px] leading-tight text-[#2a2a2a]">
+                  {bioParagraphs[0]}
+                </p>
+              ) : null}
+              {!bioExpanded ? (
+                <button
+                  type="button"
+                  className="ml-auto mt-2 text-base leading-none text-[#1f1f1f] underline"
+                  onClick={() => setBioExpanded(true)}
                 >
-                  {layer.tooltip && hoveredLayer === layer.id ? (
-                    <span className="frontpage__tooltip">{layer.tooltip}</span>
-                  ) : null}
+                  czytaj dalej
+                </button>
+              ) : null}
+              {bioExpanded ? (
+                <div className="mt-2 overflow-y-auto pr-2 text-[15px] leading-[1.3] text-[#2a2a2a] [scrollbar-color:#9a9a9a_transparent] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-[#e8dfd0] [&::-webkit-scrollbar-thumb]:bg-[#9a9a9a] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-2.5">
+                  {bioParagraphs.map((paragraph) => (
+                    <p key={paragraph.slice(0, 20)} className="mb-3 mt-0">
+                      {paragraph}
+                    </p>
+                  ))}
                 </div>
-              ))
-          : null}
-        <div className="frontpage__help">
-          <MenuButton
-            className="text-white"
-            isOpen={isMenuOpen}
-            onClick={() => setIsMenuOpen(true)}
-          />
+              ) : null}
+            </div>
+          </section>
+
+          <section className="relative min-h-0 flex-1 overflow-hidden shadow-[-12px_0_18px_rgba(0,0,0,0.22)]">
+            <div
+              className={`absolute inset-0 overflow-x-hidden ${
+                activeCategory ? "overflow-y-auto" : "overflow-y-hidden"
+              }`}
+              style={{ backgroundColor: getContainerColor(activeCategory) }}
+              aria-hidden="true"
+            >
+              {renderMainContent(activeCategory)}
+            </div>
+            {pendingCategory !== undefined ? (
+              <div
+                ref={pendingPanelRef}
+                className={`absolute inset-0 z-10 overflow-x-hidden ${
+                  pendingCategory ? "overflow-y-auto" : "overflow-y-hidden"
+                }`}
+                style={{
+                  backgroundColor: getContainerColor(pendingCategory),
+                  transform: "translateY(112%)",
+                }}
+                aria-hidden="true"
+              >
+                {renderMainContent(pendingCategory, true)}
+              </div>
+            ) : null}
+          </section>
         </div>
-        <SiteMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
       </div>
     </main>
   );
