@@ -134,10 +134,10 @@ export function Sidebar({
         </div>
       ) : (
         <div className="flex h-full flex-col p-2.5">
-          <h1 className="m-0 mb-24 w-full text-center">
+          <h1 className="m-0 mb-24 w-full text-left">
             <button
               type="button"
-              className="w-full cursor-pointer appearance-none border-0 bg-transparent p-0 text-center font-['Helvetica_Neue',Helvetica,Arial,sans-serif] text-lg font-normal leading-[1] text-black/75 transition-colors duration-200 hover:text-black"
+              className="w-full cursor-pointer appearance-none border-0 bg-transparent p-0 text-left font-['Helvetica_Neue',Helvetica,Arial,sans-serif] text-lg font-normal leading-[1] text-black/75 transition-colors duration-200 hover:text-black"
               onClick={onHomeClick}
             >
               Magdalena Łazarczyk
@@ -180,7 +180,7 @@ export function Sidebar({
             onCategoryHover={onCategoryHover}
             onCategorySelect={onCategorySelect}
           />
-          <div className="sidebar-credit-container mt-4 text-center text-xs leading-none text-black/75">
+          <div className="sidebar-credit-container mt-4 text-left text-xs leading-none text-black/75">
             {showCredit ? (
               <a
                 className="sidebar-credit-fade sidebar-credit-marquee block text-black/75 no-underline transition-colors duration-200 hover:text-black"
