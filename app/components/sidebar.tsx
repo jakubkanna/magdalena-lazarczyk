@@ -47,10 +47,10 @@ function CategoryList({
           key={section}
           type="button"
           onClick={() => onCategorySelect(section)}
-          className={`relative cursor-pointer transition-colors duration-200  ${compact ? "self-center text-sm" : "self-end text-sm"} appearance-none border-0 bg-transparent p-0 leading-none text-black/75 hover:text-black [writing-mode:vertical-rl] [transform:rotate(180deg)] ${compact ? "" : "max-md:[writing-mode:horizontal-tb] max-md:[transform:none]"} ${
+          className={`relative cursor-pointer transition-colors duration-200  ${compact ? "self-center text-sm" : "self-end text-sm"} appearance-none border-0 bg-transparent p-0 font-normal leading-none text-black/75 hover:text-black [writing-mode:vertical-rl] [transform:rotate(180deg)] ${compact ? "" : "max-md:[writing-mode:horizontal-tb] max-md:[transform:none]"} ${
             hoveredCategory === section || activeCategory === section
-              ? "font-bold"
-              : "font-normal"
+              ? "underline decoration-1 underline-offset-2"
+              : "no-underline"
           }`}
         >
           {section}
