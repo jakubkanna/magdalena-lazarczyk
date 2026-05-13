@@ -96,16 +96,11 @@ export function Sidebar({
           <div className="flex w-5 flex-col items-center gap-2">
             <button
               type="button"
-              className="flex size-5 cursor-pointer appearance-none items-center justify-center border-0 bg-transparent p-0 text-black/75 transition-colors duration-200 hover:text-black"
+              className="flex size-5 font-semibold cursor-pointer appearance-none items-center justify-center border-0 bg-transparent p-0 text-black/75 transition-colors duration-200 hover:text-black"
               onClick={onHomeClick}
               aria-label="Strona główna"
             >
-              <img
-                className="block size-4"
-                src={`${import.meta.env.BASE_URL}home-outline.svg`}
-                alt=""
-                aria-hidden="true"
-              />
+              M
             </button>
             {showSpinner ? (
               <span
