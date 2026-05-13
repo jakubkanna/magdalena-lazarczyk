@@ -1,7 +1,7 @@
 import type { Route } from "./+types/home";
 import { useAnimate } from "motion/react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import { CategoryGrid } from "../components/category-grid";
 import { Sidebar } from "../components/sidebar";
 import { bioExhibitionColumns, bioParagraphs } from "../data/bio";
@@ -64,6 +64,7 @@ const cornerCards = [
 
 export default function Home() {
   const params = useParams();
+  const location = useLocation();
   const routeCategory = getCategoryFromSlug(params.category);
   const [origin, setOrigin] = useState<{ x: number; y: number } | null>(null);
   const [paperScope, animatePaper] = useAnimate();
@@ -102,6 +103,9 @@ export default function Home() {
   >({});
 
   const navigate = useNavigate();
+  const shouldAnimateContainerFromPost =
+    (location.state as { animateContainerFromPost?: boolean } | null)
+      ?.animateContainerFromPost === true;
 
   useEffect(() => {
     const id = requestAnimationFrame(() => {
@@ -157,6 +161,37 @@ export default function Home() {
   useLayoutEffect(() => {
     contentPanelRef.current?.scrollTo({ top: 0, left: 0 });
   }, [activeCategory]);
+
+  useLayoutEffect(() => {
+    if (!shouldAnimateContainerFromPost) return;
+    const panel = contentPanelRef.current;
+    if (!panel) return;
+    let cancelled = false;
+
+    const animation = panel.animate(
+      [
+        { transform: "translateY(112%)" },
+        { transform: "translateY(0%)" },
+      ],
+      {
+        duration: 520,
+        easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+        fill: "both",
+      },
+    );
+
+    void animation.finished
+      .catch(() => undefined)
+      .then(() => {
+        if (!cancelled) {
+          navigate(".", { replace: true, state: null });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate, shouldAnimateContainerFromPost]);
 
   useEffect(() => {
     let mounted = true;
@@ -445,7 +480,7 @@ export default function Home() {
                       decoding="async"
                     />
                   </div>
-                  <div className="mt-5 grid grid-cols-3 gap-5 border-t border-[#2a2a2a]/20 pt-4 max-md:grid-cols-1">
+                  <div className="mt-5 grid grid-cols-3 gap-5 pt-4 max-md:grid-cols-1">
                     {bioExhibitionColumns.map((column) => (
                       <section key={column.title}>
                         <h2 className="mb-2 mt-0 text-[13px] font-bold uppercase text-black/90">

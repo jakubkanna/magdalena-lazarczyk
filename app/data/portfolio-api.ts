@@ -31,7 +31,20 @@ const imageByFileName = Object.fromEntries(
 
 export type PortfolioPostViewModel = PortfolioPost & {
   category: PortfolioCategory;
+  slug: string;
 };
+
+export function createPortfolioPostSlug(post: Pick<PortfolioPost, "id" | "title">) {
+  const titleSlug = post.title
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ł/g, "l")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return `${titleSlug}-${post.id}`;
+}
 
 export async function loadPortfolioImageSrc(image: string) {
   return imageByFileName[image]?.() ?? "";
@@ -42,7 +55,13 @@ export async function fetchPortfolioPosts(): Promise<PortfolioPostViewModel[]> {
 
   return wordpressPosts.map((post) => ({
     ...post,
+    slug: createPortfolioPostSlug(post),
     category:
       post.category ?? fallbackCategories[(post.id - 1) % fallbackCategories.length],
   }));
+}
+
+export async function fetchPortfolioPostBySlug(slug: string) {
+  const portfolioPosts = await fetchPortfolioPosts();
+  return portfolioPosts.find((post) => post.slug === slug) ?? null;
 }

@@ -33,13 +33,6 @@ body {
   overflow: hidden;
 }
 
-button,
-input,
-select,
-textarea {
-  font: inherit;
-}
-
 .bio-scroll-fade {
   -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 86%, transparent);
   mask-image: linear-gradient(180deg, #000 0%, #000 86%, transparent);

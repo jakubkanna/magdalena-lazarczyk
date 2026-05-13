@@ -47,9 +47,11 @@ function CategoryList({
           key={section}
           type="button"
           onClick={() => onCategorySelect(section)}
-          className={`relative cursor-pointer transition-[color,transform] duration-200  ${compact ? "self-center text-[11px]" : "self-end text-sm"} appearance-none border-0 bg-transparent p-0 leading-none text-black/75 hover:text-black [writing-mode:vertical-rl] [transform:rotate(180deg)] ${compact ? "" : "max-md:[writing-mode:horizontal-tb] max-md:[transform:none]"} ${
-            hoveredCategory === section ? "translate-x-[10px]" : "translate-x-0"
-          } ${activeCategory === section ? "font-semibold" : "font-normal"}`}
+          className={`relative cursor-pointer transition-colors duration-200  ${compact ? "self-center text-[11px]" : "self-end text-sm"} appearance-none border-0 bg-transparent p-0 leading-none text-black/75 hover:text-black [writing-mode:vertical-rl] [transform:rotate(180deg)] ${compact ? "" : "max-md:[writing-mode:horizontal-tb] max-md:[transform:none]"} ${
+            hoveredCategory === section || activeCategory === section
+              ? "font-bold"
+              : "font-normal"
+          }`}
         >
           {section}
         </button>
@@ -78,7 +80,7 @@ export function Sidebar({
 
   useEffect(() => {
     if (showCredit) return;
-    const timer = window.setTimeout(() => setShowCredit(true), 3000);
+    const timer = window.setTimeout(() => setShowCredit(true), 5000);
     return () => window.clearTimeout(timer);
   }, [showCredit]);
 
@@ -140,7 +142,7 @@ export function Sidebar({
           <h1 className="m-0 mb-24">
             <button
               type="button"
-              className="cursor-pointer appearance-none border-0 bg-transparent p-0 text-left font-sans text-lg leading-[0.9] font-normal text-black/75 transition-colors duration-200 hover:text-black"
+              className="cursor-pointer appearance-none border-0 bg-transparent p-0 text-left font-sans text-lg leading-[1] font-normal text-black/75 transition-colors duration-200 hover:text-black"
               onClick={onHomeClick}
             >
               Magdalena Łazarczyk
