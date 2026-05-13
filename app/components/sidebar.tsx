@@ -47,7 +47,7 @@ function CategoryList({
           key={section}
           type="button"
           onClick={() => onCategorySelect(section)}
-          className={`relative cursor-pointer transition-colors duration-200  ${compact ? "self-center text-[11px]" : "self-end text-sm"} appearance-none border-0 bg-transparent p-0 leading-none text-black/75 hover:text-black [writing-mode:vertical-rl] [transform:rotate(180deg)] ${compact ? "" : "max-md:[writing-mode:horizontal-tb] max-md:[transform:none]"} ${
+          className={`relative cursor-pointer transition-colors duration-200  ${compact ? "self-center text-sm" : "self-end text-sm"} appearance-none border-0 bg-transparent p-0 leading-none text-black/75 hover:text-black [writing-mode:vertical-rl] [transform:rotate(180deg)] ${compact ? "" : "max-md:[writing-mode:horizontal-tb] max-md:[transform:none]"} ${
             hoveredCategory === section || activeCategory === section
               ? "font-bold"
               : "font-normal"
@@ -142,7 +142,7 @@ export function Sidebar({
           <h1 className="m-0 mb-24">
             <button
               type="button"
-              className="cursor-pointer appearance-none border-0 bg-transparent p-0 text-left font-sans text-lg leading-[1] font-normal text-black/75 transition-colors duration-200 hover:text-black"
+              className="cursor-pointer appearance-none border-0 bg-transparent p-0 text-left font-semibold text-lg leading-[1] text-black/75 transition-colors duration-200 hover:text-black"
               onClick={onHomeClick}
             >
               Magdalena Łazarczyk

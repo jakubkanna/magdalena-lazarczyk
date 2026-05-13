@@ -6,11 +6,14 @@ import {
   useSearchParams,
 } from "react-router";
 import { AnimatedPageContainer } from "../components/animated-page-container";
+import { CategoryGrid } from "../components/category-grid";
 import { Sidebar } from "../components/sidebar";
 import { bioExhibitionColumns, bioParagraphs } from "../data/bio";
 import {
+  fetchPortfolioPosts,
   fetchPortfolioPostBySlug,
   loadPortfolioImageSrc,
+  type PortfolioCategory,
   type PortfolioPostViewModel,
 } from "../data/portfolio-api";
 
@@ -102,7 +105,9 @@ function createMockBlocks(
 function getBlockPreviewImages(blocks: MockBlock[]) {
   return blocks.flatMap((block): PreviewImage[] => {
     if (block.type === "image") {
-      return [{ alt: block.alt, src: block.src }];
+      return [
+        { alt: block.alt, description: block.description, src: block.src },
+      ];
     }
 
     if (block.type === "gallery") {
@@ -268,6 +273,16 @@ export default function Post() {
     null,
   );
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
+  const [pendingCategory, setPendingCategory] = useState<
+    (typeof sections)[number] | null
+  >(null);
+  const [isCategoryTransitioning, setIsCategoryTransitioning] = useState(false);
+  const [portfolioPosts, setPortfolioPosts] = useState<
+    PortfolioPostViewModel[]
+  >([]);
+  const [imageSrcByPostId, setImageSrcByPostId] = useState<
+    Record<number, string>
+  >({});
   const activeCategory = searchParams.get("from");
 
   useEffect(() => {
@@ -294,6 +309,27 @@ export default function Post() {
       mounted = false;
     };
   }, [params.slug]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    fetchPortfolioPosts().then(async (nextPosts) => {
+      if (!mounted) return;
+      setPortfolioPosts(nextPosts);
+      const images = await Promise.all(
+        nextPosts.map(
+          async (nextPost) =>
+            [nextPost.id, await loadPortfolioImageSrc(nextPost.image)] as const,
+        ),
+      );
+      if (!mounted) return;
+      setImageSrcByPostId(Object.fromEntries(images));
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const blocks = post && imageSrc ? createMockBlocks(post, imageSrc) : [];
   const previewImages: PreviewImage[] = [
@@ -374,6 +410,26 @@ export default function Post() {
     navigate("/");
   };
 
+  const selectCategory = (category: (typeof sections)[number]) => {
+    if (isCategoryTransitioning) return;
+    setSidebarVariant("minimized");
+    setBioOpen(false);
+    setBioExpanded(false);
+    setContactOpen(false);
+    setPendingCategory(category);
+    setIsCategoryTransitioning(true);
+  };
+
+  const finishCategoryTransition = () => {
+    if (!pendingCategory) return;
+    navigate(`/${categoryToSlug[pendingCategory]}`);
+  };
+
+  const getCategoryPosts = (category: (typeof sections)[number]) =>
+    portfolioPosts.filter(
+      (portfolioPost) => portfolioPost.category === (category as PortfolioCategory),
+    );
+
   const closeBio = () => {
     setBioOpen(false);
     setBioExpanded(false);
@@ -418,7 +474,7 @@ export default function Post() {
           categories={sections}
           bioOpen={bioOpen}
           contactOpen={contactOpen}
-          showSpinner={isLoading}
+          showSpinner={isLoading || isCategoryTransitioning}
           onHomeClick={() => navigate("/")}
           onBioClick={() => {
             if (bioOpen) {
@@ -439,9 +495,7 @@ export default function Post() {
           }}
           onCategoryHover={() => undefined}
           onCategorySelect={(category) =>
-            navigate(
-              `/${categoryToSlug[category as (typeof sections)[number]]}`,
-            )
+            selectCategory(category as (typeof sections)[number])
           }
           onExpand={() => setSidebarVariant("default")}
         />
@@ -568,87 +622,105 @@ export default function Post() {
             </div>
           </section>
 
-          <AnimatedPageContainer
-            animationKey={`post-${params.slug ?? "missing"}`}
-            animate
-            ready={!isLoading}
-            className="post-scrollbar relative min-h-0 flex-1 overflow-y-auto bg-white p-2 text-black/90"
-          >
-            {isLoading ? (
-              <div className="grid h-full place-items-center">
-                <span className="h-7 w-7 animate-spin rounded-full border-2 border-black/20 border-t-black" />
-              </div>
-            ) : post ? (
-              <>
-                <header className="grid grid-cols-12 gap-2 pb-2">
-                  <h1 className="col-span-9 m-0 text-[clamp(48px,11vw,180px)] leading-[0.82] font-normal text-black/90 max-md:col-span-12">
-                    {post.title}
-                  </h1>
-                  <div className="col-span-3 self-end text-right text-sm leading-tight max-md:col-span-12 max-md:text-left">
-                    <p className="m-0">{post.venue}</p>
-                    <p className="m-0">
-                      {post.place}, {post.year}
-                    </p>
-                  </div>
-                </header>
+          <section className="relative min-h-0 flex-1 overflow-hidden">
+            <AnimatedPageContainer
+              animationKey={`post-${params.slug ?? "missing"}`}
+              animate
+              ready={!isLoading}
+              className="post-scrollbar absolute inset-0 overflow-y-auto bg-white p-2 text-black/90"
+            >
+              {isLoading ? (
+                <div className="grid h-full place-items-center">
+                  <span className="h-7 w-7 animate-spin rounded-full border-2 border-black/20 border-t-black" />
+                </div>
+              ) : post ? (
+                <>
+                  <header className="grid grid-cols-12 gap-2 pb-2">
+                    <h1 className="col-span-9 m-0 text-[clamp(48px,11vw,180px)] leading-[0.82] font-normal text-black/90 max-md:col-span-12">
+                      {post.title}
+                    </h1>
+                    <div className="col-span-3 self-end text-right text-sm leading-tight max-md:col-span-12 max-md:text-left">
+                      <p className="m-0">{post.venue}</p>
+                      <p className="m-0">
+                        {post.place}, {post.year}
+                      </p>
+                    </div>
+                  </header>
 
-                {imageSrc ? (
-                  <div className="mb-8 grid grid-cols-12 gap-2">
-                    <button
-                      type="button"
-                      className="col-span-9 cursor-pointer appearance-none border-0 bg-transparent p-0 text-left max-lg:col-span-10 max-md:col-span-12"
-                      onClick={() =>
-                        openImagePreview({
-                          alt: post.title,
-                          src: imageSrc,
-                          description: `${post.venue}, ${post.place}, ${post.year}`,
-                        })
-                      }
-                    >
-	                      <img
-	                        className="block h-auto w-full"
-	                        src={imageSrc}
-	                        alt={post.title}
-	                        loading="eager"
-	                        decoding="async"
-	                      />
-                    </button>
-                  </div>
-                ) : null}
+                  {imageSrc ? (
+                    <div className="mb-8 grid grid-cols-12 gap-2">
+                      <button
+                        type="button"
+                        className="col-span-9 cursor-pointer appearance-none border-0 bg-transparent p-0 text-left max-lg:col-span-10 max-md:col-span-12"
+                        onClick={() =>
+                          openImagePreview({
+                            alt: post.title,
+                            src: imageSrc,
+                            description: `${post.venue}, ${post.place}, ${post.year}`,
+                          })
+                        }
+                      >
+                        <img
+                          className="block h-auto w-full"
+                          src={imageSrc}
+                          alt={post.title}
+                          loading="eager"
+                          decoding="async"
+                        />
+                      </button>
+                    </div>
+                  ) : null}
 
-                <PostBlocks blocks={blocks} onImageOpen={openImagePreview} />
-                <button
-                  type="button"
-                  className="sticky bottom-2.5 z-[999] ml-auto mr-2.5 flex size-11 cursor-pointer items-center justify-center rounded-full bg-[#eee4d5] text-black/90 shadow-[0_4px_16px_rgba(0,0,0,0.24)] transition-[background-color,color,transform] duration-200 hover:scale-105 hover:bg-[#e0d6c7] hover:text-black"
-                  onClick={goBack}
-                  aria-label="Wróć"
-                >
-                  <img
-                    className="block size-5 rotate-180"
-                    src={`${import.meta.env.BASE_URL}arrow-forward-outline.svg`}
-                    alt=""
-                    aria-hidden="true"
-                  />
-                </button>
-              </>
-            ) : (
-              <div className="grid h-full place-items-center text-center">
-                <div>
-                  <h1 className="m-0 text-[clamp(54px,12vw,180px)] leading-none font-normal">
-                    404
-                  </h1>
-                  <p className="mt-3 text-lg">Nie znaleziono projektu.</p>
+                  <PostBlocks blocks={blocks} onImageOpen={openImagePreview} />
                   <button
                     type="button"
-                    className="mt-6 cursor-pointer rounded-full bg-[#eee4d5] px-4 py-2 text-base leading-none text-black/90 shadow-[0_2px_8px_rgba(0,0,0,0.2)] transition-[background-color,color] duration-200 hover:bg-[#e0d6c7] hover:text-black"
-                    onClick={() => navigate("/")}
+                    className="sticky bottom-2.5 z-[999] ml-auto mr-2.5 flex size-11 cursor-pointer items-center justify-center rounded-full bg-[#eee4d5] text-black/90 shadow-[0_4px_16px_rgba(0,0,0,0.24)] transition-[background-color,color,transform] duration-200 hover:scale-105 hover:bg-[#e0d6c7] hover:text-black"
+                    onClick={goBack}
+                    aria-label="Wróć"
                   >
-                    Wróć na stronę główną
+                    <img
+                      className="block size-5 rotate-180"
+                      src={`${import.meta.env.BASE_URL}arrow-forward-outline.svg`}
+                      alt=""
+                      aria-hidden="true"
+                    />
                   </button>
+                </>
+              ) : (
+                <div className="grid h-full place-items-center text-center">
+                  <div>
+                    <h1 className="m-0 text-[clamp(54px,12vw,180px)] leading-none font-normal">
+                      404
+                    </h1>
+                    <p className="mt-3 text-lg">Nie znaleziono projektu.</p>
+                    <button
+                      type="button"
+                      className="mt-6 cursor-pointer rounded-full bg-[#eee4d5] px-4 py-2 text-base leading-none text-black/90 shadow-[0_2px_8px_rgba(0,0,0,0.2)] transition-[background-color,color] duration-200 hover:bg-[#e0d6c7] hover:text-black"
+                      onClick={() => navigate("/")}
+                    >
+                      Wróć na stronę główną
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
-          </AnimatedPageContainer>
+              )}
+            </AnimatedPageContainer>
+
+            {pendingCategory ? (
+              <AnimatedPageContainer
+                animationKey={`post-category-${pendingCategory}`}
+                animate
+                ready
+                className="absolute inset-0 z-20 overflow-y-auto overflow-x-hidden"
+                style={{ backgroundColor: categoryColors[pendingCategory] }}
+                onEntered={finishCategoryTransition}
+              >
+                <CategoryGrid
+                  posts={getCategoryPosts(pendingCategory)}
+                  imageSrcByPostId={imageSrcByPostId}
+                />
+              </AnimatedPageContainer>
+            ) : null}
+          </section>
         </div>
       </div>
       {activePreview ? (
