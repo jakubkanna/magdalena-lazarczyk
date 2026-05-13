@@ -169,10 +169,7 @@ export default function Home() {
     let cancelled = false;
 
     const animation = panel.animate(
-      [
-        { transform: "translateY(112%)" },
-        { transform: "translateY(0%)" },
-      ],
+      [{ transform: "translateY(112%)" }, { transform: "translateY(0%)" }],
       {
         duration: 520,
         easing: "cubic-bezier(0.22, 1, 0.36, 1)",
@@ -440,12 +437,12 @@ export default function Home() {
                   key="bio-preview"
                   className="info-panel-fade flex h-full flex-col"
                 >
-                  <p className="m-0 text-[15px] leading-tight text-black/90">
+                  <p className="m-0 text-[15px] leading-tight text-black/75">
                     {bioParagraphs[0]}
                   </p>
                   <button
                     type="button"
-                    className="mb-0 ml-auto mt-auto cursor-pointer text-base leading-none text-black/90 underline transition-colors duration-200 hover:text-black"
+                    className="mb-0 ml-auto mt-auto cursor-pointer text-base leading-none text-black/75 underline transition-colors duration-200 hover:text-black"
                     onClick={() => setBioExpanded(true)}
                   >
                     czytaj dalej
@@ -455,12 +452,12 @@ export default function Home() {
               {bioExpanded ? (
                 <div
                   key="bio-expanded"
-                  className="info-panel-fade bio-scroll-fade mt-2 overflow-y-auto pb-12 pr-2 text-[15px] leading-[1.3] text-black/90 [scrollbar-color:#9a9a9a_transparent] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-[#e8dfd0] [&::-webkit-scrollbar-thumb]:bg-[#9a9a9a] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-2.5"
+                  className="info-panel-fade bio-scroll-fade mt-2 overflow-y-auto pb-12 pr-2 text-[15px] leading-[1.3] text-black/75 [scrollbar-color:#9a9a9a_transparent] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-[#e8dfd0] [&::-webkit-scrollbar-thumb]:bg-[#9a9a9a] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-2.5"
                 >
                   <div className="grid grid-cols-[minmax(0,1fr)_calc(100vw/12)] gap-5 max-md:grid-cols-1">
                     <div className="columns-2 gap-5 max-lg:columns-1">
                       {" "}
-                      <h2 className="mb-2 mt-0 text-[13px] font-bold uppercase text-black/90">
+                      <h2 className="mb-2 mt-0 text-[13px] font-bold uppercase text-black/75">
                         Bio
                       </h2>
                       {bioParagraphs.map((paragraph) => (
@@ -483,7 +480,7 @@ export default function Home() {
                   <div className="mt-5 grid grid-cols-3 gap-5 pt-4 max-md:grid-cols-1">
                     {bioExhibitionColumns.map((column) => (
                       <section key={column.title}>
-                        <h2 className="mb-2 mt-0 text-[13px] font-bold uppercase text-black/90">
+                        <h2 className="mb-2 mt-0 text-[13px] font-bold uppercase text-black/75">
                           {column.title}
                         </h2>
                         <ul className="m-0 list-none p-0">
@@ -501,14 +498,14 @@ export default function Home() {
               {contactOpen ? (
                 <div
                   key="contact"
-                  className="info-panel-fade flex h-full flex-col items-end justify-center gap-1 text-right text-[15px] leading-tight text-black/90"
+                  className="info-panel-fade flex h-full flex-col items-end justify-center gap-1 text-right text-[15px] leading-tight text-black/75"
                 >
-                  <h2 className="mb-2 mt-0 text-[13px] font-bold uppercase text-black/90">
+                  <h2 className="mb-2 mt-0 text-[13px] font-bold uppercase text-black/75">
                     Kontakt
                   </h2>
                   <button
                     type="button"
-                    className="relative w-fit cursor-pointer appearance-none border-0 bg-transparent p-0 text-right text-black/90 underline transition-colors duration-200 hover:text-black"
+                    className="relative w-fit cursor-pointer appearance-none border-0 bg-transparent p-0 text-right text-black/75 underline transition-colors duration-200 hover:text-black"
                     onClick={() =>
                       void copyContactValue(
                         "magdalena.lazarczyk@gmail.com",
@@ -518,27 +515,27 @@ export default function Home() {
                   >
                     magdalena.lazarczyk@gmail.com
                     {copiedContact === "email" ? (
-                      <span className="absolute right-0 top-full z-[9999] mt-1 rounded-full bg-[#eee4d5] px-2 py-1 text-[11px] leading-none text-black/90 shadow-[0_2px_8px_rgba(0,0,0,0.16)]">
+                      <span className="absolute right-0 top-full z-[9999] mt-1 rounded-full bg-[#eee4d5] px-2 py-1 text-[11px] leading-none text-black/75 shadow-[0_2px_8px_rgba(0,0,0,0.16)]">
                         skopiowano
                       </span>
                     ) : null}
                   </button>
                   <button
                     type="button"
-                    className="relative w-fit cursor-pointer appearance-none border-0 bg-transparent p-0 text-right text-black/90 underline transition-colors duration-200 hover:text-black"
+                    className="relative w-fit cursor-pointer appearance-none border-0 bg-transparent p-0 text-right text-black/75 underline transition-colors duration-200 hover:text-black"
                     onClick={() =>
                       void copyContactValue("+48 504439128", "phone")
                     }
                   >
                     +48 504439128
                     {copiedContact === "phone" ? (
-                      <span className="absolute right-0 top-full z-[9999] mt-1 rounded-full bg-[#eee4d5] px-2 py-1 text-[11px] leading-none text-black/90 shadow-[0_2px_8px_rgba(0,0,0,0.16)]">
+                      <span className="absolute right-0 top-full z-[9999] mt-1 rounded-full bg-[#eee4d5] px-2 py-1 text-[11px] leading-none text-black/75 shadow-[0_2px_8px_rgba(0,0,0,0.16)]">
                         skopiowano
                       </span>
                     ) : null}
                   </button>
                   <a
-                    className="w-fit text-black/90 underline transition-colors duration-200 hover:text-black"
+                    className="w-fit text-black/75 underline transition-colors duration-200 hover:text-black"
                     href="https://www.instagram.com/magdalena_lazarczyk/"
                     target="_blank"
                     rel="noreferrer"
