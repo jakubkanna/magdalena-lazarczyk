@@ -8,17 +8,23 @@ import {
   useNavigation,
   useOutlet,
 } from "react-router";
+import { useState } from "react";
 
 import type { Route } from "./+types/root";
 import { Sidebar } from "./components/sidebar";
 import "./app.css";
 
 const sections = ["Warsztaty", "Teatr", "Sztuka"] as const;
+const MOBILE_BREAKPOINT_QUERY = "(max-width: 767px)";
 const categoryToSlug: Record<(typeof sections)[number], string> = {
   Warsztaty: "warsztaty",
   Teatr: "teatr",
   Sztuka: "sztuka",
 };
+
+const isMobileViewport = () =>
+  typeof window !== "undefined" &&
+  window.matchMedia(MOBILE_BREAKPOINT_QUERY).matches;
 
 export const links: Route.LinksFunction = () => [
   { rel: "icon", href: `${import.meta.env.BASE_URL}favicon.ico` },
@@ -94,6 +100,9 @@ export default function App() {
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   const navigate = useNavigate();
+  const [sidebarVariant, setSidebarVariant] = useState<
+    "default" | "minimized"
+  >(() => (isMobileViewport() ? "minimized" : "default"));
   let message = "Błąd";
   let details = "Wystąpił nieoczekiwany błąd.";
   let stack: string | undefined;
@@ -114,9 +123,9 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
       className="relative isolate h-svh min-h-svh w-screen overflow-hidden bg-[#e8dfd0]"
       aria-label="Błąd strony"
     >
-      <div className="flex h-full min-h-0 w-screen max-md:block">
+      <div className="flex h-full min-h-0 w-screen max-md:flex-col">
         <Sidebar
-          variant="default"
+          variant={sidebarVariant}
           activeCategory={null}
           hoveredCategory={null}
           categories={sections}
@@ -132,7 +141,8 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
               `/${categoryToSlug[category as (typeof sections)[number]]}`,
             )
           }
-          onExpand={() => undefined}
+          onCollapse={() => setSidebarVariant("minimized")}
+          onExpand={() => setSidebarVariant("default")}
         />
 
         <section className="relative z-[6] flex h-full min-h-0 min-w-0 flex-1 items-center justify-center overflow-hidden bg-[#7eaed8] p-6 shadow-[-12px_0_18px_rgba(0,0,0,0.22)]">

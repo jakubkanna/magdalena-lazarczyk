@@ -185,7 +185,7 @@ function PostBlocks({
           return (
             <div
               key={`${block.type}-${index}`}
-              className="col-span-12 m-0 grid grid-cols-4 gap-2 py-4 text-sm leading-tight max-md:grid-cols-2"
+              className="col-span-12 m-0 grid grid-cols-4 gap-2 py-4 text-sm leading-tight max-md:grid-cols-1"
             >
               {block.items.map((item) => (
                 <div key={item} className="min-h-16 bg-black/[0.035] p-3">
@@ -491,7 +491,7 @@ export default function Post() {
       className="relative isolate h-svh min-h-svh w-screen overflow-hidden bg-[#e8dfd0]"
       aria-label={post?.title ?? "Projekt"}
     >
-      <div className="flex h-full min-h-0 w-screen max-md:block">
+      <div className="flex h-full min-h-0 w-screen max-md:flex-col">
         <Sidebar
           variant={sidebarVariant}
           activeCategory={activeCategory}
@@ -524,6 +524,7 @@ export default function Post() {
           onCategorySelect={(category) =>
             selectCategory(category as (typeof sections)[number])
           }
+          onCollapse={() => setSidebarVariant("minimized")}
           onExpand={() => setSidebarVariant("default")}
         />
 
@@ -557,7 +558,7 @@ export default function Post() {
               ) : post ? (
                 <>
                   <header className="grid grid-cols-12 gap-2 pb-2">
-                    <h1 className="col-span-9 m-0 text-9xl leading-[0.82] font-normal text-black/90 max-md:col-span-12">
+                    <h1 className="col-span-9 m-0 text-9xl leading-[0.82] font-normal text-black/90 max-md:col-span-12 max-md:text-5xl">
                       {post.title}
                     </h1>
                     <div className="col-span-3 self-end text-right text-sm leading-tight max-md:col-span-12 max-md:text-left">

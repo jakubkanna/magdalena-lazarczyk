@@ -12,7 +12,7 @@ const ROW_LOAD_DELAY_MS = 320;
 
 function getColumns() {
   if (typeof window === "undefined") return 3;
-  return window.matchMedia(MOBILE_BREAKPOINT_QUERY).matches ? 2 : 3;
+  return window.matchMedia(MOBILE_BREAKPOINT_QUERY).matches ? 1 : 3;
 }
 
 export function CategoryGrid({ posts, imageSrcByPostId }: CategoryGridProps) {
@@ -84,7 +84,7 @@ export function CategoryGrid({ posts, imageSrcByPostId }: CategoryGridProps) {
 
   return (
     <div className="p-2">
-      <div className="grid grid-cols-3 gap-1 max-md:grid-cols-2">
+      <div className="grid grid-cols-3 gap-1 max-md:grid-cols-1">
         {visiblePosts.map((post) => (
           <ProjectCard
             key={post.id}

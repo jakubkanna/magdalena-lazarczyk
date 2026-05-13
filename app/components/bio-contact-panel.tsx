@@ -59,7 +59,7 @@ export function BioContactPanel({
         isOpen
           ? bioExpanded
             ? "h-[50svh] py-2.5"
-            : "h-29.5 py-2.5"
+            : "h-29.5 py-2.5 max-md:h-40"
           : "h-0 py-0"
       }`}
     >

@@ -15,8 +15,15 @@ type SidebarProps = {
   onContactClick: () => void;
   onCategoryHover: (category: string | null) => void;
   onCategorySelect: (category: string) => void;
+  onCollapse: () => void;
   onExpand: () => void;
 };
+
+const MOBILE_BREAKPOINT_QUERY = "(max-width: 767px)";
+
+const isMobileViewport = () =>
+  typeof window !== "undefined" &&
+  window.matchMedia(MOBILE_BREAKPOINT_QUERY).matches;
 
 function CategoryList({
   categories,
@@ -37,8 +44,8 @@ function CategoryList({
     <nav
       className={
         compact
-          ? "relative z-[6] mt-2 flex flex-1 flex-col items-center justify-around py-2"
-          : "relative z-[6] mt-auto flex min-h-[52%] flex-col items-end justify-around px-1 py-3.5 max-md:mt-4 max-md:min-h-0 max-md:flex-row max-md:justify-between"
+          ? "relative z-[6] mt-2 flex flex-1 flex-col items-center justify-around py-2 max-md:hidden"
+          : "relative z-[6] mt-auto flex min-h-[52%] flex-col items-end justify-around px-1 py-3.5 max-md:mt-auto max-md:min-h-0 max-md:w-full max-md:flex-row max-md:items-center max-md:justify-between max-md:gap-3"
       }
       aria-label="Sekcje"
     >
@@ -73,6 +80,7 @@ export function Sidebar({
   onContactClick,
   onCategoryHover,
   onCategorySelect,
+  onCollapse,
   onExpand,
 }: SidebarProps) {
   const [showCredit, setShowCredit] = useState(false);
@@ -84,16 +92,23 @@ export function Sidebar({
     return () => window.clearTimeout(timer);
   }, [showCredit]);
 
+  const handleInfoButtonClick = (callback: () => void) => {
+    callback();
+    if (isMobileViewport()) {
+      onCollapse();
+    }
+  };
+
   return (
     <aside
-      className={`relative z-[5] h-full shrink-0 overflow-x-hidden overflow-y-auto bg-[#e8dfd0] transition-[width] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] max-md:min-h-[170px] max-md:w-full ${
+      className={`relative z-[5] h-full shrink-0 overflow-x-hidden overflow-y-auto bg-[#e8dfd0] transition-[width,height] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] max-md:w-full max-md:overflow-hidden ${
         variant === "minimized" ? "w-14" : "w-[calc(100vw/12)]"
-      }`}
+      } ${variant === "minimized" ? "max-md:h-14" : "max-md:h-svh"}`}
       aria-label="Nawigacja"
     >
       {variant === "minimized" ? (
-        <div className="flex h-full flex-col p-2.5">
-          <div className="flex w-5 flex-col items-center gap-2">
+        <div className="flex h-full flex-col p-2.5 max-md:h-14 max-md:flex-row max-md:items-center max-md:justify-between">
+          <div className="flex w-5 flex-col items-center gap-2 max-md:w-full max-md:flex-row max-md:justify-between">
             <button
               type="button"
               className="flex size-5 cursor-pointer appearance-none items-center justify-center border-0 bg-transparent p-0 text-center font-['Helvetica_Neue',Helvetica,Arial,sans-serif] font-normal text-black/75 transition-colors duration-200 hover:text-black"
@@ -115,8 +130,8 @@ export function Sidebar({
                 aria-label="Rozwiń sidebar"
               >
                 <img
-                  className="block size-4"
-                  src={`${import.meta.env.BASE_URL}arrow-forward-outline.svg`}
+                  className="block size-5"
+                  src={`${import.meta.env.BASE_URL}menu.svg`}
                   alt=""
                   aria-hidden="true"
                 />
@@ -133,17 +148,32 @@ export function Sidebar({
           />
         </div>
       ) : (
-        <div className="flex h-full flex-col p-2.5">
-          <h1 className="m-0 mb-24 w-full text-left">
+        <div className="flex h-full flex-col p-2.5 max-md:min-h-svh">
+          <div className="mb-24 flex w-full items-start justify-between gap-2 max-md:mb-8">
+            <h1 className="m-0 w-full text-left">
+              <button
+                type="button"
+                className="w-full cursor-pointer appearance-none border-0 bg-transparent p-0 text-left font-['Helvetica_Neue',Helvetica,Arial,sans-serif] text-lg font-normal leading-[1] text-black/75 transition-colors duration-200 hover:text-black"
+                onClick={onHomeClick}
+              >
+                Magdalena Łazarczyk
+              </button>
+            </h1>
             <button
               type="button"
-              className="w-full cursor-pointer appearance-none border-0 bg-transparent p-0 text-left font-['Helvetica_Neue',Helvetica,Arial,sans-serif] text-lg font-normal leading-[1] text-black/75 transition-colors duration-200 hover:text-black"
-              onClick={onHomeClick}
+              className="hidden size-6 shrink-0 cursor-pointer appearance-none items-center justify-center border-0 bg-transparent p-0 max-md:flex"
+              onClick={onCollapse}
+              aria-label="Zwiń sidebar"
             >
-              Magdalena Łazarczyk
+              <img
+                className="block size-5"
+                src={`${import.meta.env.BASE_URL}menu.svg`}
+                alt=""
+                aria-hidden="true"
+              />
             </button>
-          </h1>
-          <div className="mt-2 flex flex-col items-start gap-2">
+          </div>
+          <div className="mt-2 flex flex-col items-start gap-2 max-md:flex-row max-md:items-center">
             <button
               type="button"
               className={`cursor-pointer rounded-full px-2 py-1 text-base leading-none text-black/75 shadow-[0_2px_8px_rgba(0,0,0,0.2)] transition-[background-color,color] duration-200 hover:text-black ${
@@ -151,7 +181,7 @@ export function Sidebar({
                   ? "bg-[#dfd5c6] hover:bg-[#d2c7b8]"
                   : "bg-[#eee4d5] hover:bg-[#e0d6c7]"
               }`}
-              onClick={onBioClick}
+              onClick={() => handleInfoButtonClick(onBioClick)}
             >
               Bio
             </button>
@@ -162,7 +192,7 @@ export function Sidebar({
                   ? "bg-[#dfd5c6] hover:bg-[#d2c7b8]"
                   : "bg-[#eee4d5] hover:bg-[#e0d6c7]"
               }`}
-              onClick={onContactClick}
+              onClick={() => handleInfoButtonClick(onContactClick)}
               aria-label="Kontakt"
             >
               <img
@@ -180,7 +210,7 @@ export function Sidebar({
             onCategoryHover={onCategoryHover}
             onCategorySelect={onCategorySelect}
           />
-          <div className="sidebar-credit-container mt-4 text-left text-xs leading-none text-black/75">
+          <div className="sidebar-credit-container mt-4 text-left text-xs leading-none text-black/75 max-md:mt-auto">
             {showCredit ? (
               <a
                 className="sidebar-credit-fade sidebar-credit-marquee block text-black/75 no-underline transition-colors duration-200 hover:text-black"

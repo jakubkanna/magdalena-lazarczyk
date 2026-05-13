@@ -42,9 +42,14 @@ const slugToCategory: Record<string, (typeof sections)[number]> = {
   sztuka: "Sztuka",
 };
 const SIDEBAR_VARIANT_STORAGE_KEY = "ml.sidebar.variant";
+const MOBILE_BREAKPOINT_QUERY = "(max-width: 767px)";
 
 const getCategoryFromSlug = (slug?: string) =>
   slug ? (slugToCategory[slug.toLowerCase()] ?? null) : null;
+
+const isMobileViewport = () =>
+  typeof window !== "undefined" &&
+  window.matchMedia(MOBILE_BREAKPOINT_QUERY).matches;
 
 const cornerCards = [
   {
@@ -79,6 +84,7 @@ export default function Home() {
   const [sidebarVariant, setSidebarVariant] = useState<"default" | "minimized">(
     () => {
       if (typeof window === "undefined") return "default";
+      if (isMobileViewport()) return "minimized";
       const stored = window.localStorage.getItem(SIDEBAR_VARIANT_STORAGE_KEY);
       if (stored === "default" || stored === "minimized") return stored;
 
@@ -295,13 +301,13 @@ export default function Home() {
       return (
         <div
           ref={paperScope}
-          className="absolute right-2.5 bottom-2.5 flex items-end gap-2.5"
+          className="absolute right-2.5 bottom-2.5 flex items-end gap-2.5 max-md:left-2.5 max-md:flex-col max-md:items-stretch"
         >
           {(origin ? cornerCards : []).map((card) => (
             <div
               key={`base-${card.src}`}
               data-fly-card
-              className="h-[min(42svh,560px)] w-[calc(100vw/12*2)] cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.24)] transition-transform duration-200 hover:scale-[1.05] max-md:h-[min(34svh,380px)] max-md:w-[min(38vw,240px)]"
+              className="h-[min(42svh,560px)] w-[calc(100vw/12*2)] cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.24)] transition-transform duration-200 hover:scale-[1.05] max-md:h-[22svh] max-md:w-full"
               style={
                 origin
                   ? {
@@ -340,7 +346,7 @@ export default function Home() {
       className="relative isolate h-svh min-h-svh w-screen overflow-hidden bg-[#e8dfd0]"
       aria-label="Magdalena Łazarczyk"
     >
-      <div className="flex h-full min-h-0 w-screen max-md:block">
+      <div className="flex h-full min-h-0 w-screen max-md:flex-col">
         <Sidebar
           variant={sidebarVariant}
           activeCategory={activeCategory}
@@ -371,6 +377,7 @@ export default function Home() {
           onCategorySelect={(category) =>
             void selectCategory(category as (typeof sections)[number])
           }
+          onCollapse={() => setSidebarVariant("minimized")}
           onExpand={() => setSidebarVariant("default")}
         />
 
