@@ -2,6 +2,7 @@ import type { Route } from "./+types/home";
 import { useAnimate } from "motion/react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
+import { AnimatedPageContainer } from "../components/animated-page-container";
 import { CategoryGrid } from "../components/category-grid";
 import { Sidebar } from "../components/sidebar";
 import { bioExhibitionColumns, bioParagraphs } from "../data/bio";
@@ -69,7 +70,6 @@ export default function Home() {
   const [origin, setOrigin] = useState<{ x: number; y: number } | null>(null);
   const [paperScope, animatePaper] = useAnimate();
   const contentPanelRef = useRef<HTMLDivElement | null>(null);
-  const pendingPanelRef = useRef<HTMLDivElement | null>(null);
 
   const [activeCategory, setActiveCategory] = useState<
     (typeof sections)[number] | null
@@ -162,34 +162,6 @@ export default function Home() {
     contentPanelRef.current?.scrollTo({ top: 0, left: 0 });
   }, [activeCategory]);
 
-  useLayoutEffect(() => {
-    if (!shouldAnimateContainerFromPost) return;
-    const panel = contentPanelRef.current;
-    if (!panel) return;
-    let cancelled = false;
-
-    const animation = panel.animate(
-      [{ transform: "translateY(112%)" }, { transform: "translateY(0%)" }],
-      {
-        duration: 520,
-        easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-        fill: "both",
-      },
-    );
-
-    void animation.finished
-      .catch(() => undefined)
-      .then(() => {
-        if (!cancelled) {
-          navigate(".", { replace: true, state: null });
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [navigate, shouldAnimateContainerFromPost]);
-
   useEffect(() => {
     let mounted = true;
     fetchPortfolioPosts().then(async (portfolioPosts) => {
@@ -244,25 +216,6 @@ export default function Home() {
       requestAnimationFrame(step);
     });
 
-  const animatePanelY = (
-    element: HTMLElement,
-    from: string,
-    to: string,
-    duration: number,
-    easing: string,
-  ) =>
-    new Promise<void>((resolve) => {
-      const animation = element.animate(
-        [
-          { transform: `translateY(${from})` },
-          { transform: `translateY(${to})` },
-        ],
-        { duration, easing, fill: "forwards" },
-      );
-      animation.onfinish = () => resolve();
-      animation.oncancel = () => resolve();
-    });
-
   const runContentTransition = async (
     category: (typeof sections)[number] | null,
     path: string,
@@ -273,19 +226,7 @@ export default function Home() {
     setHoveredCategory(null);
     setPendingCategory(category);
     await waitFrames(2);
-
-    const pendingPanel = pendingPanelRef.current;
-    if (pendingPanel) {
-      pendingPanel.style.transform = "translateY(112%)";
-      pendingPanel.getBoundingClientRect();
-      await animatePanelY(
-        pendingPanel,
-        "112%",
-        "0%",
-        520,
-        "cubic-bezier(0.22, 1, 0.36, 1)",
-      );
-    }
+    await new Promise<void>((resolve) => setTimeout(resolve, 520));
 
     navigate(path);
     setActiveCategory(category);
@@ -548,30 +489,32 @@ export default function Home() {
           </section>
 
           <section className="relative min-h-0 flex-1 overflow-hidden">
-            <div
-              ref={contentPanelRef}
+            <AnimatedPageContainer
+              animationKey={`home-${location.key}`}
+              animate={shouldAnimateContainerFromPost}
+              containerRef={contentPanelRef}
               className={`absolute inset-0 overflow-x-hidden ${
                 activeCategory ? "overflow-y-auto" : "overflow-y-hidden"
               }`}
               style={{ backgroundColor: getContainerColor(activeCategory) }}
-              aria-hidden="true"
+              onEntered={() => navigate(".", { replace: true, state: null })}
             >
               {renderMainContent(activeCategory)}
-            </div>
+            </AnimatedPageContainer>
             {pendingCategory !== undefined ? (
-              <div
-                ref={pendingPanelRef}
+              <AnimatedPageContainer
+                animationKey={`pending-${pendingCategory ?? "home"}`}
+                animate
+                ready
                 className={`absolute inset-0 z-10 overflow-x-hidden ${
                   pendingCategory ? "overflow-y-auto" : "overflow-y-hidden"
                 }`}
                 style={{
                   backgroundColor: getContainerColor(pendingCategory),
-                  transform: "translateY(112%)",
                 }}
-                aria-hidden="true"
               >
                 {renderMainContent(pendingCategory, true)}
-              </div>
+              </AnimatedPageContainer>
             ) : null}
           </section>
         </div>

@@ -1,10 +1,11 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   useLocation,
   useNavigate,
   useParams,
   useSearchParams,
 } from "react-router";
+import { AnimatedPageContainer } from "../components/animated-page-container";
 import { Sidebar } from "../components/sidebar";
 import { bioExhibitionColumns, bioParagraphs } from "../data/bio";
 import {
@@ -19,14 +20,34 @@ const categoryToSlug: Record<(typeof sections)[number], string> = {
   Teatr: "teatr",
   Sztuka: "sztuka",
 };
+const categoryColors: Record<(typeof sections)[number], string> = {
+  Warsztaty: "#F2621C",
+  Sztuka: "#D4FC85",
+  Teatr: "#0011FF",
+};
+
+function hexToRgba(hex: string, alpha: number) {
+  const normalizedHex = hex.replace("#", "");
+  const red = Number.parseInt(normalizedHex.slice(0, 2), 16);
+  const green = Number.parseInt(normalizedHex.slice(2, 4), 16);
+  const blue = Number.parseInt(normalizedHex.slice(4, 6), 16);
+
+  return `rgb(${red} ${green} ${blue} / ${alpha})`;
+}
 
 type MockBlock =
   | { type: "paragraph"; content: string }
   | { type: "columns"; columns: string[] }
   | { type: "quote"; content: string }
-  | { type: "image"; alt: string; src: string }
-  | { type: "gallery"; images: { alt: string; src: string }[] }
+  | { type: "image"; alt: string; description?: string; src: string }
+  | { type: "gallery"; images: PreviewImage[] }
   | { type: "grid"; items: string[] };
+
+type PreviewImage = {
+  alt: string;
+  description?: string;
+  src: string;
+};
 
 function createMockBlocks(
   post: PortfolioPostViewModel,
@@ -58,8 +79,16 @@ function createMockBlocks(
     {
       type: "gallery",
       images: [
-        { src: imageSrc, alt: `${post.title} - zdjęcie 1` },
-        { src: imageSrc, alt: `${post.title} - zdjęcie 2` },
+        {
+          src: imageSrc,
+          alt: `${post.title} - zdjęcie 1`,
+          description: "Opis zdjęcia z bloku galerii WordPress.",
+        },
+        {
+          src: imageSrc,
+          alt: `${post.title} - zdjęcie 2`,
+          description: "Drugi opis zdjęcia przekazany z danych WordPress.",
+        },
       ],
     },
     {
@@ -70,7 +99,27 @@ function createMockBlocks(
   ];
 }
 
-function PostBlocks({ blocks }: { blocks: MockBlock[] }) {
+function getBlockPreviewImages(blocks: MockBlock[]) {
+  return blocks.flatMap((block): PreviewImage[] => {
+    if (block.type === "image") {
+      return [{ alt: block.alt, src: block.src }];
+    }
+
+    if (block.type === "gallery") {
+      return block.images;
+    }
+
+    return [];
+  });
+}
+
+function PostBlocks({
+  blocks,
+  onImageOpen,
+}: {
+  blocks: MockBlock[];
+  onImageOpen: (image: PreviewImage) => void;
+}) {
   return (
     <div className="grid grid-cols-12 gap-x-2 gap-y-12 text-black/90">
       {blocks.map((block, index) => {
@@ -136,14 +185,25 @@ function PostBlocks({ blocks }: { blocks: MockBlock[] }) {
               className="col-span-9 grid grid-cols-2 gap-2 max-lg:col-span-10 max-md:col-span-12 max-md:grid-cols-1"
             >
               {block.images.map((image) => (
-                <img
+                <button
                   key={image.alt}
-                  className="block h-auto w-full"
-                  src={image.src}
-                  alt={image.alt}
-                  loading="lazy"
-                  decoding="async"
-                />
+                  type="button"
+                  className="cursor-pointer appearance-none border-0 bg-transparent p-0 text-left"
+                  onClick={() => onImageOpen(image)}
+                >
+                  <img
+                    className="block h-auto w-full"
+                    src={image.src}
+                    alt={image.alt}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  {image.description ? (
+                    <span className="mt-1 block text-left text-sm leading-tight text-black/75">
+                      {image.description}
+                    </span>
+                  ) : null}
+                </button>
               ))}
             </div>
           );
@@ -154,13 +214,24 @@ function PostBlocks({ blocks }: { blocks: MockBlock[] }) {
             key={`${block.type}-${index}`}
             className="col-span-9 m-0 max-lg:col-span-10 max-md:col-span-12"
           >
-            <img
-              className="block h-auto w-full"
-              src={block.src}
-              alt={block.alt}
-              loading="lazy"
-              decoding="async"
-            />
+            <button
+              type="button"
+              className="cursor-pointer appearance-none border-0 bg-transparent p-0 text-left"
+              onClick={() => onImageOpen({ alt: block.alt, src: block.src })}
+            >
+              <img
+                className="block h-auto w-full"
+                src={block.src}
+                alt={block.alt}
+                loading="lazy"
+                decoding="async"
+              />
+              {block.description ? (
+                <span className="mt-1 block text-left text-sm leading-tight text-black/75">
+                  {block.description}
+                </span>
+              ) : null}
+            </button>
           </figure>
         );
       })}
@@ -187,9 +258,6 @@ export default function Post() {
   const [post, setPost] = useState<PortfolioPostViewModel | null>(initialPost);
   const [imageSrc, setImageSrc] = useState(initialImageSrc);
   const [isLoading, setIsLoading] = useState(!initialPost || !initialImageSrc);
-  const [isFeaturedImageReady, setIsFeaturedImageReady] =
-    useState(!initialImageSrc);
-  const [hasAnimatedArticle, setHasAnimatedArticle] = useState(false);
   const [sidebarVariant, setSidebarVariant] = useState<"default" | "minimized">(
     "minimized",
   );
@@ -199,8 +267,7 @@ export default function Post() {
   const [copiedContact, setCopiedContact] = useState<"email" | "phone" | null>(
     null,
   );
-  const articleRef = useRef<HTMLElement | null>(null);
-  const featuredImageRef = useRef<HTMLImageElement | null>(null);
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
   const activeCategory = searchParams.get("from");
 
   useEffect(() => {
@@ -218,7 +285,6 @@ export default function Post() {
 
       if (!mounted) return;
       setPost(nextPost);
-      setIsFeaturedImageReady(!nextImageSrc);
       setImageSrc(nextImageSrc);
       setIsLoading(false);
     }
@@ -230,50 +296,68 @@ export default function Post() {
   }, [params.slug]);
 
   const blocks = post && imageSrc ? createMockBlocks(post, imageSrc) : [];
+  const previewImages: PreviewImage[] = [
+    ...(post && imageSrc
+      ? [
+          {
+            alt: post.title,
+            src: imageSrc,
+            description: `${post.venue}, ${post.place}, ${post.year}`,
+          },
+        ]
+      : []),
+    ...getBlockPreviewImages(blocks),
+  ];
+  const activePreview =
+    previewIndex !== null ? previewImages[previewIndex] : undefined;
+  const previewBackdropColor =
+    activeCategory === "Warsztaty" ||
+    activeCategory === "Teatr" ||
+    activeCategory === "Sztuka"
+      ? categoryColors[activeCategory]
+      : "#7eaed8";
 
-  useLayoutEffect(() => {
-    const image = featuredImageRef.current;
-    if (!imageSrc || !image?.complete) return;
-
-    if (image.decode) {
-      image
-        .decode()
-        .then(() => setIsFeaturedImageReady(true))
-        .catch(() => setIsFeaturedImageReady(true));
-      return;
-    }
-
-    setIsFeaturedImageReady(true);
-  }, [imageSrc]);
-
-  const isArticleReady =
-    !isLoading && (post === null || !imageSrc || isFeaturedImageReady);
-
-  useLayoutEffect(() => {
-    if (!isArticleReady || hasAnimatedArticle) return;
-    const article = articleRef.current;
-    if (!article) return;
-
-    article.style.transform = "translateY(112%)";
-    const animation = article.animate(
-      [{ transform: "translateY(112%)" }, { transform: "translateY(0%)" }],
-      {
-        duration: 520,
-        easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-        fill: "both",
-      },
+  const openImagePreview = (image: PreviewImage) => {
+    const nextIndex = previewImages.findIndex(
+      (previewImage) =>
+        previewImage.src === image.src && previewImage.alt === image.alt,
     );
+    setPreviewIndex(nextIndex >= 0 ? nextIndex : 0);
+  };
 
-    animation.onfinish = () => {
-      article.style.transform = "";
-      setHasAnimatedArticle(true);
-    };
-    animation.oncancel = () => {
-      article.style.transform = "";
+  const showPreviousPreviewImage = () => {
+    setPreviewIndex((current) => {
+      if (current === null || previewImages.length === 0) return current;
+      return (current - 1 + previewImages.length) % previewImages.length;
+    });
+  };
+
+  const showNextPreviewImage = () => {
+    setPreviewIndex((current) => {
+      if (current === null || previewImages.length === 0) return current;
+      return (current + 1) % previewImages.length;
+    });
+  };
+
+  useEffect(() => {
+    if (previewIndex === null) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setPreviewIndex(null);
+        return;
+      }
+      if (event.key === "ArrowLeft") {
+        showPreviousPreviewImage();
+      }
+      if (event.key === "ArrowRight") {
+        showNextPreviewImage();
+      }
     };
 
-    return () => animation.cancel();
-  }, [hasAnimatedArticle, isArticleReady]);
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [previewIndex, previewImages.length]);
 
   const goBack = () => {
     if (
@@ -484,14 +568,11 @@ export default function Post() {
             </div>
           </section>
 
-          <article
-            ref={articleRef}
-            className="relative min-h-0 flex-1 overflow-y-auto bg-white p-2 text-black/90"
-            style={
-              !hasAnimatedArticle
-                ? { transform: "translateY(112%)" }
-                : undefined
-            }
+          <AnimatedPageContainer
+            animationKey={`post-${params.slug ?? "missing"}`}
+            animate
+            ready={!isLoading}
+            className="post-scrollbar relative min-h-0 flex-1 overflow-y-auto bg-white p-2 text-black/90"
           >
             {isLoading ? (
               <div className="grid h-full place-items-center">
@@ -513,33 +594,32 @@ export default function Post() {
 
                 {imageSrc ? (
                   <div className="mb-8 grid grid-cols-12 gap-2">
-                    <img
-                      ref={featuredImageRef}
-                      className="col-span-9 block h-auto w-full max-lg:col-span-10 max-md:col-span-12"
-                      src={imageSrc}
-                      alt={post.title}
-                      loading="eager"
-                      decoding="async"
-                      onLoad={(event) => {
-                        const image = event.currentTarget;
-                        if (image.decode) {
-                          image
-                            .decode()
-                            .then(() => setIsFeaturedImageReady(true))
-                            .catch(() => setIsFeaturedImageReady(true));
-                          return;
-                        }
-                        setIsFeaturedImageReady(true);
-                      }}
-                      onError={() => setIsFeaturedImageReady(true)}
-                    />
+                    <button
+                      type="button"
+                      className="col-span-9 cursor-pointer appearance-none border-0 bg-transparent p-0 text-left max-lg:col-span-10 max-md:col-span-12"
+                      onClick={() =>
+                        openImagePreview({
+                          alt: post.title,
+                          src: imageSrc,
+                          description: `${post.venue}, ${post.place}, ${post.year}`,
+                        })
+                      }
+                    >
+	                      <img
+	                        className="block h-auto w-full"
+	                        src={imageSrc}
+	                        alt={post.title}
+	                        loading="eager"
+	                        decoding="async"
+	                      />
+                    </button>
                   </div>
                 ) : null}
 
-                <PostBlocks blocks={blocks} />
+                <PostBlocks blocks={blocks} onImageOpen={openImagePreview} />
                 <button
                   type="button"
-                  className="sticky bottom-2.5 z-[999] ml-auto mr-5 flex size-11 cursor-pointer items-center justify-center rounded-full bg-[#eee4d5] text-black/90 shadow-[0_4px_16px_rgba(0,0,0,0.24)] transition-[background-color,color,transform] duration-200 hover:scale-105 hover:bg-[#e0d6c7] hover:text-black"
+                  className="sticky bottom-2.5 z-[999] ml-auto mr-2.5 flex size-11 cursor-pointer items-center justify-center rounded-full bg-[#eee4d5] text-black/90 shadow-[0_4px_16px_rgba(0,0,0,0.24)] transition-[background-color,color,transform] duration-200 hover:scale-105 hover:bg-[#e0d6c7] hover:text-black"
                   onClick={goBack}
                   aria-label="Wróć"
                 >
@@ -568,9 +648,78 @@ export default function Post() {
                 </div>
               </div>
             )}
-          </article>
+          </AnimatedPageContainer>
         </div>
       </div>
+      {activePreview ? (
+        <div
+          className="image-preview-fade fixed inset-0 z-[2000] grid place-items-center p-2"
+          style={{ backgroundColor: hexToRgba(previewBackdropColor, 0.9) }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Podgląd zdjęcia"
+          onClick={() => setPreviewIndex(null)}
+        >
+          <button
+            type="button"
+            className="absolute right-2.5 top-2.5 z-[2001] cursor-pointer rounded-full bg-[#eee4d5] px-3 py-2 text-sm leading-none text-black/90 shadow-[0_4px_16px_rgba(0,0,0,0.24)] transition-[background-color,color] duration-200 hover:bg-[#e0d6c7] hover:text-black"
+            onClick={() => setPreviewIndex(null)}
+          >
+            Zamknij
+          </button>
+          {previewImages.length > 1 ? (
+            <>
+              <button
+                type="button"
+                className="absolute left-2.5 top-1/2 z-[2001] flex size-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-[#eee4d5] text-black/90 shadow-[0_4px_16px_rgba(0,0,0,0.24)] transition-[background-color,color,transform] duration-200 hover:scale-105 hover:bg-[#e0d6c7] hover:text-black"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  showPreviousPreviewImage();
+                }}
+                aria-label="Poprzednie zdjęcie"
+              >
+                <img
+                  className="block size-5 rotate-180"
+                  src={`${import.meta.env.BASE_URL}arrow-forward-outline.svg`}
+                  alt=""
+                  aria-hidden="true"
+                />
+              </button>
+              <button
+                type="button"
+                className="absolute right-2.5 top-1/2 z-[2001] flex size-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-[#eee4d5] text-black/90 shadow-[0_4px_16px_rgba(0,0,0,0.24)] transition-[background-color,color,transform] duration-200 hover:scale-105 hover:bg-[#e0d6c7] hover:text-black"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  showNextPreviewImage();
+                }}
+                aria-label="Następne zdjęcie"
+              >
+                <img
+                  className="block size-5"
+                  src={`${import.meta.env.BASE_URL}arrow-forward-outline.svg`}
+                  alt=""
+                  aria-hidden="true"
+                />
+              </button>
+            </>
+          ) : null}
+          <figure
+            className="m-0 flex max-h-[calc(100svh-40px)] max-w-[calc(100vw-40px)] flex-col items-center gap-2"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <img
+              className="image-preview-media min-h-0 max-h-[calc(100svh-84px)] max-w-full object-contain"
+              src={activePreview.src}
+              alt={activePreview.alt}
+            />
+            {activePreview.description ? (
+              <figcaption className="max-w-[min(720px,calc(100vw-40px))] text-center text-sm leading-tight text-black/90">
+                {activePreview.description}
+              </figcaption>
+            ) : null}
+          </figure>
+        </div>
+      ) : null}
     </main>
   );
 }
