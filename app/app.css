@@ -12,8 +12,7 @@
   --font-sans:
     "Nunito", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
     "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-display:
-    "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Frank Ruhl Libre", "Times New Roman", serif;
 }
 
 html,

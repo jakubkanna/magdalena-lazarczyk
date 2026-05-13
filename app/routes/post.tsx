@@ -17,6 +17,7 @@ import {
   type PortfolioPostViewModel,
 } from "../data/portfolio-api";
 import { defaultSiteContent, fetchSiteContent } from "../data/site-content";
+import { sanitizeContentHtml } from "../utils/html-content";
 
 const sections = ["Warsztaty", "Teatr", "Sztuka"] as const;
 const categoryToSlug: Record<(typeof sections)[number], string> = {
@@ -62,13 +63,22 @@ function createMockBlocks(
       type: "paragraph",
       content:
         post.content ??
-        `${post.title} to projekt zrealizowany w obszarze ${post.category.toLowerCase()}, w którym obraz, przestrzeń i materia pracują jako równorzędne elementy narracji.`,
+        `${post.title} to projekt zrealizowany w obszarze ${post.category.toLowerCase()}, w którym obraz, przestrzeń i materia pracują jako równorzędne elementy narracji. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer materia, nibh sed cursus consequat, ligula nunc pretium lorem, vitae fermentum massa justo non arcu. Sed przestrzeń działa tu jak zapis procesu: odsłania kolejne warstwy pracy, testów i decyzji formalnych. Aliquam erat volutpat. Phasellus dictum turpis id metus volutpat, a luctus elit cursus. Mauris non dolor sed lorem tristique mattis.
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus eget luctus elit. Cras faucibus nunc non diam laoreet faucibus. Ut consequat eget sem ut venenatis. Suspendisse et viverra arcu. Morbi tristique pretium mi non condimentum. Nullam eget sollicitudin sem. Proin non aliquet eros. Morbi fringilla, felis sed fermentum volutpat, ipsum ligula feugiat diam, vitae finibus nibh nulla in urna. Praesent efficitur tincidunt dolor, eget egestas diam placerat et.
+
+In risus mauris, ultrices aliquam pharetra vel, venenatis in nunc. Donec laoreet est at leo elementum, vel malesuada sapien facilisis. Quisque consequat velit non orci viverra, pretium faucibus nisl vehicula. Etiam nec ornare libero. Fusce ac pharetra dolor. Cras vitae felis mattis, placerat tellus non, dapibus nisi. In sed facilisis ex, vel ullamcorper libero. Proin sit amet euismod eros, et cursus ante. Curabitur facilisis justo ac vestibulum tempor. Etiam rhoncus turpis et libero consequat, sit amet congue diam pharetra. Vivamus sed ligula at nisl mattis aliquet.
+
+Nunc sed mauris eget nibh gravida dictum eu sed mauris. Vestibulum semper pretium turpis, quis aliquam elit pulvinar ut. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Pellentesque feugiat, neque eget facilisis bibendum, felis nibh ullamcorper nisi, vel sagittis lacus libero ut turpis. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Aliquam hendrerit vulputate ornare. Fusce pulvinar, urna et efficitur vulputate, sem elit sollicitudin ante, quis commodo magna est in felis.
+
+Nunc suscipit at justo quis consectetur. Praesent facilisis magna sit amet enim laoreet, vel imperdiet est molestie. Quisque in tellus sodales, vulputate mi ac, luctus lacus. Interdum et malesuada fames ac ante ipsum primis in faucibus. Mauris posuere ut risus sed dapibus. Integer pellentesque purus non arcu iaculis, at vulputate mauris tincidunt. Aliquam volutpat, tellus id elementum eleifend, sapien nisi scelerisque mauris, at tempus tellus nibh ut erat. Fusce massa dui, mollis et velit sagittis, consectetur ullamcorper leo. In eget erat dapibus, pulvinar augue id, varius eros. Phasellus a metus in purus vestibulum ullamcorper a et nisi. Nam justo nibh, dignissim fringilla lorem quis, tristique molestie est. Proin nec arcu enim. Donec ac volutpat nunc. Etiam a tincidunt nisi. Aliquam ac ultrices enim, eget dictum ipsum.
+
+Sed condimentum diam id quam feugiat lacinia. Sed ante velit, congue gravida nulla pellentesque, facilisis suscipit tellus. Nullam sollicitudin, eros id mollis mattis, nibh sapien vehicula elit, vitae efficitur eros elit nec purus. In semper lorem at sem accumsan, eu tincidunt leo lacinia. Duis ac venenatis nibh. Cras quis nisi non dolor ullamcorper sodales ut quis purus. Mauris ac sem ipsum. Vestibulum eu interdum nibh. Nullam laoreet, velit at malesuada lacinia, tellus turpis varius elit, ut dapibus nulla odio eu nisl. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Pellentesque ut malesuada neque.`,
     },
     {
       type: "columns",
       columns: [
-        "Układ scenograficzny traktowany jest tu jak żywy system: porządkuje ruch, buduje napięcia i zostawia miejsce dla nieoczywistych relacji między ciałem, obiektem oraz światłem.",
-        "Warstwa wizualna powstaje z pracy na materiale, skali i relacji przedmiotów z przestrzenią. Dzięki temu projekt może funkcjonować jak samodzielny obraz oraz jako narzędzie dramaturgiczne.",
+        "Układ scenograficzny traktowany jest tu jak żywy system: porządkuje ruch, buduje napięcia i zostawia miejsce dla nieoczywistych relacji między ciałem, obiektem oraz światłem. Suspendisse potenti. Donec luctus, arcu non porttitor luctus, neque erat gravida nibh, vitae tincidunt lorem neque id mi. W tej części opisu można umieścić dłuższy komentarz kuratorski, notatki z procesu albo fragment tekstu programowego.",
+        "Warstwa wizualna powstaje z pracy na materiale, skali i relacji przedmiotów z przestrzenią. Dzięki temu projekt może funkcjonować jak samodzielny obraz oraz jako narzędzie dramaturgiczne. Curabitur vel sem sit amet massa suscipit posuere. Praesent vel orci sed justo gravida pulvinar. Tekst pełni funkcję roboczego wypełnienia dla przyszłych bloków WordPress i pozwala sprawdzić rytm scrollowania na dłuższych stronach.",
       ],
     },
     {
@@ -98,7 +108,7 @@ function createMockBlocks(
     {
       type: "paragraph",
       content:
-        "Mock WordPress blocks are rendered as a front-end contract for the future CMS integration: paragraphs, media, quotes and structured grids can be replaced by real block data without changing the page layout.",
+        "Mock WordPress blocks are rendered as a front-end contract for the future CMS integration: paragraphs, media, quotes and structured grids can be replaced by real block data without changing the page layout. Vivamus vulputate, lorem in tincidunt malesuada, nulla ipsum hendrerit orci, non sagittis enim lorem sed erat. Aenean facilisis może zostać zastąpiona opisem technicznym, listą materiałów albo informacją o współpracy. Nam at orci id risus pretium faucibus. Etiam ac nibh non sem blandit tristique. Ten dłuższy tekst pozwala sprawdzić, jak zachowują się przyciski, podgląd zdjęć oraz powrót przy większej ilości treści.",
     },
   ];
 }
@@ -131,12 +141,13 @@ function PostBlocks({
       {blocks.map((block, index) => {
         if (block.type === "paragraph") {
           return (
-            <p
+            <div
               key={`${block.type}-${index}`}
-              className="col-span-8 m-0 text-lg leading-[1.12] max-lg:col-span-10 max-md:col-span-12"
-            >
-              {block.content}
-            </p>
+              className="col-span-8 m-0 text-lg leading-[1.2] max-lg:col-span-10 max-md:col-span-12"
+              dangerouslySetInnerHTML={{
+                __html: sanitizeContentHtml(block.content),
+              }}
+            />
           );
         }
 
@@ -144,15 +155,16 @@ function PostBlocks({
           return (
             <div
               key={`${block.type}-${index}`}
-              className="col-span-12 columns-2 gap-4 text-lg leading-[1.12] max-md:columns-1"
+              className="col-span-12 columns-2 gap-4 text-lg leading-[1.2] max-md:columns-1"
             >
               {block.columns.map((column) => (
-                <p
+                <div
                   key={column.slice(0, 32)}
                   className="mb-4 mt-0 break-inside-avoid"
-                >
-                  {column}
-                </p>
+                  dangerouslySetInnerHTML={{
+                    __html: sanitizeContentHtml(column),
+                  }}
+                />
               ))}
             </div>
           );
@@ -205,7 +217,7 @@ function PostBlocks({
                     decoding="async"
                   />
                   {image.description ? (
-                    <span className="mt-1 block text-left text-sm leading-tight text-black/75">
+                    <span className="mt-1 block text-left text-sm italic leading-tight text-black/75">
                       {image.description}
                     </span>
                   ) : null}
@@ -233,7 +245,7 @@ function PostBlocks({
                 decoding="async"
               />
               {block.description ? (
-                <span className="mt-1 block text-left text-sm leading-tight text-black/75">
+                <span className="mt-1 block text-left text-sm italic leading-tight text-black/75">
                   {block.description}
                 </span>
               ) : null}
@@ -524,6 +536,10 @@ export default function Post() {
             siteContent={siteContent}
             textColorClass="text-black/90"
             onBioExpand={() => setBioExpanded(true)}
+            onClose={() => {
+              closeBio();
+              closeContact();
+            }}
             onCopyContact={(value, key) => void copyContactValue(value, key)}
           />
 
@@ -694,7 +710,7 @@ export default function Post() {
               alt={activePreview.alt}
             />
             {activePreview.description ? (
-              <figcaption className="max-w-[min(720px,calc(100vw-40px))] text-center text-sm leading-tight text-black/90">
+              <figcaption className="max-w-[min(720px,calc(100vw-40px))] text-center text-sm italic leading-tight text-black/90">
                 {activePreview.description}
               </figcaption>
             ) : null}

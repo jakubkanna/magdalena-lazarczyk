@@ -9,16 +9,18 @@
     "build": "react-router build && node scripts/prepare-github-pages.mjs",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
-    "typecheck": "react-router typegen && tsc"
+    "typecheck": "react-router typegen && tsc",
+    "validate:html": "node scripts/validate-html-content.mjs"
   },
   "dependencies": {
     "@react-router/node": "7.14.0",
     "@react-router/serve": "7.14.0",
+    "dompurify": "^3.4.3",
+    "isbot": "^5",
     "motion": "^12.38.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "react-router": "7.14.0",
-    "isbot": "^5"
+    "react-router": "7.14.0"
   },
   "devDependencies": {
     "@react-router/dev": "7.14.0",
@@ -26,6 +28,7 @@
     "@types/node": "^22",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "html-validate": "^11.1.0",
     "tailwindcss": "^4.2.2",
     "typescript": "^5.9.3",
     "vite": "^8.0.3"

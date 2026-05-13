@@ -382,6 +382,7 @@ export default function Home() {
             copiedContact={copiedContact}
             siteContent={siteContent}
             onBioExpand={() => setBioExpanded(true)}
+            onClose={closeInfoPanels}
             onCopyContact={(value, key) => void copyContactValue(value, key)}
           />
 
