@@ -137,7 +137,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 
         <section className="relative z-[6] flex h-full min-h-0 min-w-0 flex-1 items-center justify-center overflow-hidden bg-[#7eaed8] p-6 shadow-[-12px_0_18px_rgba(0,0,0,0.22)]">
           <div className="max-w-xl text-center text-black/75">
-            <h1 className="m-0 text-[clamp(72px,18vw,220px)] leading-none font-normal">
+            <h1 className="m-0 text-8xl leading-none font-normal max-md:text-7xl">
               {message}
             </h1>
             <p className="mx-auto mt-4 max-w-md text-lg leading-tight">

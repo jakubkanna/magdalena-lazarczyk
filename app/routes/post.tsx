@@ -6,9 +6,9 @@ import {
   useSearchParams,
 } from "react-router";
 import { AnimatedPageContainer } from "../components/animated-page-container";
+import { BioContactPanel } from "../components/bio-contact-panel";
 import { CategoryGrid } from "../components/category-grid";
 import { Sidebar } from "../components/sidebar";
-import { bioExhibitionColumns, bioParagraphs } from "../data/bio";
 import {
   fetchPortfolioPosts,
   fetchPortfolioPostBySlug,
@@ -16,6 +16,7 @@ import {
   type PortfolioCategory,
   type PortfolioPostViewModel,
 } from "../data/portfolio-api";
+import { defaultSiteContent, fetchSiteContent } from "../data/site-content";
 
 const sections = ["Warsztaty", "Teatr", "Sztuka"] as const;
 const categoryToSlug: Record<(typeof sections)[number], string> = {
@@ -132,7 +133,7 @@ function PostBlocks({
           return (
             <p
               key={`${block.type}-${index}`}
-              className="col-span-8 m-0 text-[clamp(18px,2vw,30px)] leading-[1.12] max-lg:col-span-10 max-md:col-span-12"
+              className="col-span-8 m-0 text-lg leading-[1.12] max-lg:col-span-10 max-md:col-span-12"
             >
               {block.content}
             </p>
@@ -143,7 +144,7 @@ function PostBlocks({
           return (
             <div
               key={`${block.type}-${index}`}
-              className="col-span-12 columns-2 gap-4 text-[clamp(18px,2vw,30px)] leading-[1.12] max-md:columns-1"
+              className="col-span-12 columns-2 gap-4 text-lg leading-[1.12] max-md:columns-1"
             >
               {block.columns.map((column) => (
                 <p
@@ -161,7 +162,7 @@ function PostBlocks({
           return (
             <blockquote
               key={`${block.type}-${index}`}
-              className="col-span-5 col-start-8 m-0 pl-4 text-right text-[clamp(22px,3vw,46px)] leading-none italic max-lg:col-span-10 max-lg:col-start-1 max-md:col-span-12"
+              className="col-span-5 col-start-8 m-0 pl-4 text-right text-2xl leading-none italic max-lg:col-span-10 max-lg:col-start-1 max-lg:text-4xl max-md:col-span-12 max-md:text-3xl"
             >
               {block.content}
             </blockquote>
@@ -283,6 +284,7 @@ export default function Post() {
   const [imageSrcByPostId, setImageSrcByPostId] = useState<
     Record<number, string>
   >({});
+  const [siteContent, setSiteContent] = useState(defaultSiteContent);
   const activeCategory = searchParams.get("from");
 
   useEffect(() => {
@@ -326,6 +328,16 @@ export default function Post() {
       setImageSrcByPostId(Object.fromEntries(images));
     });
 
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    fetchSiteContent().then((content) => {
+      if (mounted) setSiteContent(content);
+    });
     return () => {
       mounted = false;
     };
@@ -407,7 +419,7 @@ export default function Post() {
       return;
     }
 
-    navigate("/");
+    navigate("/", { state: { animateContainerFromPost: true } });
   };
 
   const selectCategory = (category: (typeof sections)[number]) => {
@@ -427,7 +439,8 @@ export default function Post() {
 
   const getCategoryPosts = (category: (typeof sections)[number]) =>
     portfolioPosts.filter(
-      (portfolioPost) => portfolioPost.category === (category as PortfolioCategory),
+      (portfolioPost) =>
+        portfolioPost.category === (category as PortfolioCategory),
     );
 
   const closeBio = () => {
@@ -475,7 +488,9 @@ export default function Post() {
           bioOpen={bioOpen}
           contactOpen={contactOpen}
           showSpinner={isLoading || isCategoryTransitioning}
-          onHomeClick={() => navigate("/")}
+          onHomeClick={() =>
+            navigate("/", { state: { animateContainerFromPost: true } })
+          }
           onBioClick={() => {
             if (bioOpen) {
               closeBio();
@@ -501,126 +516,16 @@ export default function Post() {
         />
 
         <div className="relative z-[6] h-full min-h-0 min-w-0 flex flex-1 flex-col bg-[#e8dfd0] shadow-[-12px_0_18px_rgba(0,0,0,0.22)]">
-          <section
-            className={`overflow-hidden bg-[#e8dfd0] px-2.5 transition-all duration-500 ease-out ${
-              bioOpen || contactOpen
-                ? bioExpanded
-                  ? "h-[50svh] py-2.5"
-                  : "h-29.5 py-2.5"
-                : "h-0 py-0"
-            }`}
-          >
-            <div className="flex h-full flex-col p-4">
-              {bioOpen && !bioExpanded ? (
-                <div
-                  key="bio-preview"
-                  className="info-panel-fade flex h-full flex-col"
-                >
-                  <p className="m-0 text-[15px] leading-tight text-black/90">
-                    {bioParagraphs[0]}
-                  </p>
-                  <button
-                    type="button"
-                    className="mb-0 ml-auto mt-auto cursor-pointer text-base leading-none text-black/90 underline transition-colors duration-200 hover:text-black"
-                    onClick={() => setBioExpanded(true)}
-                  >
-                    czytaj dalej
-                  </button>
-                </div>
-              ) : null}
-              {bioExpanded ? (
-                <div
-                  key="bio-expanded"
-                  className="info-panel-fade bio-scroll-fade mt-2 overflow-y-auto pb-12 pr-2 text-[15px] leading-[1.3] text-black/90 [scrollbar-color:#9a9a9a_transparent] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-[#e8dfd0] [&::-webkit-scrollbar-thumb]:bg-[#9a9a9a] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-2.5"
-                >
-                  <div className="grid grid-cols-[minmax(0,1fr)_calc(100vw/12)] gap-5 max-md:grid-cols-1">
-                    <div className="columns-2 gap-5 max-lg:columns-1">
-                      {bioParagraphs.map((paragraph) => (
-                        <p
-                          key={paragraph.slice(0, 20)}
-                          className="mb-3 mt-0 break-inside-avoid"
-                        >
-                          {paragraph}
-                        </p>
-                      ))}
-                    </div>
-                    <img
-                      className="block h-auto w-full self-start object-cover"
-                      src={`${import.meta.env.BASE_URL}image 1.png`}
-                      alt="Magdalena Łazarczyk"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </div>
-                  <div className="mt-5 grid grid-cols-3 gap-5 pt-4 max-md:grid-cols-1">
-                    {bioExhibitionColumns.map((column) => (
-                      <section key={column.title}>
-                        <h2 className="mb-2 mt-0 text-[13px] font-bold uppercase text-black/90">
-                          {column.title}
-                        </h2>
-                        <ul className="m-0 list-none p-0">
-                          {column.items.map((item) => (
-                            <li key={item} className="mb-2">
-                              {item}
-                            </li>
-                          ))}
-                        </ul>
-                      </section>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-              {contactOpen ? (
-                <div
-                  key="contact"
-                  className="info-panel-fade flex h-full flex-col items-end justify-center gap-1 text-right text-[15px] leading-tight text-black/90"
-                >
-                  <h2 className="mb-2 mt-0 text-[13px] font-bold uppercase text-black/90">
-                    Kontakt
-                  </h2>
-                  <button
-                    type="button"
-                    className="relative w-fit cursor-pointer appearance-none border-0 bg-transparent p-0 text-right text-black/90 underline transition-colors duration-200 hover:text-black"
-                    onClick={() =>
-                      void copyContactValue(
-                        "magdalena.lazarczyk@gmail.com",
-                        "email",
-                      )
-                    }
-                  >
-                    magdalena.lazarczyk@gmail.com
-                    {copiedContact === "email" ? (
-                      <span className="absolute right-0 top-full z-[9999] mt-1 rounded-full bg-[#eee4d5] px-2 py-1 text-[11px] leading-none text-black/90 shadow-[0_2px_8px_rgba(0,0,0,0.16)]">
-                        skopiowano
-                      </span>
-                    ) : null}
-                  </button>
-                  <button
-                    type="button"
-                    className="relative w-fit cursor-pointer appearance-none border-0 bg-transparent p-0 text-right text-black/90 underline transition-colors duration-200 hover:text-black"
-                    onClick={() =>
-                      void copyContactValue("+48 504439128", "phone")
-                    }
-                  >
-                    +48 504439128
-                    {copiedContact === "phone" ? (
-                      <span className="absolute right-0 top-full z-[9999] mt-1 rounded-full bg-[#eee4d5] px-2 py-1 text-[11px] leading-none text-black/90 shadow-[0_2px_8px_rgba(0,0,0,0.16)]">
-                        skopiowano
-                      </span>
-                    ) : null}
-                  </button>
-                  <a
-                    className="w-fit text-black/90 underline transition-colors duration-200 hover:text-black"
-                    href="https://www.instagram.com/magdalena_lazarczyk/"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    instagram
-                  </a>
-                </div>
-              ) : null}
-            </div>
-          </section>
+          <BioContactPanel
+            bioOpen={bioOpen}
+            bioExpanded={bioExpanded}
+            contactOpen={contactOpen}
+            copiedContact={copiedContact}
+            siteContent={siteContent}
+            textColorClass="text-black/90"
+            onBioExpand={() => setBioExpanded(true)}
+            onCopyContact={(value, key) => void copyContactValue(value, key)}
+          />
 
           <section className="relative min-h-0 flex-1 overflow-hidden">
             <AnimatedPageContainer
@@ -636,7 +541,7 @@ export default function Post() {
               ) : post ? (
                 <>
                   <header className="grid grid-cols-12 gap-2 pb-2">
-                    <h1 className="col-span-9 m-0 text-[clamp(48px,11vw,180px)] leading-[0.82] font-normal text-black/90 max-md:col-span-12">
+                    <h1 className="col-span-9 m-0 text-9xl leading-[0.82] font-normal text-black/90 max-md:col-span-12">
                       {post.title}
                     </h1>
                     <div className="col-span-3 self-end text-right text-sm leading-tight max-md:col-span-12 max-md:text-left">
@@ -689,14 +594,18 @@ export default function Post() {
               ) : (
                 <div className="grid h-full place-items-center text-center">
                   <div>
-                    <h1 className="m-0 text-[clamp(54px,12vw,180px)] leading-none font-normal">
+                    <h1 className="m-0 text-8xl leading-none font-normal max-md:text-7xl">
                       404
                     </h1>
                     <p className="mt-3 text-lg">Nie znaleziono projektu.</p>
                     <button
                       type="button"
                       className="mt-6 cursor-pointer rounded-full bg-[#eee4d5] px-4 py-2 text-base leading-none text-black/90 shadow-[0_2px_8px_rgba(0,0,0,0.2)] transition-[background-color,color] duration-200 hover:bg-[#e0d6c7] hover:text-black"
-                      onClick={() => navigate("/")}
+                      onClick={() =>
+                        navigate("/", {
+                          state: { animateContainerFromPost: true },
+                        })
+                      }
                     >
                       Wróć na stronę główną
                     </button>

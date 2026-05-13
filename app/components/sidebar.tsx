@@ -180,7 +180,7 @@ export function Sidebar({
             onCategoryHover={onCategoryHover}
             onCategorySelect={onCategorySelect}
           />
-          <div className="sidebar-credit-container mt-4 text-[11px] leading-none text-black/75">
+          <div className="sidebar-credit-container mt-4 text-xs leading-none text-black/75">
             {showCredit ? (
               <a
                 className="sidebar-credit-fade sidebar-credit-marquee block text-black/75 no-underline transition-colors duration-200 hover:text-black"
