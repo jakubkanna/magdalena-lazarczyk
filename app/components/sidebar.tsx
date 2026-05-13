@@ -96,7 +96,7 @@ export function Sidebar({
           <div className="flex w-5 flex-col items-center gap-2">
             <button
               type="button"
-              className="flex size-5 cursor-pointer appearance-none items-center justify-center border-0 bg-transparent p-0 font-display font-semibold text-black/75 transition-colors duration-200 hover:text-black"
+              className="flex size-5 cursor-pointer appearance-none items-center justify-center border-0 bg-transparent p-0 text-center font-['Helvetica_Neue',Helvetica,Arial,sans-serif] font-normal text-black/75 transition-colors duration-200 hover:text-black"
               onClick={onHomeClick}
               aria-label="Strona główna"
             >
@@ -134,16 +134,16 @@ export function Sidebar({
         </div>
       ) : (
         <div className="flex h-full flex-col p-2.5">
-          <h1 className="m-0 mb-24">
+          <h1 className="m-0 mb-24 w-full text-center">
             <button
               type="button"
-              className="cursor-pointer appearance-none border-0 bg-transparent p-0 text-left font-display text-lg font-semibold leading-[1] text-black/75 transition-colors duration-200 hover:text-black"
+              className="w-full cursor-pointer appearance-none border-0 bg-transparent p-0 text-center font-['Helvetica_Neue',Helvetica,Arial,sans-serif] text-lg font-normal leading-[1] text-black/75 transition-colors duration-200 hover:text-black"
               onClick={onHomeClick}
             >
               Magdalena Łazarczyk
             </button>
           </h1>
-          <div className="mt-2 flex gap-2">
+          <div className="mt-2 flex flex-col items-start gap-2">
             <button
               type="button"
               className={`cursor-pointer rounded-full px-2 py-1 text-base leading-none text-black/75 shadow-[0_2px_8px_rgba(0,0,0,0.2)] transition-[background-color,color] duration-200 hover:text-black ${
@@ -180,7 +180,7 @@ export function Sidebar({
             onCategoryHover={onCategoryHover}
             onCategorySelect={onCategorySelect}
           />
-          <div className="sidebar-credit-container mt-4 text-xs leading-none text-black/75">
+          <div className="sidebar-credit-container mt-4 text-center text-xs leading-none text-black/75">
             {showCredit ? (
               <a
                 className="sidebar-credit-fade sidebar-credit-marquee block text-black/75 no-underline transition-colors duration-200 hover:text-black"
