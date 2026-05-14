@@ -21,6 +21,11 @@ const categoryToSlug: Record<(typeof sections)[number], string> = {
   Teatr: "teatr",
   Sztuka: "sztuka",
 };
+const categoryColors: Record<(typeof sections)[number], string> = {
+  Warsztaty: "#F2621C",
+  Sztuka: "#D4FC85",
+  Teatr: "#0011FF",
+};
 
 const isMobileViewport = () =>
   typeof window !== "undefined" &&
@@ -37,16 +42,6 @@ export const links: Route.LinksFunction = () => [
   {
     rel: "apple-touch-icon",
     href: `${import.meta.env.BASE_URL}favicon.png`,
-  },
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
-  {
-    rel: "preconnect",
-    href: "https://fonts.gstatic.com",
-    crossOrigin: "anonymous",
-  },
-  {
-    rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;600&family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Parisienne&display=swap",
   },
 ];
 
@@ -129,12 +124,9 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
           activeCategory={null}
           hoveredCategory={null}
           categories={sections}
-          bioOpen={false}
-          contactOpen={false}
+          categoryColors={categoryColors}
           showSpinner={false}
           onHomeClick={() => navigate("/")}
-          onBioClick={() => navigate("/#bio")}
-          onContactClick={() => navigate("/#contact")}
           onCategoryHover={() => undefined}
           onCategorySelect={(category) =>
             navigate(

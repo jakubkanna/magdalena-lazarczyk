@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type SidebarVariant = "default" | "minimized";
 
@@ -7,23 +7,40 @@ type SidebarProps = {
   activeCategory: string | null;
   hoveredCategory: string | null;
   categories: readonly string[];
-  bioOpen: boolean;
-  contactOpen: boolean;
+  categoryColors: Record<string, string>;
   showSpinner: boolean;
   onHomeClick: () => void;
-  onBioClick: () => void;
-  onContactClick: () => void;
   onCategoryHover: (category: string | null) => void;
   onCategorySelect: (category: string) => void;
   onCollapse: () => void;
   onExpand: () => void;
 };
 
-const MOBILE_BREAKPOINT_QUERY = "(max-width: 767px)";
+const LOGO_LETTERS = "MAGDALENAŁAZARCZYK".split("");
+const LOGO_LETTER_INTERVAL_MS = 250;
 
-const isMobileViewport = () =>
-  typeof window !== "undefined" &&
-  window.matchMedia(MOBILE_BREAKPOINT_QUERY).matches;
+function SidebarLogo({
+  onClick,
+  textClass,
+  hoverClass,
+}: {
+  onClick: () => void;
+  textClass: string;
+  hoverClass: string;
+}) {
+  return (
+    <h1 className="m-0 w-full">
+      <button
+        type="button"
+        className={`mx-auto block w-full max-w-full cursor-pointer appearance-none border-0 bg-transparent p-0 text-center text-xl leading-none transition-colors duration-200 max-md:text-[clamp(1.5rem,9vw,3rem)] ${textClass} ${hoverClass} font-["Helvetica"]`}
+        onClick={onClick}
+        aria-label="Magdalena Łazarczyk"
+      >
+        · Magdalena Łazarczyk ·
+      </button>
+    </h1>
+  );
+}
 
 function CategoryList({
   categories,
@@ -31,6 +48,9 @@ function CategoryList({
   hoveredCategory,
   onCategoryHover,
   onCategorySelect,
+  categoryColors,
+  inactiveTextClass,
+  inactiveHoverClass,
   compact = false,
 }: {
   categories: readonly string[];
@@ -38,31 +58,63 @@ function CategoryList({
   hoveredCategory: string | null;
   onCategoryHover: (category: string | null) => void;
   onCategorySelect: (category: string) => void;
+  categoryColors: Record<string, string>;
+  inactiveTextClass: string;
+  inactiveHoverClass: string;
   compact?: boolean;
 }) {
   return (
     <nav
       className={
         compact
-          ? "relative z-[6] mt-2 flex flex-1 flex-col items-center justify-around py-2 max-md:hidden"
-          : "relative z-[6] mt-auto flex min-h-[52%] flex-col items-end justify-around px-1 py-3.5 max-md:mt-auto max-md:min-h-0 max-md:w-full max-md:flex-row max-md:items-center max-md:justify-between max-md:gap-2"
+          ? "relative z-[6] mt-2 flex w-full flex-1 flex-col items-center justify-around py-2 max-md:hidden"
+          : "relative z-[6] flex h-full w-full flex-col items-stretch max-md:flex-row max-md:items-center max-md:justify-between max-md:gap-2"
       }
       aria-label="Sekcje"
     >
-      {categories.map((section) => (
-        <button
-          key={section}
-          type="button"
-          onClick={() => onCategorySelect(section)}
-          className={`relative cursor-pointer transition-colors duration-200  ${compact ? "self-center text-sm" : "self-end text-sm"} appearance-none border-0 bg-transparent p-0 font-normal leading-none text-black/75 hover:text-black [writing-mode:vertical-rl] [transform:rotate(180deg)] ${compact ? "" : "max-md:min-h-11 max-md:px-2 max-md:py-3 max-md:[writing-mode:horizontal-tb] max-md:[transform:none]"} ${
-            hoveredCategory === section || activeCategory === section
-              ? "underline decoration-1 underline-offset-2"
-              : "no-underline"
-          }`}
-        >
-          {section}
-        </button>
-      ))}
+      {categories.map((section) => {
+        const isActive = activeCategory === section;
+        const isHovered = hoveredCategory === section;
+
+        return (
+          <div
+            key={section}
+            className={
+              compact
+                ? "flex w-full items-center justify-center"
+                : "flex min-h-0 w-full flex-1 items-center justify-center"
+            }
+          >
+            <button
+              type="button"
+              onClick={() => onCategorySelect(section)}
+              className={`relative cursor-pointer border transition-colors duration-200 ${compact ? "bg-transparent px-2 text-sm [writing-mode:vertical-rl] [transform:rotate(180deg)]" : "h-full w-full bg-[#eee4d5] px-3 py-4 text-center text-base shadow-[0_4px_16px_rgba(0,0,0,0.18)] hover:bg-[#e0d6c7]"} appearance-none font-normal leading-none ${inactiveHoverClass} ${compact ? "" : "max-md:h-auto max-md:min-h-11 max-md:rounded-full max-md:bg-transparent max-md:px-2 max-md:py-3 max-md:text-sm max-md:shadow-none max-md:[writing-mode:horizontal-tb] max-md:[transform:none]"} ${
+                isActive
+                  ? compact
+                    ? "rounded-full border-current px-3 py-2 shadow-[0_2px_8px_rgba(0,0,0,0.2)]"
+                    : "border-transparent shadow-[0_4px_16px_rgba(0,0,0,0.24)]"
+                  : `border-transparent ${inactiveTextClass}`
+              } ${
+                isHovered && !isActive
+                  ? "underline decoration-1 underline-offset-2"
+                  : "no-underline"
+              }`}
+              style={
+                isActive
+                  ? compact
+                    ? { color: categoryColors[section] }
+                    : {
+                        backgroundColor: categoryColors[section],
+                        color: "#000",
+                      }
+                  : undefined
+              }
+            >
+              {section}
+            </button>
+          </div>
+        );
+      })}
     </nav>
   );
 }
@@ -72,19 +124,35 @@ export function Sidebar({
   activeCategory,
   hoveredCategory,
   categories,
-  bioOpen,
-  contactOpen,
+  categoryColors,
   showSpinner,
   onHomeClick,
-  onBioClick,
-  onContactClick,
   onCategoryHover,
   onCategorySelect,
   onCollapse,
   onExpand,
 }: SidebarProps) {
+  const sidebarRef = useRef<HTMLElement | null>(null);
   const [showCredit, setShowCredit] = useState(false);
+  const [logoLetterIndex, setLogoLetterIndex] = useState(0);
+  const [logoAnimating, setLogoAnimating] = useState(false);
   const currentYear = new Date().getFullYear();
+  const sidebarTextClass = "text-black/75";
+  const sidebarHoverClass = "hover:text-black";
+
+  useEffect(() => {
+    if (!logoAnimating) {
+      setLogoLetterIndex(0);
+      return;
+    }
+
+    setLogoLetterIndex(1);
+    const timer = window.setInterval(() => {
+      setLogoLetterIndex((index) => (index + 1) % LOGO_LETTERS.length);
+    }, LOGO_LETTER_INTERVAL_MS);
+
+    return () => window.clearInterval(timer);
+  }, [logoAnimating]);
 
   useEffect(() => {
     if (showCredit) return;
@@ -92,30 +160,42 @@ export function Sidebar({
     return () => window.clearTimeout(timer);
   }, [showCredit]);
 
-  const handleInfoButtonClick = (callback: () => void) => {
-    callback();
-    if (isMobileViewport()) {
+  useEffect(() => {
+    if (variant !== "default") return;
+
+    const onPointerDown = (event: PointerEvent) => {
+      const sidebarElement = sidebarRef.current;
+      if (!sidebarElement || !(event.target instanceof Node)) return;
+      if (sidebarElement.contains(event.target)) return;
       onCollapse();
-    }
-  };
+    };
+
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [onCollapse, variant]);
 
   return (
     <aside
+      ref={sidebarRef}
       className={`relative z-[5] h-full shrink-0 overflow-x-hidden overflow-y-auto bg-[#e8dfd0] transition-[width,height] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] max-md:w-full max-md:overflow-hidden ${
-        variant === "minimized" ? "w-14" : "w-[calc(100vw/12)]"
+        variant === "minimized" ? "w-14" : "w-[calc(100vw/6)]"
       } ${variant === "minimized" ? "max-md:h-14" : "max-md:h-svh"}`}
       aria-label="Nawigacja"
     >
       {variant === "minimized" ? (
-        <div className="flex h-full flex-col p-2.5 max-md:h-14 max-md:flex-row max-md:items-center max-md:justify-between max-md:px-2 max-md:py-1.5">
-          <div className="flex w-5 flex-col items-center gap-2 max-md:w-full max-md:flex-row max-md:justify-between">
+        <div className="flex h-full flex-col items-center justify-around p-2.5 max-md:h-14 max-md:flex-row max-md:justify-between max-md:px-2 max-md:py-1.5">
+          <div className="flex w-full flex-col items-center gap-2 max-md:flex-row max-md:justify-between">
             <button
               type="button"
-              className="flex size-5 cursor-pointer appearance-none items-center justify-center border-0 bg-transparent p-0 text-center font-['Helvetica_Neue',Helvetica,Arial,sans-serif] font-normal text-black/75 transition-colors duration-200 hover:text-black max-md:size-11"
+              className={`sidebar-mini-logo flex size-7 cursor-pointer appearance-none items-center justify-center rounded-full bg-transparent p-0 text-center text-xl font-normal leading-none transition-[background-color,color,box-shadow,transform] duration-500 max-md:size-11 ${sidebarTextClass} ${sidebarHoverClass}`}
               onClick={onHomeClick}
+              onMouseEnter={() => setLogoAnimating(true)}
+              onMouseLeave={() => setLogoAnimating(false)}
+              onFocus={() => setLogoAnimating(true)}
+              onBlur={() => setLogoAnimating(false)}
               aria-label="Strona główna"
             >
-              M
+              {LOGO_LETTERS[logoLetterIndex]}
             </button>
             {showSpinner ? (
               <span
@@ -125,12 +205,12 @@ export function Sidebar({
             ) : (
               <button
                 type="button"
-                className="flex size-5 cursor-pointer appearance-none items-center justify-center border-0 bg-transparent p-0 max-md:size-11"
+                className="flex size-7 cursor-pointer appearance-none items-center justify-center rounded-full bg-transparent p-0 max-md:size-11"
                 onClick={onExpand}
                 aria-label="Rozwiń sidebar"
               >
                 <img
-                  className="block size-5"
+                  className="block size-7 max-md:size-5"
                   src={`${import.meta.env.BASE_URL}menu.svg`}
                   alt=""
                   aria-hidden="true"
@@ -144,24 +224,23 @@ export function Sidebar({
             hoveredCategory={hoveredCategory}
             onCategoryHover={onCategoryHover}
             onCategorySelect={onCategorySelect}
+            categoryColors={categoryColors}
+            inactiveTextClass={sidebarTextClass}
+            inactiveHoverClass={sidebarHoverClass}
             compact
           />
         </div>
       ) : (
-        <div className="flex h-full flex-col p-2.5 max-md:min-h-svh">
-          <div className="mb-24 flex w-full items-start justify-between gap-2 max-md:mb-8">
-            <h1 className="m-0 w-full text-left">
-              <button
-                type="button"
-                className="w-full cursor-pointer appearance-none border-0 bg-transparent p-0 text-left font-['Helvetica_Neue',Helvetica,Arial,sans-serif] text-lg font-normal leading-[1] text-black/75 transition-colors duration-200 hover:text-black"
-                onClick={onHomeClick}
-              >
-                Magdalena Łazarczyk
-              </button>
-            </h1>
+        <div className="flex h-full flex-col max-md:min-h-svh">
+          <div className="relative z-10 flex w-full shrink-0 items-start justify-center p-2.5 shadow-[0_12px_18px_rgba(0,0,0,0.16)]">
+            <SidebarLogo
+              onClick={onHomeClick}
+              textClass={sidebarTextClass}
+              hoverClass={sidebarHoverClass}
+            />
             <button
               type="button"
-              className="hidden size-6 shrink-0 cursor-pointer appearance-none items-center justify-center border-0 bg-transparent p-0 max-md:flex max-md:size-11"
+              className="absolute right-2.5 top-2.5 hidden size-6 shrink-0 cursor-pointer appearance-none items-center justify-center border-0 bg-transparent p-0 max-md:flex max-md:size-11"
               onClick={onCollapse}
               aria-label="Zwiń sidebar"
             >
@@ -173,71 +252,52 @@ export function Sidebar({
               />
             </button>
           </div>
-          <div className="mt-2 flex flex-col items-start gap-2 max-md:flex-row max-md:items-center">
-            <button
-              type="button"
-              className={`min-h-0 cursor-pointer rounded-full px-2 py-1 text-base leading-none text-black/75 shadow-[0_2px_8px_rgba(0,0,0,0.2)] transition-[background-color,color] duration-200 hover:text-black max-md:min-h-11 max-md:px-3 max-md:py-2 ${
-                bioOpen
-                  ? "bg-[#dfd5c6] hover:bg-[#d2c7b8]"
-                  : "bg-[#eee4d5] hover:bg-[#e0d6c7]"
-              }`}
-              onClick={() => handleInfoButtonClick(onBioClick)}
-            >
-              Bio
-            </button>
-            <button
-              type="button"
-              className={`inline-flex cursor-pointer items-center justify-center rounded-full p-1 text-base leading-none text-black/75 shadow-[0_2px_8px_rgba(0,0,0,0.2)] transition-[background-color,color] duration-200 hover:text-black max-md:size-11 ${
-                contactOpen
-                  ? "bg-[#dfd5c6] hover:bg-[#d2c7b8]"
-                  : "bg-[#eee4d5] hover:bg-[#e0d6c7]"
-              }`}
-              onClick={() => handleInfoButtonClick(onContactClick)}
-              aria-label="Kontakt"
-            >
-              <img
-                className="block size-4"
-                src={`${import.meta.env.BASE_URL}frontpage/call-outline.svg`}
-                alt=""
-                aria-hidden="true"
+          <div className="relative z-0 min-h-0 w-full flex-1">
+            <div className="flex h-full w-full items-center justify-end">
+              <CategoryList
+                categories={categories}
+                activeCategory={activeCategory}
+                hoveredCategory={hoveredCategory}
+                onCategoryHover={onCategoryHover}
+                onCategorySelect={onCategorySelect}
+                categoryColors={categoryColors}
+                inactiveTextClass={sidebarTextClass}
+                inactiveHoverClass={sidebarHoverClass}
               />
-            </button>
+            </div>
           </div>
-          <CategoryList
-            categories={categories}
-            activeCategory={activeCategory}
-            hoveredCategory={hoveredCategory}
-            onCategoryHover={onCategoryHover}
-            onCategorySelect={onCategorySelect}
-          />
-          <div className="sidebar-credit-container mt-4 text-left text-xs leading-none text-black/75 max-md:mt-auto">
-            {showCredit ? (
-              <a
-                className="sidebar-credit-fade sidebar-credit-marquee block text-black/75 no-underline transition-colors duration-200 hover:text-black"
-                href="https://jakubkanna.com"
-                target="_blank"
-                rel="noreferrer"
-              >
-                <span
-                  onAnimationEnd={(event) => {
-                    if (event.animationName === "sidebar-credit-marquee") {
-                      setShowCredit(false);
-                    }
-                  }}
+          <div className="relative z-10 flex w-full shrink-0 items-center justify-center p-2.5 shadow-[0_-12px_18px_rgba(0,0,0,0.16)]">
+            <div
+              className={`sidebar-credit-container w-full text-center text-xs leading-none ${sidebarTextClass}`}
+            >
+              {showCredit ? (
+                <a
+                  className={`sidebar-credit-fade sidebar-credit-marquee block no-underline transition-colors duration-200 ${sidebarTextClass} ${sidebarHoverClass}`}
+                  href="https://jakubkanna.com"
+                  target="_blank"
+                  rel="noreferrer"
                 >
-                  Designed &amp; Developed by Jakub Kanna
-                </span>
-              </a>
-            ) : (
-              <a
-                className="sidebar-credit-fade block text-black/75 no-underline transition-colors duration-200 hover:text-black"
-                href="https://jakubkanna.com"
-                target="_blank"
-                rel="noreferrer"
-              >
-                © {currentYear}
-              </a>
-            )}
+                  <span
+                    onAnimationEnd={(event) => {
+                      if (event.animationName === "sidebar-credit-marquee") {
+                        setShowCredit(false);
+                      }
+                    }}
+                  >
+                    Designed &amp; Developed by Jakub Kanna
+                  </span>
+                </a>
+              ) : (
+                <a
+                  className={`sidebar-credit-fade block no-underline transition-colors duration-200 ${sidebarTextClass} ${sidebarHoverClass}`}
+                  href="https://jakubkanna.com"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  © {currentYear}
+                </a>
+              )}
+            </div>
           </div>
         </div>
       )}

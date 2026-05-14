@@ -8,6 +8,7 @@ import {
 import { AnimatedPageContainer } from "../components/animated-page-container";
 import { BioContactPanel } from "../components/bio-contact-panel";
 import { CategoryGrid } from "../components/category-grid";
+import { FixedInfoButtons } from "../components/fixed-info-buttons";
 import { Sidebar } from "../components/sidebar";
 import {
   fetchPortfolioPosts,
@@ -497,17 +498,28 @@ export default function Post() {
           activeCategory={activeCategory}
           hoveredCategory={null}
           categories={sections}
-          bioOpen={bioOpen}
-          contactOpen={contactOpen}
+          categoryColors={categoryColors}
           showSpinner={isLoading || isCategoryTransitioning}
           onHomeClick={() =>
             navigate("/", { state: { animateContainerFromPost: true } })
           }
+          onCategoryHover={() => undefined}
+          onCategorySelect={(category) =>
+            selectCategory(category as (typeof sections)[number])
+          }
+          onCollapse={() => setSidebarVariant("minimized")}
+          onExpand={() => setSidebarVariant("default")}
+        />
+
+        <FixedInfoButtons
+          bioOpen={bioOpen}
+          contactOpen={contactOpen}
           onBioClick={() => {
             if (bioOpen) {
               closeBio();
             } else {
-              closeContact();
+              setContactOpen(false);
+              setCopiedContact(null);
               setBioOpen(true);
               setBioExpanded(false);
             }
@@ -516,16 +528,11 @@ export default function Post() {
             if (contactOpen) {
               closeContact();
             } else {
-              closeBio();
+              setBioOpen(false);
+              setBioExpanded(false);
               setContactOpen(true);
             }
           }}
-          onCategoryHover={() => undefined}
-          onCategorySelect={(category) =>
-            selectCategory(category as (typeof sections)[number])
-          }
-          onCollapse={() => setSidebarVariant("minimized")}
-          onExpand={() => setSidebarVariant("default")}
         />
 
         <div className="relative z-[6] h-full min-h-0 min-w-0 flex flex-1 flex-col bg-[#e8dfd0] shadow-[-12px_0_18px_rgba(0,0,0,0.22)]">
@@ -544,7 +551,7 @@ export default function Post() {
             onCopyContact={(value, key) => void copyContactValue(value, key)}
           />
 
-          <section className="relative min-h-0 flex-1 overflow-hidden">
+          <section className="relative z-10 min-h-0 flex-1 overflow-hidden shadow-[0_-12px_18px_rgba(0,0,0,0.18)]">
             <AnimatedPageContainer
               animationKey={`post-${params.slug ?? "missing"}`}
               animate

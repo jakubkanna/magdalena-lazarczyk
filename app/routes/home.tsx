@@ -1,10 +1,10 @@
 import type { Route } from "./+types/home";
-import { useAnimate } from "motion/react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 import { AnimatedPageContainer } from "../components/animated-page-container";
 import { BioContactPanel } from "../components/bio-contact-panel";
 import { CategoryGrid } from "../components/category-grid";
+import { FixedInfoButtons } from "../components/fixed-info-buttons";
 import { Sidebar } from "../components/sidebar";
 import {
   fetchPortfolioPosts,
@@ -51,30 +51,10 @@ const isMobileViewport = () =>
   typeof window !== "undefined" &&
   window.matchMedia(MOBILE_BREAKPOINT_QUERY).matches;
 
-const cornerCards = [
-  {
-    src: `${import.meta.env.BASE_URL}frontpage/3.jpg`,
-    alt: "Kolaż portretowy 1",
-    category: "Warsztaty",
-  },
-  {
-    src: `${import.meta.env.BASE_URL}frontpage/blu insta new.jpg`,
-    alt: "Kolaż portretowy 2",
-    category: "Teatr",
-  },
-  {
-    src: `${import.meta.env.BASE_URL}frontpage/ig29.jpgmm.jpg`,
-    alt: "Kolaż portretowy 3",
-    category: "Sztuka",
-  },
-] as const;
-
 export default function Home() {
   const params = useParams();
   const location = useLocation();
   const routeCategory = getCategoryFromSlug(params.category);
-  const [origin, setOrigin] = useState<{ x: number; y: number } | null>(null);
-  const [paperScope, animatePaper] = useAnimate();
   const contentPanelRef = useRef<HTMLDivElement | null>(null);
 
   const [activeCategory, setActiveCategory] = useState<
@@ -117,7 +97,6 @@ export default function Home() {
 
   useEffect(() => {
     const id = requestAnimationFrame(() => {
-      setOrigin({ x: window.innerWidth, y: window.innerHeight });
       if (window.location.hash === "#bio") {
         setBioOpen(true);
       }
@@ -143,39 +122,6 @@ export default function Home() {
   useEffect(() => {
     window.localStorage.setItem(SIDEBAR_VARIANT_STORAGE_KEY, sidebarVariant);
   }, [sidebarVariant]);
-
-  useEffect(() => {
-    if (!origin) return;
-    if (activeCategory !== null) return;
-    const paperRoot = paperScope.current as HTMLElement | null;
-    if (!paperRoot) return;
-
-    const cards = Array.from(
-      paperRoot.querySelectorAll<HTMLElement>("[data-fly-card]"),
-    );
-    cards.forEach((card, index) => {
-      card.getAnimations().forEach((animation) => animation.cancel());
-      card.dataset.flying = "true";
-      card.style.setProperty("--paper-flight-delay", `${index * 0.5}s`);
-      const animation = animatePaper(
-        card,
-        {
-          x: [origin.x, 0],
-          y: [origin.y, 0],
-          opacity: [0, 1],
-          scale: [0.94, 1],
-          rotate: [7, -2, 0],
-          skewX: [-3, 1.5, 0],
-          skewY: [1.5, -1, 0],
-        },
-        { duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: index * 0.5 },
-      );
-      void animation.then(() => {
-        delete card.dataset.flying;
-        card.style.removeProperty("--paper-flight-delay");
-      });
-    });
-  }, [activeCategory, animatePaper, origin, paperScope]);
 
   useLayoutEffect(() => {
     contentPanelRef.current?.scrollTo({ top: 0, left: 0 });
@@ -278,7 +224,7 @@ export default function Home() {
     posts.filter((post) => post.category === (category as PortfolioCategory));
 
   const getContainerColor = (category: (typeof sections)[number] | null) =>
-    category ? categoryColors[category] : "#7eaed8";
+    category ? categoryColors[category] : "#e8dfd0";
 
   const copyContactValue = async (value: string, key: "email" | "phone") => {
     try {
@@ -303,45 +249,9 @@ export default function Home() {
 
   const renderMainContent = (
     category: (typeof sections)[number] | null,
-    overlay = false,
   ) => {
     if (!category) {
-      if (overlay) {
-        return null;
-      }
-      return (
-        <div
-          ref={paperScope}
-          className="absolute right-2.5 bottom-2.5 flex items-end gap-2.5 max-md:left-2.5 max-md:flex-col max-md:items-stretch"
-        >
-          {(origin ? cornerCards : []).map((card) => (
-            <div
-              key={`base-${card.src}`}
-              data-fly-card
-              className="group h-[min(42svh,560px)] w-[calc(100vw/12*2)] cursor-pointer overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.24)] max-md:h-[22svh] max-md:w-full"
-              style={
-                origin
-                  ? {
-                      transform: `translate(${origin.x}px, ${origin.y}px) scale(0.94)`,
-                      opacity: 0,
-                    }
-                  : undefined
-              }
-              onMouseEnter={() => setHoveredCategory(card.category)}
-              onMouseLeave={() => setHoveredCategory(null)}
-              onClick={() => void selectCategory(card.category)}
-            >
-              <img
-                className="paper-card-image block h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.05] max-md:transition-none max-md:group-hover:scale-100"
-                src={card.src}
-                alt={card.alt}
-                loading={overlay ? "lazy" : "eager"}
-                decoding="async"
-              />
-            </div>
-          ))}
-        </div>
-      );
+      return null;
     }
 
     return (
@@ -363,15 +273,26 @@ export default function Home() {
           activeCategory={activeCategory}
           hoveredCategory={hoveredCategory}
           categories={sections}
-          bioOpen={bioOpen}
-          contactOpen={contactOpen}
+          categoryColors={categoryColors}
           showSpinner={isTransitioning}
           onHomeClick={() => void goHome()}
+          onCategoryHover={setHoveredCategory}
+          onCategorySelect={(category) =>
+            void selectCategory(category as (typeof sections)[number])
+          }
+          onCollapse={() => setSidebarVariant("minimized")}
+          onExpand={() => setSidebarVariant("default")}
+        />
+
+        <FixedInfoButtons
+          bioOpen={bioOpen}
+          contactOpen={contactOpen}
           onBioClick={() => {
             if (bioOpen) {
               closeBio();
             } else {
-              closeContact();
+              setContactOpen(false);
+              setCopiedContact(null);
               setBioOpen(true);
               setBioExpanded(false);
             }
@@ -380,16 +301,11 @@ export default function Home() {
             if (contactOpen) {
               closeContact();
             } else {
-              closeBio();
+              setBioOpen(false);
+              setBioExpanded(false);
               setContactOpen(true);
             }
           }}
-          onCategoryHover={setHoveredCategory}
-          onCategorySelect={(category) =>
-            void selectCategory(category as (typeof sections)[number])
-          }
-          onCollapse={() => setSidebarVariant("minimized")}
-          onExpand={() => setSidebarVariant("default")}
         />
 
         <div className="relative z-[6] h-full min-h-0 min-w-0 flex flex-1 flex-col bg-[#e8dfd0] shadow-[-12px_0_18px_rgba(0,0,0,0.22)]">
@@ -404,7 +320,7 @@ export default function Home() {
             onCopyContact={(value, key) => void copyContactValue(value, key)}
           />
 
-          <section className="relative min-h-0 flex-1 overflow-hidden">
+          <section className="relative z-10 min-h-0 flex-1 overflow-hidden shadow-[0_-12px_18px_rgba(0,0,0,0.18)]">
             <AnimatedPageContainer
               animationKey={`home-${location.key}`}
               animate={shouldAnimateContainerFromPost}
@@ -429,7 +345,7 @@ export default function Home() {
                   backgroundColor: getContainerColor(pendingCategory),
                 }}
               >
-                {renderMainContent(pendingCategory, true)}
+                {renderMainContent(pendingCategory)}
               </AnimatedPageContainer>
             ) : null}
           </section>
