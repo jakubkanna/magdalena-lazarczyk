@@ -150,19 +150,30 @@ export default function Home() {
     const paperRoot = paperScope.current as HTMLElement | null;
     if (!paperRoot) return;
 
-    const cards = Array.from(paperRoot.querySelectorAll("[data-fly-card]"));
+    const cards = Array.from(
+      paperRoot.querySelectorAll<HTMLElement>("[data-fly-card]"),
+    );
     cards.forEach((card, index) => {
       card.getAnimations().forEach((animation) => animation.cancel());
-      animatePaper(
+      card.dataset.flying = "true";
+      card.style.setProperty("--paper-flight-delay", `${index * 0.5}s`);
+      const animation = animatePaper(
         card,
         {
           x: [origin.x, 0],
           y: [origin.y, 0],
           opacity: [0, 1],
           scale: [0.94, 1],
+          rotate: [7, -2, 0],
+          skewX: [-3, 1.5, 0],
+          skewY: [1.5, -1, 0],
         },
         { duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: index * 0.5 },
       );
+      void animation.then(() => {
+        delete card.dataset.flying;
+        card.style.removeProperty("--paper-flight-delay");
+      });
     });
   }, [activeCategory, animatePaper, origin, paperScope]);
 
@@ -321,7 +332,7 @@ export default function Home() {
               onClick={() => void selectCategory(card.category)}
             >
               <img
-                className="block h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.05] max-md:transition-none max-md:group-hover:scale-100"
+                className="paper-card-image block h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.05] max-md:transition-none max-md:group-hover:scale-100"
                 src={card.src}
                 alt={card.alt}
                 loading={overlay ? "lazy" : "eager"}
