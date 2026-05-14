@@ -66,8 +66,8 @@ export function ProjectCard({ post, imageSrc }: ProjectCardProps) {
             loading="lazy"
             decoding="async"
           />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100">
-            <div className="w-[min(92%,520px)] translate-y-2 rounded-2xl bg-white px-4 py-4 text-[#222] shadow-[10px_14px_34px_rgb(0_0_0_/_0.24)] transition-transform duration-200 group-hover:translate-y-0 group-focus-visible:translate-y-0">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-end p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100">
+            <div className="w-fit max-w-[92%] translate-y-3 scale-90 rounded-2xl bg-white px-4 py-4 text-[#222] opacity-0 shadow-[10px_14px_34px_rgb(0_0_0_/_0.24)] transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.18,1.45,0.32,1)] group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:scale-100 group-focus-visible:opacity-100">
               <h2 className="text-base leading-tight italic">{post.title}</h2>
               <div className="mt-3 text-sm leading-[1.2]">
                 <p>

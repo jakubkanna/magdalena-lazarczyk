@@ -28,7 +28,7 @@ export function FixedInfoButtons({
         }`}
         onClick={onBioClick}
       >
-        Bio
+        <span className="button-text-shake">Bio</span>
       </button>
       <button
         type="button"
@@ -39,11 +39,11 @@ export function FixedInfoButtons({
         }`}
         onClick={onContactClick}
         aria-label="Kontakt"
-      >
-        <img
-          className="block size-4"
-          src={`${import.meta.env.BASE_URL}frontpage/call-outline.svg`}
-          alt=""
+        >
+          <img
+            className="button-text-shake block size-4"
+            src={`${import.meta.env.BASE_URL}frontpage/call-outline.svg`}
+            alt=""
           aria-hidden="true"
         />
       </button>
@@ -55,7 +55,7 @@ export function FixedInfoButtons({
           aria-label={bioOpen ? "Zamknij Bio" : "Zamknij Kontakt"}
         >
           <span
-            className="block size-4 bg-current"
+            className="button-text-shake block size-4 bg-current"
             style={{
               WebkitMask: `url("${import.meta.env.BASE_URL}close.svg") center / contain no-repeat`,
               mask: `url("${import.meta.env.BASE_URL}close.svg") center / contain no-repeat`,

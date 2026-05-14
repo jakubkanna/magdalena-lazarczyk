@@ -36,7 +36,7 @@ function SidebarLogo({
         onClick={onClick}
         aria-label="Magdalena Łazarczyk"
       >
-        · Magdalena Łazarczyk ·
+        <span>· Magdalena Łazarczyk ·</span>
       </button>
     </h1>
   );
@@ -110,7 +110,7 @@ function CategoryList({
                   : undefined
               }
             >
-              {section}
+              <span className="button-text-shake">{section}</span>
             </button>
           </div>
         );
@@ -195,22 +195,24 @@ export function Sidebar({
               onBlur={() => setLogoAnimating(false)}
               aria-label="Strona główna"
             >
-              {LOGO_LETTERS[logoLetterIndex]}
+              <span>{LOGO_LETTERS[logoLetterIndex]}</span>
             </button>
             {showSpinner ? (
               <span
-                className="block size-4 animate-spin rounded-full border-2 border-[#202020]/25 border-t-[#202020]"
+                className="flex size-7 items-center justify-center max-md:size-11"
                 aria-label="Ładowanie"
-              />
+              >
+                <span className="block size-4 animate-spin rounded-full border-2 border-[#202020]/25 border-t-[#202020]" />
+              </span>
             ) : (
               <button
                 type="button"
-                className="flex size-7 cursor-pointer appearance-none items-center justify-center rounded-full bg-transparent p-0 max-md:size-11"
+                className="group flex size-7 cursor-pointer appearance-none items-center justify-center rounded-full bg-transparent p-0 max-md:size-11"
                 onClick={onExpand}
                 aria-label="Rozwiń sidebar"
               >
                 <img
-                  className="block size-7 max-md:size-5"
+                  className="button-text-shake block size-7 max-md:size-5"
                   src={`${import.meta.env.BASE_URL}menu.svg`}
                   alt=""
                   aria-hidden="true"

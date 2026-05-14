@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import {
   useLocation,
   useNavigate,
@@ -565,7 +565,7 @@ export default function Post() {
               ) : post ? (
                 <>
                   <header className="grid grid-cols-12 gap-2 pb-2">
-                    <h1 className="col-span-9 m-0 text-9xl leading-[0.82] font-normal text-black/90 max-md:col-span-12 max-md:text-5xl">
+                    <h1 className="col-span-9 m-0 pb-2 text-9xl leading-[0.94] font-normal text-black/90 max-md:col-span-12 max-md:text-5xl">
                       {post.title}
                     </h1>
                     <div className="col-span-3 self-end text-right text-sm leading-tight max-md:col-span-12 max-md:text-left">
@@ -603,7 +603,17 @@ export default function Post() {
                   <PostBlocks blocks={blocks} onImageOpen={openImagePreview} />
                   <button
                     type="button"
-                    className="sticky bottom-2.5 z-[999] ml-auto mr-2.5 flex size-11 cursor-pointer items-center justify-center rounded-full bg-[#eee4d5] text-black/90 shadow-[0_4px_16px_rgba(0,0,0,0.24)] transition-[background-color,color,transform] duration-200 hover:scale-105 hover:bg-[#e0d6c7] hover:text-black"
+                    className="post-back-button sticky bottom-2.5 z-[999] ml-auto mr-2.5 flex size-11 cursor-pointer items-center justify-center rounded-full bg-[#eee4d5] text-black/90 shadow-[0_4px_16px_rgba(0,0,0,0.24)] transition-[background-color,color,transform] duration-500 hover:rotate-[360deg] hover:scale-110 hover:text-black"
+                    style={
+                      {
+                        "--post-back-button-hover-bg":
+                          activeCategory
+                            ? categoryColors[
+                                activeCategory as keyof typeof categoryColors
+                              ]
+                            : "#e0d6c7",
+                      } as CSSProperties
+                    }
                     onClick={goBack}
                     aria-label="Wróć"
                   >

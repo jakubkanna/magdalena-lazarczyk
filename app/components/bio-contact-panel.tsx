@@ -87,7 +87,7 @@ export function BioContactPanel({
               className={`mb-0 ml-auto mt-auto cursor-pointer text-sm leading-none underline transition-colors duration-200 hover:text-black ${textColorClass}`}
               onClick={onBioExpand}
             >
-              czytaj dalej
+              <span className="button-text-shake">czytaj dalej</span>
             </button>
           </div>
         ) : null}

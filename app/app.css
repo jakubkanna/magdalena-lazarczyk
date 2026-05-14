@@ -117,6 +117,23 @@ body {
   transform: scale(1.35) rotate(360deg);
 }
 
+.post-back-button:hover,
+.post-back-button:focus-visible {
+  background: var(--post-back-button-hover-bg);
+}
+
+.button-text-shake {
+  display: inline-block;
+}
+
+button:hover .button-text-shake,
+button:focus-visible .button-text-shake,
+a:hover .button-text-shake,
+a:focus-visible .button-text-shake {
+  animation: button-text-shake 420ms ease-in-out infinite;
+  transform-origin: 50% 60%;
+}
+
 @keyframes sidebar-credit-fade-in {
   from {
     opacity: 0;
@@ -166,6 +183,25 @@ body {
 
   to {
     transform: translateY(0%);
+  }
+}
+
+@keyframes button-text-shake {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(6deg);
+  }
+
+  50% {
+    transform: rotate(0deg);
+  }
+
+  75% {
+    transform: rotate(-6deg);
   }
 }
 
