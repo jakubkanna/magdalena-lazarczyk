@@ -45,7 +45,7 @@ function CategoryList({
       className={
         compact
           ? "relative z-[6] mt-2 flex flex-1 flex-col items-center justify-around py-2 max-md:hidden"
-          : "relative z-[6] mt-auto flex min-h-[52%] flex-col items-end justify-around px-1 py-3.5 max-md:mt-auto max-md:min-h-0 max-md:w-full max-md:flex-row max-md:items-center max-md:justify-between max-md:gap-3"
+          : "relative z-[6] mt-auto flex min-h-[52%] flex-col items-end justify-around px-1 py-3.5 max-md:mt-auto max-md:min-h-0 max-md:w-full max-md:flex-row max-md:items-center max-md:justify-between max-md:gap-2"
       }
       aria-label="Sekcje"
     >
@@ -54,7 +54,7 @@ function CategoryList({
           key={section}
           type="button"
           onClick={() => onCategorySelect(section)}
-          className={`relative cursor-pointer transition-colors duration-200  ${compact ? "self-center text-sm" : "self-end text-sm"} appearance-none border-0 bg-transparent p-0 font-normal leading-none text-black/75 hover:text-black [writing-mode:vertical-rl] [transform:rotate(180deg)] ${compact ? "" : "max-md:[writing-mode:horizontal-tb] max-md:[transform:none]"} ${
+          className={`relative cursor-pointer transition-colors duration-200  ${compact ? "self-center text-sm" : "self-end text-sm"} appearance-none border-0 bg-transparent p-0 font-normal leading-none text-black/75 hover:text-black [writing-mode:vertical-rl] [transform:rotate(180deg)] ${compact ? "" : "max-md:min-h-11 max-md:px-2 max-md:py-3 max-md:[writing-mode:horizontal-tb] max-md:[transform:none]"} ${
             hoveredCategory === section || activeCategory === section
               ? "underline decoration-1 underline-offset-2"
               : "no-underline"
@@ -107,11 +107,11 @@ export function Sidebar({
       aria-label="Nawigacja"
     >
       {variant === "minimized" ? (
-        <div className="flex h-full flex-col p-2.5 max-md:h-14 max-md:flex-row max-md:items-center max-md:justify-between">
+        <div className="flex h-full flex-col p-2.5 max-md:h-14 max-md:flex-row max-md:items-center max-md:justify-between max-md:px-2 max-md:py-1.5">
           <div className="flex w-5 flex-col items-center gap-2 max-md:w-full max-md:flex-row max-md:justify-between">
             <button
               type="button"
-              className="flex size-5 cursor-pointer appearance-none items-center justify-center border-0 bg-transparent p-0 text-center font-['Helvetica_Neue',Helvetica,Arial,sans-serif] font-normal text-black/75 transition-colors duration-200 hover:text-black"
+              className="flex size-5 cursor-pointer appearance-none items-center justify-center border-0 bg-transparent p-0 text-center font-['Helvetica_Neue',Helvetica,Arial,sans-serif] font-normal text-black/75 transition-colors duration-200 hover:text-black max-md:size-11"
               onClick={onHomeClick}
               aria-label="Strona główna"
             >
@@ -125,7 +125,7 @@ export function Sidebar({
             ) : (
               <button
                 type="button"
-                className="flex size-5 cursor-pointer appearance-none items-center justify-center border-0 bg-transparent p-0"
+                className="flex size-5 cursor-pointer appearance-none items-center justify-center border-0 bg-transparent p-0 max-md:size-11"
                 onClick={onExpand}
                 aria-label="Rozwiń sidebar"
               >
@@ -161,7 +161,7 @@ export function Sidebar({
             </h1>
             <button
               type="button"
-              className="hidden size-6 shrink-0 cursor-pointer appearance-none items-center justify-center border-0 bg-transparent p-0 max-md:flex"
+              className="hidden size-6 shrink-0 cursor-pointer appearance-none items-center justify-center border-0 bg-transparent p-0 max-md:flex max-md:size-11"
               onClick={onCollapse}
               aria-label="Zwiń sidebar"
             >
@@ -176,7 +176,7 @@ export function Sidebar({
           <div className="mt-2 flex flex-col items-start gap-2 max-md:flex-row max-md:items-center">
             <button
               type="button"
-              className={`cursor-pointer rounded-full px-2 py-1 text-base leading-none text-black/75 shadow-[0_2px_8px_rgba(0,0,0,0.2)] transition-[background-color,color] duration-200 hover:text-black ${
+              className={`min-h-0 cursor-pointer rounded-full px-2 py-1 text-base leading-none text-black/75 shadow-[0_2px_8px_rgba(0,0,0,0.2)] transition-[background-color,color] duration-200 hover:text-black max-md:min-h-11 max-md:px-3 max-md:py-2 ${
                 bioOpen
                   ? "bg-[#dfd5c6] hover:bg-[#d2c7b8]"
                   : "bg-[#eee4d5] hover:bg-[#e0d6c7]"
@@ -187,7 +187,7 @@ export function Sidebar({
             </button>
             <button
               type="button"
-              className={`inline-flex cursor-pointer items-center justify-center rounded-full p-1 text-base leading-none text-black/75 shadow-[0_2px_8px_rgba(0,0,0,0.2)] transition-[background-color,color] duration-200 hover:text-black ${
+              className={`inline-flex cursor-pointer items-center justify-center rounded-full p-1 text-base leading-none text-black/75 shadow-[0_2px_8px_rgba(0,0,0,0.2)] transition-[background-color,color] duration-200 hover:text-black max-md:size-11 ${
                 contactOpen
                   ? "bg-[#dfd5c6] hover:bg-[#d2c7b8]"
                   : "bg-[#eee4d5] hover:bg-[#e0d6c7]"

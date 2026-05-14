@@ -307,7 +307,7 @@ export default function Home() {
             <div
               key={`base-${card.src}`}
               data-fly-card
-              className="h-[min(42svh,560px)] w-[calc(100vw/12*2)] cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.24)] transition-transform duration-200 hover:scale-[1.05] max-md:h-[22svh] max-md:w-full"
+              className="group h-[min(42svh,560px)] w-[calc(100vw/12*2)] cursor-pointer overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.24)] max-md:h-[22svh] max-md:w-full"
               style={
                 origin
                   ? {
@@ -321,7 +321,7 @@ export default function Home() {
               onClick={() => void selectCategory(card.category)}
             >
               <img
-                className="block h-full w-full object-cover"
+                className="block h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.05] max-md:transition-none max-md:group-hover:scale-100"
                 src={card.src}
                 alt={card.alt}
                 loading={overlay ? "lazy" : "eager"}
