@@ -4,7 +4,6 @@ import { useLocation, useNavigate, useParams } from "react-router";
 import { AnimatedPageContainer } from "../components/animated-page-container";
 import { BioContactPanel } from "../components/bio-contact-panel";
 import { CategoryGrid } from "../components/category-grid";
-import { FixedInfoButtons } from "../components/fixed-info-buttons";
 import { Sidebar } from "../components/sidebar";
 import {
   fetchPortfolioPosts,
@@ -14,18 +13,25 @@ import {
 } from "../data/portfolio-api";
 import { defaultSiteContent, fetchSiteContent } from "../data/site-content";
 
-export function meta({}: Route.MetaArgs) {
+export function meta({ params }: Route.MetaArgs) {
+  const category = getCategoryFromSlug(params.category);
+  const title = category
+    ? `${category} | Magdalena Łazarczyk`
+    : "Magdalena Łazarczyk";
+  const description = category
+    ? `Portfolio Magdaleny Łazarczyk - ${category.toLowerCase()}.`
+    : "Portfolio Magdaleny Łazarczyk - scenografia, kostiumy, teatr, sztuka i warsztaty.";
+
   return [
-    { title: "Magdalena Łazarczyk" },
+    { title },
     {
       name: "description",
-      content:
-        "Portfolio Magdaleny Łazarczyk - scenografia, kostiumy, teatr, sztuka i warsztaty.",
+      content: description,
     },
   ];
 }
 
-const sections = ["Warsztaty", "Teatr", "Sztuka"] as const;
+const sections = ["Teatr", "Sztuka", "Warsztaty"] as const;
 const categoryColors: Record<(typeof sections)[number], string> = {
   Warsztaty: "#F2621C",
   Sztuka: "#D4FC85",
@@ -275,18 +281,18 @@ export default function Home() {
           categories={sections}
           categoryColors={categoryColors}
           showSpinner={isTransitioning}
-          onHomeClick={() => void goHome()}
+          bioOpen={bioOpen}
+          contactOpen={contactOpen}
+          onHomeClick={() => {
+            if (isMobileViewport()) setSidebarVariant("minimized");
+            void goHome();
+          }}
           onCategoryHover={setHoveredCategory}
           onCategorySelect={(category) =>
             void selectCategory(category as (typeof sections)[number])
           }
           onCollapse={() => setSidebarVariant("minimized")}
           onExpand={() => setSidebarVariant("default")}
-        />
-
-        <FixedInfoButtons
-          bioOpen={bioOpen}
-          contactOpen={contactOpen}
           onBioClick={() => {
             if (bioOpen) {
               closeBio();
@@ -296,6 +302,7 @@ export default function Home() {
               setBioOpen(true);
               setBioExpanded(false);
             }
+            if (isMobileViewport()) setSidebarVariant("minimized");
           }}
           onContactClick={() => {
             if (contactOpen) {
@@ -305,6 +312,7 @@ export default function Home() {
               setBioExpanded(false);
               setContactOpen(true);
             }
+            if (isMobileViewport()) setSidebarVariant("minimized");
           }}
         />
 

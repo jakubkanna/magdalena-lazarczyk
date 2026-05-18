@@ -14,7 +14,7 @@ import type { Route } from "./+types/root";
 import { Sidebar } from "./components/sidebar";
 import "./app.css";
 
-const sections = ["Warsztaty", "Teatr", "Sztuka"] as const;
+const sections = ["Teatr", "Sztuka", "Warsztaty"] as const;
 const MOBILE_BREAKPOINT_QUERY = "(max-width: 767px)";
 const categoryToSlug: Record<(typeof sections)[number], string> = {
   Warsztaty: "warsztaty",

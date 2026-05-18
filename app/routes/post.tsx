@@ -1,3 +1,4 @@
+import type { Route } from "./+types/post";
 import { useEffect, useState, type CSSProperties } from "react";
 import {
   useLocation,
@@ -8,11 +9,11 @@ import {
 import { AnimatedPageContainer } from "../components/animated-page-container";
 import { BioContactPanel } from "../components/bio-contact-panel";
 import { CategoryGrid } from "../components/category-grid";
-import { FixedInfoButtons } from "../components/fixed-info-buttons";
 import { Sidebar } from "../components/sidebar";
 import {
   fetchPortfolioPosts,
   fetchPortfolioPostBySlug,
+  getPortfolioPostBySlug,
   loadPortfolioImageSrc,
   type PortfolioCategory,
   type PortfolioPostViewModel,
@@ -20,7 +21,8 @@ import {
 import { defaultSiteContent, fetchSiteContent } from "../data/site-content";
 import { sanitizeContentHtml } from "../utils/html-content";
 
-const sections = ["Warsztaty", "Teatr", "Sztuka"] as const;
+const sections = ["Teatr", "Sztuka", "Warsztaty"] as const;
+const MOBILE_BREAKPOINT_QUERY = "(max-width: 767px)";
 const categoryToSlug: Record<(typeof sections)[number], string> = {
   Warsztaty: "warsztaty",
   Teatr: "teatr",
@@ -31,6 +33,28 @@ const categoryColors: Record<(typeof sections)[number], string> = {
   Sztuka: "#D4FC85",
   Teatr: "#0011FF",
 };
+
+const isMobileViewport = () =>
+  typeof window !== "undefined" &&
+  window.matchMedia(MOBILE_BREAKPOINT_QUERY).matches;
+
+export function meta({ params }: Route.MetaArgs) {
+  const post = params.slug ? getPortfolioPostBySlug(params.slug) : null;
+  const title = post
+    ? `${post.title} | Magdalena Łazarczyk`
+    : "Projekt | Magdalena Łazarczyk";
+  const description = post
+    ? `${post.title} - ${post.venue}, ${post.place}, ${post.year}.`
+    : "Projekt z portfolio Magdaleny Łazarczyk.";
+
+  return [
+    { title },
+    {
+      name: "description",
+      content: description,
+    },
+  ];
+}
 
 function hexToRgba(hex: string, alpha: number) {
   const normalizedHex = hex.replace("#", "");
@@ -500,20 +524,18 @@ export default function Post() {
           categories={sections}
           categoryColors={categoryColors}
           showSpinner={isLoading || isCategoryTransitioning}
-          onHomeClick={() =>
-            navigate("/", { state: { animateContainerFromPost: true } })
-          }
+          bioOpen={bioOpen}
+          contactOpen={contactOpen}
+          onHomeClick={() => {
+            if (isMobileViewport()) setSidebarVariant("minimized");
+            navigate("/", { state: { animateContainerFromPost: true } });
+          }}
           onCategoryHover={() => undefined}
           onCategorySelect={(category) =>
             selectCategory(category as (typeof sections)[number])
           }
           onCollapse={() => setSidebarVariant("minimized")}
           onExpand={() => setSidebarVariant("default")}
-        />
-
-        <FixedInfoButtons
-          bioOpen={bioOpen}
-          contactOpen={contactOpen}
           onBioClick={() => {
             if (bioOpen) {
               closeBio();
@@ -523,6 +545,7 @@ export default function Post() {
               setBioOpen(true);
               setBioExpanded(false);
             }
+            if (isMobileViewport()) setSidebarVariant("minimized");
           }}
           onContactClick={() => {
             if (contactOpen) {
@@ -532,6 +555,7 @@ export default function Post() {
               setBioExpanded(false);
               setContactOpen(true);
             }
+            if (isMobileViewport()) setSidebarVariant("minimized");
           }}
         />
 
@@ -556,7 +580,7 @@ export default function Post() {
               animationKey={`post-${params.slug ?? "missing"}`}
               animate
               ready={!isLoading}
-              className="post-scrollbar absolute inset-0 overflow-y-auto bg-white p-2 text-black/90"
+              className="post-scrollbar absolute inset-0 overflow-y-auto bg-white p-4 text-black/90"
             >
               {isLoading ? (
                 <div className="grid h-full place-items-center">
@@ -564,15 +588,15 @@ export default function Post() {
                 </div>
               ) : post ? (
                 <>
-                  <header className="grid grid-cols-12 gap-2 pb-2">
-                    <h1 className="col-span-9 m-0 pb-2 text-9xl leading-[0.94] font-normal text-black/90 max-md:col-span-12 max-md:text-5xl">
+                  <header className="grid grid-cols-12 gap-2 pb-2 pt-3">
+                    <h1 className="col-span-12 m-0 text-[5.333rem] leading-[0.94] font-normal text-black/90 max-md:text-[2.8125rem]">
                       {post.title}
                     </h1>
-                    <div className="col-span-3 self-end text-right text-sm leading-tight max-md:col-span-12 max-md:text-left">
-                      <p className="m-0">{post.venue}</p>
-                      <p className="m-0">
+                    <div className="col-span-12 grid pb-2 text-right text-sm leading-tight">
+                      <span>{post.venue}</span>
+                      <span>
                         {post.place}, {post.year}
-                      </p>
+                      </span>
                     </div>
                   </header>
 
@@ -590,7 +614,7 @@ export default function Post() {
                         }
                       >
                         <img
-                          className="block h-auto w-full"
+                          className="block max-h-[calc(100svh-1rem)] w-full object-contain object-left-top"
                           src={imageSrc}
                           alt={post.title}
                           loading="eager"
@@ -603,15 +627,14 @@ export default function Post() {
                   <PostBlocks blocks={blocks} onImageOpen={openImagePreview} />
                   <button
                     type="button"
-                    className="post-back-button sticky bottom-2.5 z-[999] ml-auto mr-2.5 flex size-11 cursor-pointer items-center justify-center rounded-full bg-[#eee4d5] text-black/90 shadow-[0_4px_16px_rgba(0,0,0,0.24)] transition-[background-color,color,transform] duration-500 hover:rotate-[360deg] hover:scale-110 hover:text-black"
+                    className="post-back-button sticky bottom-2 z-[999] ml-auto mr-2 flex size-11 cursor-pointer items-center justify-center rounded-full bg-[#eee4d5] text-black/90 shadow-[0_4px_16px_rgba(0,0,0,0.24)] transition-[background-color,color,transform] duration-500 hover:rotate-[360deg] hover:scale-110 hover:text-black"
                     style={
                       {
-                        "--post-back-button-hover-bg":
-                          activeCategory
-                            ? categoryColors[
-                                activeCategory as keyof typeof categoryColors
-                              ]
-                            : "#e0d6c7",
+                        "--post-back-button-hover-bg": activeCategory
+                          ? categoryColors[
+                              activeCategory as keyof typeof categoryColors
+                            ]
+                          : "#e0d6c7",
                       } as CSSProperties
                     }
                     onClick={goBack}
@@ -677,16 +700,24 @@ export default function Post() {
         >
           <button
             type="button"
-            className="absolute right-2.5 top-2.5 z-[2001] cursor-pointer rounded-full bg-[#eee4d5] px-3 py-2 text-sm leading-none text-black/90 shadow-[0_4px_16px_rgba(0,0,0,0.24)] transition-[background-color,color] duration-200 hover:bg-[#e0d6c7] hover:text-black"
+            className="absolute right-2 top-2 z-[2001] flex size-11 cursor-pointer items-center justify-center rounded-full bg-[#eee4d5] p-0 text-black/90 shadow-[0_4px_16px_rgba(0,0,0,0.24)] transition-[background-color,color,transform] duration-200 hover:scale-105 hover:bg-[#e0d6c7] hover:text-black"
             onClick={() => setPreviewIndex(null)}
+            aria-label="Zamknij"
           >
-            Zamknij
+            <span
+              className="button-text-shake block size-5 bg-current"
+              style={{
+                WebkitMask: `url("${import.meta.env.BASE_URL}close.svg") center / contain no-repeat`,
+                mask: `url("${import.meta.env.BASE_URL}close.svg") center / contain no-repeat`,
+              }}
+              aria-hidden="true"
+            />
           </button>
           {previewImages.length > 1 ? (
             <>
               <button
                 type="button"
-                className="absolute left-2.5 top-1/2 z-[2001] flex size-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-[#eee4d5] text-black/90 shadow-[0_4px_16px_rgba(0,0,0,0.24)] transition-[background-color,color,transform] duration-200 hover:scale-105 hover:bg-[#e0d6c7] hover:text-black"
+                className="absolute left-2 top-1/2 z-[2001] flex size-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-[#eee4d5] text-black/90 shadow-[0_4px_16px_rgba(0,0,0,0.24)] transition-[background-color,color,transform] duration-200 hover:scale-105 hover:bg-[#e0d6c7] hover:text-black"
                 onClick={(event) => {
                   event.stopPropagation();
                   showPreviousPreviewImage();
@@ -702,7 +733,7 @@ export default function Post() {
               </button>
               <button
                 type="button"
-                className="absolute right-2.5 top-1/2 z-[2001] flex size-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-[#eee4d5] text-black/90 shadow-[0_4px_16px_rgba(0,0,0,0.24)] transition-[background-color,color,transform] duration-200 hover:scale-105 hover:bg-[#e0d6c7] hover:text-black"
+                className="absolute right-2 top-1/2 z-[2001] flex size-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-[#eee4d5] text-black/90 shadow-[0_4px_16px_rgba(0,0,0,0.24)] transition-[background-color,color,transform] duration-200 hover:scale-105 hover:bg-[#e0d6c7] hover:text-black"
                 onClick={(event) => {
                   event.stopPropagation();
                   showNextPreviewImage();

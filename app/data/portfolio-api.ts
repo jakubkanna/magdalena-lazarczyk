@@ -50,7 +50,7 @@ export async function loadPortfolioImageSrc(image: string) {
   return imageByFileName[image]?.() ?? "";
 }
 
-export async function fetchPortfolioPosts(): Promise<PortfolioPostViewModel[]> {
+export function getPortfolioPosts(): PortfolioPostViewModel[] {
   const wordpressPosts = posts as PortfolioPost[];
 
   return wordpressPosts.map((post) => ({
@@ -61,7 +61,14 @@ export async function fetchPortfolioPosts(): Promise<PortfolioPostViewModel[]> {
   }));
 }
 
+export function getPortfolioPostBySlug(slug: string) {
+  return getPortfolioPosts().find((post) => post.slug === slug) ?? null;
+}
+
+export async function fetchPortfolioPosts(): Promise<PortfolioPostViewModel[]> {
+  return getPortfolioPosts();
+}
+
 export async function fetchPortfolioPostBySlug(slug: string) {
-  const portfolioPosts = await fetchPortfolioPosts();
-  return portfolioPosts.find((post) => post.slug === slug) ?? null;
+  return getPortfolioPostBySlug(slug);
 }

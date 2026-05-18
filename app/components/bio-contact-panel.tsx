@@ -18,6 +18,7 @@ type BioContactPanelProps = {
 
 const tooltipClass =
   "absolute right-0 top-full z-[9999] mt-1 rounded-full bg-[#eee4d5] px-2 py-1 text-xs leading-none shadow-[0_2px_8px_rgba(0,0,0,0.16)]";
+const infoLabelClass = "text-sm font-normal leading-none";
 
 export function BioContactPanel({
   bioExpanded,
@@ -63,14 +64,10 @@ export function BioContactPanel({
     <section
       ref={panelRef}
       className={`overflow-hidden bg-[#e8dfd0] px-2.5 transition-all duration-500 ease-out ${
-        isOpen
-          ? isExtended
-            ? "h-svh py-2.5"
-            : "h-auto py-2.5"
-          : "h-0 py-0"
+        isOpen ? (isExtended ? "h-svh py-2.5" : "h-auto py-2.5") : "h-0 py-0"
       }`}
     >
-      <div className="flex h-full flex-col p-4 pt-16">
+      <div className="flex h-full flex-col p-4">
         {bioOpen && !bioExpanded ? (
           <div
             key="bio-preview"
@@ -84,7 +81,7 @@ export function BioContactPanel({
             />
             <button
               type="button"
-              className={`mb-0 ml-auto mt-auto cursor-pointer text-sm leading-none underline transition-colors duration-200 hover:text-black ${textColorClass}`}
+              className={`mb-0 ml-auto mt-auto cursor-pointer ${infoLabelClass} transition-colors duration-200 hover:text-black ${textColorClass}`}
               onClick={onBioExpand}
             >
               <span className="button-text-shake">czytaj dalej</span>
@@ -98,9 +95,7 @@ export function BioContactPanel({
           >
             <div className="grid grid-cols-[minmax(0,1fr)_calc(100vw/12)] gap-5 max-md:grid-cols-1">
               <div className="columns-2 gap-5 max-lg:columns-1">
-                <h2
-                  className={`mb-2 mt-0 font-['Helvetica',Arial,sans-serif] text-xs font-bold uppercase ${textColorClass}`}
-                >
+                <h2 className={`mb-2 mt-0 ${infoLabelClass} ${textColorClass}`}>
                   Bio
                 </h2>
                 {bio.paragraphs.map((paragraph) => (
@@ -125,7 +120,7 @@ export function BioContactPanel({
               {bio.exhibitionColumns.map((column) => (
                 <section key={column.title}>
                   <h2
-                    className={`mb-2 mt-0 font-['Helvetica',Arial,sans-serif] text-xs font-bold uppercase ${textColorClass}`}
+                    className={`mb-2 mt-0 ${infoLabelClass} ${textColorClass}`}
                   >
                     {column.title}
                   </h2>
@@ -146,9 +141,7 @@ export function BioContactPanel({
             key="contact"
             className={`info-panel-fade flex h-full flex-col items-end justify-center gap-1 text-right text-sm leading-tight ${textColorClass}`}
           >
-            <h2
-              className={`mb-2 mt-0 font-['Helvetica',Arial,sans-serif] text-xs font-bold uppercase ${textColorClass}`}
-            >
+            <h2 className={`mb-2 mt-0 ${infoLabelClass} ${textColorClass}`}>
               Kontakt
             </h2>
             <button
