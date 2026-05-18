@@ -288,15 +288,6 @@ export function Sidebar({
             inactiveHoverClass={sidebarHoverClass}
             compact
           />
-          {hasInfoButtons ? (
-            <SidebarInfoButtons
-              bioOpen={bioOpen}
-              contactOpen={contactOpen}
-              onBioClick={onBioClick!}
-              onContactClick={onContactClick!}
-              compact
-            />
-          ) : null}
           {showSpinner ? (
             <span
               className="mt-14 flex size-7 shrink-0 items-center justify-center max-md:mt-0 max-md:size-8"
