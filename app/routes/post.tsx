@@ -1,5 +1,10 @@
 import type { Route } from "./+types/post";
-import { useEffect, useState, type CSSProperties } from "react";
+import {
+  useEffect,
+  useState,
+  type CSSProperties,
+  type MouseEvent,
+} from "react";
 import {
   useLocation,
   useNavigate,
@@ -65,220 +70,47 @@ function hexToRgba(hex: string, alpha: number) {
   return `rgb(${red} ${green} ${blue} / ${alpha})`;
 }
 
-type MockBlock =
-  | { type: "paragraph"; content: string }
-  | { type: "columns"; columns: string[] }
-  | { type: "quote"; content: string }
-  | { type: "image"; alt: string; description?: string; src: string }
-  | { type: "gallery"; images: PreviewImage[] }
-  | { type: "grid"; items: string[] };
-
 type PreviewImage = {
   alt: string;
   description?: string;
   src: string;
 };
 
-function createMockBlocks(
-  post: PortfolioPostViewModel,
-  imageSrc: string,
-  galleryImageSrcs: string[],
-): MockBlock[] {
-  const galleryImages = [imageSrc, ...galleryImageSrcs].map((src, index) => ({
-    src,
-    alt: `${post.title} - zdjęcie ${index + 1}`,
-    description:
-      index === 0
-        ? "Opis zdjęcia z bloku galerii WordPress."
-        : "Opis zdjęcia przekazany z danych WordPress.",
-  }));
-
-  return [
-    {
-      type: "paragraph",
-      content:
-        post.content ??
-        `${post.title} to projekt zrealizowany w obszarze ${post.category.toLowerCase()}, w którym obraz, przestrzeń i materia pracują jako równorzędne elementy narracji. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer materia, nibh sed cursus consequat, ligula nunc pretium lorem, vitae fermentum massa justo non arcu. Sed przestrzeń działa tu jak zapis procesu: odsłania kolejne warstwy pracy, testów i decyzji formalnych. Aliquam erat volutpat. Phasellus dictum turpis id metus volutpat, a luctus elit cursus. Mauris non dolor sed lorem tristique mattis.
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus eget luctus elit. Cras faucibus nunc non diam laoreet faucibus. Ut consequat eget sem ut venenatis. Suspendisse et viverra arcu. Morbi tristique pretium mi non condimentum. Nullam eget sollicitudin sem. Proin non aliquet eros. Morbi fringilla, felis sed fermentum volutpat, ipsum ligula feugiat diam, vitae finibus nibh nulla in urna. Praesent efficitur tincidunt dolor, eget egestas diam placerat et.
-
-In risus mauris, ultrices aliquam pharetra vel, venenatis in nunc. Donec laoreet est at leo elementum, vel malesuada sapien facilisis. Quisque consequat velit non orci viverra, pretium faucibus nisl vehicula. Etiam nec ornare libero. Fusce ac pharetra dolor. Cras vitae felis mattis, placerat tellus non, dapibus nisi. In sed facilisis ex, vel ullamcorper libero. Proin sit amet euismod eros, et cursus ante. Curabitur facilisis justo ac vestibulum tempor. Etiam rhoncus turpis et libero consequat, sit amet congue diam pharetra. Vivamus sed ligula at nisl mattis aliquet.
-
-Nunc sed mauris eget nibh gravida dictum eu sed mauris. Vestibulum semper pretium turpis, quis aliquam elit pulvinar ut. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Pellentesque feugiat, neque eget facilisis bibendum, felis nibh ullamcorper nisi, vel sagittis lacus libero ut turpis. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Aliquam hendrerit vulputate ornare. Fusce pulvinar, urna et efficitur vulputate, sem elit sollicitudin ante, quis commodo magna est in felis.
-
-Nunc suscipit at justo quis consectetur. Praesent facilisis magna sit amet enim laoreet, vel imperdiet est molestie. Quisque in tellus sodales, vulputate mi ac, luctus lacus. Interdum et malesuada fames ac ante ipsum primis in faucibus. Mauris posuere ut risus sed dapibus. Integer pellentesque purus non arcu iaculis, at vulputate mauris tincidunt. Aliquam volutpat, tellus id elementum eleifend, sapien nisi scelerisque mauris, at tempus tellus nibh ut erat. Fusce massa dui, mollis et velit sagittis, consectetur ullamcorper leo. In eget erat dapibus, pulvinar augue id, varius eros. Phasellus a metus in purus vestibulum ullamcorper a et nisi. Nam justo nibh, dignissim fringilla lorem quis, tristique molestie est. Proin nec arcu enim. Donec ac volutpat nunc. Etiam a tincidunt nisi. Aliquam ac ultrices enim, eget dictum ipsum.
-
-Sed condimentum diam id quam feugiat lacinia. Sed ante velit, congue gravida nulla pellentesque, facilisis suscipit tellus. Nullam sollicitudin, eros id mollis mattis, nibh sapien vehicula elit, vitae efficitur eros elit nec purus. In semper lorem at sem accumsan, eu tincidunt leo lacinia. Duis ac venenatis nibh. Cras quis nisi non dolor ullamcorper sodales ut quis purus. Mauris ac sem ipsum. Vestibulum eu interdum nibh. Nullam laoreet, velit at malesuada lacinia, tellus turpis varius elit, ut dapibus nulla odio eu nisl. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Pellentesque ut malesuada neque.`,
-    },
-    {
-      type: "columns",
-      columns: [
-        "Układ scenograficzny traktowany jest tu jak żywy system: porządkuje ruch, buduje napięcia i zostawia miejsce dla nieoczywistych relacji między ciałem, obiektem oraz światłem. Suspendisse potenti. Donec luctus, arcu non porttitor luctus, neque erat gravida nibh, vitae tincidunt lorem neque id mi. W tej części opisu można umieścić dłuższy komentarz kuratorski, notatki z procesu albo fragment tekstu programowego.",
-        "Warstwa wizualna powstaje z pracy na materiale, skali i relacji przedmiotów z przestrzenią. Dzięki temu projekt może funkcjonować jak samodzielny obraz oraz jako narzędzie dramaturgiczne. Curabitur vel sem sit amet massa suscipit posuere. Praesent vel orci sed justo gravida pulvinar. Tekst pełni funkcję roboczego wypełnienia dla przyszłych bloków WordPress i pozwala sprawdzić rytm scrollowania na dłuższych stronach.",
-      ],
-    },
-    {
-      type: "quote",
-      content:
-        "Przedmiot nie jest dekoracją. Jest nośnikiem pamięci, gestu i zmiany.",
-    },
-    {
-      type: "grid",
-      items: [post.venue, post.place, post.year, ...post.credits],
-    },
-    {
-      type: "gallery",
-      images: galleryImages,
-    },
-    {
-      type: "paragraph",
-      content:
-        "Mock WordPress blocks are rendered as a front-end contract for the future CMS integration: paragraphs, media, quotes and structured grids can be replaced by real block data without changing the page layout. Vivamus vulputate, lorem in tincidunt malesuada, nulla ipsum hendrerit orci, non sagittis enim lorem sed erat. Aenean facilisis może zostać zastąpiona opisem technicznym, listą materiałów albo informacją o współpracy. Nam at orci id risus pretium faucibus. Etiam ac nibh non sem blandit tristique. Ten dłuższy tekst pozwala sprawdzić, jak zachowują się przyciski, podgląd zdjęć oraz powrót przy większej ilości treści.",
-    },
-  ];
-}
-
-function getBlockPreviewImages(blocks: MockBlock[]) {
-  return blocks.flatMap((block): PreviewImage[] => {
-    if (block.type === "image") {
-      return [
-        { alt: block.alt, description: block.description, src: block.src },
-      ];
-    }
-
-    if (block.type === "gallery") {
-      return block.images;
-    }
-
-    return [];
-  });
-}
-
-function PostBlocks({
-  blocks,
-  onImageOpen,
-}: {
-  blocks: MockBlock[];
-  onImageOpen: (image: PreviewImage) => void;
-}) {
-  return (
-    <div className="grid grid-cols-12 gap-x-2 gap-y-12 text-black/90">
-      {blocks.map((block, index) => {
-        if (block.type === "paragraph") {
-          return (
-            <div
-              key={`${block.type}-${index}`}
-              className="col-span-8 m-0 text-md leading-[1.2] max-lg:col-span-10 max-md:col-span-12"
-              dangerouslySetInnerHTML={{
-                __html: sanitizeContentHtml(block.content),
-              }}
-            />
-          );
-        }
-
-        if (block.type === "columns") {
-          return (
-            <div
-              key={`${block.type}-${index}`}
-              className="col-span-12 columns-2 gap-4 text-md leading-[1.2] max-md:columns-1"
-            >
-              {block.columns.map((column) => (
-                <div
-                  key={column.slice(0, 32)}
-                  className="mb-4 mt-0 break-inside-avoid"
-                  dangerouslySetInnerHTML={{
-                    __html: sanitizeContentHtml(column),
-                  }}
-                />
-              ))}
-            </div>
-          );
-        }
-
-        if (block.type === "quote") {
-          return (
-            <blockquote
-              key={`${block.type}-${index}`}
-              className="col-span-5 col-start-8 m-0 pl-4 text-right text-2xl leading-none italic max-lg:col-span-10 max-lg:col-start-1 max-lg:text-4xl max-md:col-span-12 max-md:text-3xl"
-            >
-              {block.content}
-            </blockquote>
-          );
-        }
-
-        if (block.type === "grid") {
-          return (
-            <div
-              key={`${block.type}-${index}`}
-              className="col-span-12 m-0 grid grid-cols-4 gap-2 py-4 text-sm leading-tight max-md:grid-cols-1"
-            >
-              {block.items.map((item) => (
-                <div key={item} className="min-h-16 bg-black/[0.035] p-3">
-                  {item}
-                </div>
-              ))}
-            </div>
-          );
-        }
-
-        if (block.type === "gallery") {
-          return (
-            <div
-              key={`${block.type}-${index}`}
-              className="col-span-12 grid grid-cols-3 gap-2 max-lg:grid-cols-2 max-md:grid-cols-1"
-            >
-              {block.images.map((image) => (
-                <button
-                  key={image.alt}
-                  type="button"
-                  className="cursor-pointer appearance-none border-0 bg-transparent p-0 text-left"
-                  onClick={() => onImageOpen(image)}
-                >
-                  <img
-                    className="block aspect-square w-full object-cover"
-                    src={image.src}
-                    alt={image.alt}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  {image.description ? (
-                    <span className="mt-1 block text-left text-sm italic leading-tight text-black/75">
-                      {image.description}
-                    </span>
-                  ) : null}
-                </button>
-              ))}
-            </div>
-          );
-        }
-
-        return (
-          <figure
-            key={`${block.type}-${index}`}
-            className="col-span-9 m-0 max-lg:col-span-10 max-md:col-span-12"
-          >
-            <button
-              type="button"
-              className="cursor-pointer appearance-none border-0 bg-transparent p-0 text-left"
-              onClick={() => onImageOpen({ alt: block.alt, src: block.src })}
-            >
-              <img
-                className="block h-auto w-full"
-                src={block.src}
-                alt={block.alt}
-                loading="lazy"
-                decoding="async"
-              />
-              {block.description ? (
-                <span className="mt-1 block text-left text-sm italic leading-tight text-black/75">
-                  {block.description}
-                </span>
-              ) : null}
-            </button>
-          </figure>
-        );
-      })}
-    </div>
+function getAttributeValue(source: string, attributeName: string) {
+  const match = source.match(
+    new RegExp(`${attributeName}=["']([^"']+)["']`, "i"),
   );
+  return match?.[1] ?? "";
+}
+
+function getPreviewImagesFromHtml(html: string): PreviewImage[] {
+  if (!html) return [];
+
+  if (typeof document !== "undefined") {
+    const template = document.createElement("template");
+    template.innerHTML = html;
+
+    return Array.from(template.content.querySelectorAll("img"))
+      .map((image, index) => {
+        const figure = image.closest("figure");
+        const caption =
+          figure?.querySelector("figcaption")?.textContent?.trim() ?? "";
+
+        return {
+          alt: image.getAttribute("alt") || `Zdjęcie ${index + 1}`,
+          description: caption || undefined,
+          src: image.getAttribute("src") ?? "",
+        };
+      })
+      .filter((image) => image.src);
+  }
+
+  return Array.from(html.matchAll(/<img\b[^>]*>/gi))
+    .map((match, index) => ({
+      alt: getAttributeValue(match[0], "alt") || `Zdjęcie ${index + 1}`,
+      src: getAttributeValue(match[0], "src"),
+    }))
+    .filter((image) => image.src);
 }
 
 export default function Post() {
@@ -387,8 +219,6 @@ export default function Post() {
     };
   }, []);
 
-  const blocks =
-    post && imageSrc ? createMockBlocks(post, imageSrc, galleryImageSrcs) : [];
   const previewImages: PreviewImage[] = [
     ...(post && imageSrc
       ? [
@@ -399,7 +229,13 @@ export default function Post() {
           },
         ]
       : []),
-    ...getBlockPreviewImages(blocks),
+    ...(post
+      ? galleryImageSrcs.map((src, index) => ({
+          alt: `${post.title} - zdjęcie ${index + 2}`,
+          src,
+        }))
+      : []),
+    ...(post ? getPreviewImagesFromHtml(post.content ?? "") : []),
   ];
   const activePreview =
     previewIndex !== null ? previewImages[previewIndex] : undefined;
@@ -413,9 +249,33 @@ export default function Post() {
   const openImagePreview = (image: PreviewImage) => {
     const nextIndex = previewImages.findIndex(
       (previewImage) =>
-        previewImage.src === image.src && previewImage.alt === image.alt,
+        previewImage.src === image.src ||
+        (previewImage.alt === image.alt && previewImage.src === image.src),
     );
     setPreviewIndex(nextIndex >= 0 ? nextIndex : 0);
+  };
+
+  const openPostContentImagePreview = (
+    event: MouseEvent<HTMLDivElement>,
+  ) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    const image = target.closest("img");
+    if (!(image instanceof HTMLImageElement)) return;
+
+    const src = image.getAttribute("src") ?? image.currentSrc;
+    if (!src) return;
+
+    const figure = image.closest("figure");
+    const caption =
+      figure?.querySelector("figcaption")?.textContent?.trim() ?? "";
+
+    openImagePreview({
+      alt: image.getAttribute("alt") || post?.title || "Zdjęcie",
+      description: caption || undefined,
+      src,
+    });
   };
 
   const showPreviousPreviewImage = () => {
@@ -632,7 +492,15 @@ export default function Post() {
                     </div>
                   ) : null}
 
-                  <PostBlocks blocks={blocks} onImageOpen={openImagePreview} />
+                  {post.content ? (
+                    <div
+                      className="wp-block-content wp-block-content-post"
+                      onClick={openPostContentImagePreview}
+                      dangerouslySetInnerHTML={{
+                        __html: sanitizeContentHtml(post.content),
+                      }}
+                    />
+                  ) : null}
                   <button
                     type="button"
                     className="post-back-button sticky bottom-2 z-[999] ml-auto mr-2 flex size-11 cursor-pointer items-center justify-center rounded-full bg-[#eee4d5] text-black/90 shadow-[0_4px_16px_rgba(0,0,0,0.24)] transition-[background-color,color,transform] duration-500 hover:rotate-[360deg] hover:scale-110 hover:text-black"

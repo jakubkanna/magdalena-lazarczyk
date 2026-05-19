@@ -1,20 +1,9 @@
-import wordpressSiteContent from "./wordpress-site-content.json";
-
-export type BioExhibitionColumn = {
-  title: string;
-  items: string[];
-};
-
 export type SiteContent = {
   bio: {
-    portrait: {
-      alt: string;
-      src: string;
-    };
-    paragraphs: string[];
-    exhibitionColumns: BioExhibitionColumn[];
+    html: string;
   };
   contact: {
+    html: string;
     email: string;
     phone: string;
     instagramUrl: string;
@@ -28,109 +17,79 @@ type WordPressPage = {
   };
 };
 
-export const defaultSiteContent = wordpressSiteContent as SiteContent;
+export const defaultSiteContent: SiteContent = {
+  bio: {
+    html: "",
+  },
+  contact: {
+    html: "",
+    email: "",
+    phone: "",
+    instagramUrl: "",
+  },
+};
 
-function isStringArray(value: unknown): value is string[] {
-  return Array.isArray(value) && value.every((item) => typeof item === "string");
-}
+function parseWordPressSiteContent(
+  bioPage: WordPressPage | undefined,
+  contactPage: WordPressPage | undefined,
+): SiteContent | null {
+  const bioHtml = bioPage?.content?.rendered;
+  const contactHtml = contactPage?.content?.rendered;
+  if (!bioHtml || !contactHtml) return null;
 
-function isExhibitionColumns(value: unknown): value is BioExhibitionColumn[] {
-  return (
-    Array.isArray(value) &&
-    value.every(
-      (column) =>
-        typeof column === "object" &&
-        column !== null &&
-        typeof (column as BioExhibitionColumn).title === "string" &&
-        isStringArray((column as BioExhibitionColumn).items),
-    )
-  );
-}
-
-function getRecordValue(value: unknown, key: string) {
-  if (!value || typeof value !== "object") return undefined;
-  return (value as Record<string, unknown>)[key];
-}
-
-function parseWordPressSiteContent(value: unknown): SiteContent | null {
-  if (!value || typeof value !== "object") return null;
-
-  const acf = (value as WordPressPage).acf;
-  if (!acf || typeof acf !== "object") return null;
-
-  const fields = acf as Partial<SiteContent> & {
-    bio_paragraphs?: unknown;
-    bio_exhibition_columns?: unknown;
-    bio_portrait?: { alt?: unknown; url?: unknown };
-    contact_email?: unknown;
-    contact_instagram_url?: unknown;
-    contact_phone?: unknown;
-  };
-
-  const paragraphs = fields.bio?.paragraphs ?? fields.bio_paragraphs;
-  const exhibitionColumns =
-    fields.bio?.exhibitionColumns ?? fields.bio_exhibition_columns;
-  const portrait = fields.bio?.portrait ?? fields.bio_portrait;
-  const email = fields.contact?.email ?? fields.contact_email;
-  const phone = fields.contact?.phone ?? fields.contact_phone;
-  const instagramUrl =
-    fields.contact?.instagramUrl ?? fields.contact_instagram_url;
-  const portraitAlt = getRecordValue(portrait, "alt");
-  const portraitSrc = getRecordValue(portrait, "src");
-  const portraitUrl = getRecordValue(portrait, "url");
-
-  if (
-    !isStringArray(paragraphs) ||
-    !isExhibitionColumns(exhibitionColumns) ||
-    typeof email !== "string" ||
-    typeof phone !== "string" ||
-    typeof instagramUrl !== "string"
-  ) {
-    return null;
-  }
+  const contactAcf =
+    contactPage?.acf && typeof contactPage.acf === "object"
+      ? (contactPage.acf as Record<string, unknown>)
+      : {};
 
   return {
     bio: {
-      portrait: {
-        alt:
-          typeof portraitAlt === "string"
-            ? portraitAlt
-            : defaultSiteContent.bio.portrait.alt,
-        src:
-          typeof portraitSrc === "string"
-            ? portraitSrc
-            : typeof portraitUrl === "string"
-              ? portraitUrl
-              : defaultSiteContent.bio.portrait.src,
-      },
-      paragraphs,
-      exhibitionColumns,
+      html: bioHtml,
     },
     contact: {
-      email,
-      phone,
-      instagramUrl,
+      html: contactHtml,
+      email:
+        typeof contactAcf.contact_email === "string"
+          ? contactAcf.contact_email
+          : defaultSiteContent.contact.email,
+      phone:
+        typeof contactAcf.contact_phone === "string"
+          ? contactAcf.contact_phone
+          : defaultSiteContent.contact.phone,
+      instagramUrl:
+        typeof contactAcf.contact_instagram_url === "string"
+          ? contactAcf.contact_instagram_url
+          : defaultSiteContent.contact.instagramUrl,
     },
   };
 }
 
 export async function fetchSiteContent(): Promise<SiteContent> {
-  const wordpressApiUrl = import.meta.env.VITE_WORDPRESS_API_URL as
+  const configuredUrl = import.meta.env.VITE_WORDPRESS_API_URL as
     | string
     | undefined;
+  const wordpressApiUrl =
+    configuredUrl || (import.meta.env.DEV ? "http://localhost:8081" : undefined);
 
   if (!wordpressApiUrl) {
     return defaultSiteContent;
   }
 
   try {
-    const response = await fetch(
-      `${wordpressApiUrl.replace(/\/$/, "")}/wp-json/wp/v2/pages?slug=bio`,
-    );
-    if (!response.ok) return defaultSiteContent;
+    const apiBase = wordpressApiUrl.replace(/\/$/, "");
+    const [bioResponse, contactResponse] = await Promise.all([
+      fetch(`${apiBase}/wp-json/wp/v2/pages?slug=bio`),
+      fetch(`${apiBase}/wp-json/wp/v2/pages?slug=contact`),
+    ]);
+    if (!bioResponse.ok || !contactResponse.ok) return defaultSiteContent;
 
-    const pages = (await response.json()) as WordPressPage[];
-    const content = parseWordPressSiteContent(pages[0]);
+    const [bioPages, contactPages] = (await Promise.all([
+      bioResponse.json(),
+      contactResponse.json(),
+    ])) as [WordPressPage[], WordPressPage[]];
+    const bioPage = bioPages[0];
+    const contactPage = contactPages[0];
+    const content = parseWordPressSiteContent(bioPage, contactPage);
     return content ?? defaultSiteContent;
   } catch {
     return defaultSiteContent;

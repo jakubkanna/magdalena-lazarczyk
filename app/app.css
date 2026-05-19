@@ -83,6 +83,167 @@ body {
     sans-serif;
 }
 
+.wp-block-content {
+  color: inherit;
+}
+
+.wp-block-content > * {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+.wp-block-content p,
+.wp-block-content li {
+  line-height: 1.2;
+}
+
+.wp-block-content a {
+  text-decoration: underline;
+  text-underline-offset: 0.08em;
+}
+
+.wp-block-content figure {
+  margin: 0 0 0.75rem;
+}
+
+.wp-block-content img {
+  display: block;
+  height: auto;
+  max-width: 100%;
+}
+
+.wp-block-content iframe {
+  display: block;
+  border: 0;
+  max-width: 100%;
+}
+
+.wp-block-content blockquote {
+  margin: 3rem 0;
+  max-width: 42rem;
+  padding-left: 1rem;
+  font-size: clamp(1.75rem, 4vw, 4rem);
+  font-style: italic;
+  line-height: 0.95;
+}
+
+.wp-block-content .wp-block-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.wp-block-content .wp-block-gallery figure {
+  margin: 0;
+}
+
+.wp-block-content .wp-block-gallery img {
+  aspect-ratio: 1;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.wp-block-content .wp-block-embed,
+.wp-block-content .wp-block-embed__wrapper {
+  width: 100%;
+}
+
+.wp-block-content .wp-block-embed__wrapper {
+  position: relative;
+  aspect-ratio: 16 / 9;
+}
+
+.wp-block-content .wp-block-embed__wrapper iframe,
+.wp-block-content iframe[src*="vimeo.com"] {
+  width: 100%;
+  height: 100%;
+}
+
+.wp-block-content .wp-block-embed__wrapper iframe {
+  position: absolute;
+  inset: 0;
+}
+
+.wp-block-content-post {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 3rem 0.5rem;
+}
+
+.wp-block-content-post img {
+  cursor: pointer;
+}
+
+.wp-block-content-post > * {
+  grid-column: span 8 / span 8;
+  margin-bottom: 0;
+}
+
+.wp-block-content-post > .wp-block-gallery {
+  grid-column: 1 / -1;
+}
+
+.wp-block-content-post > .wp-block-embed {
+  grid-column: 1 / -1;
+}
+
+.wp-block-content-bio {
+  columns: 2;
+  column-gap: 1.25rem;
+}
+
+.wp-block-content-bio > * {
+  break-inside: avoid;
+}
+
+.wp-block-content-bio .wp-block-image {
+  float: right;
+  margin-left: 1.25rem;
+  width: calc(100vw / 12);
+}
+
+.wp-block-content-bio h3 {
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.wp-block-content-bio ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.wp-block-content-contact {
+  text-align: right;
+}
+
+.wp-block-content-contact > * {
+  margin-bottom: 0.25rem;
+}
+
+@media (max-width: 1023px) {
+  .wp-block-content-bio {
+    columns: 1;
+  }
+}
+
+@media (max-width: 767px) {
+  .wp-block-content-post > * {
+    grid-column: 1 / -1;
+  }
+
+  .wp-block-content .wp-block-gallery {
+    grid-template-columns: 1fr;
+  }
+
+  .wp-block-content-bio .wp-block-image {
+    float: none;
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
 .page-container-enter {
   animation: page-container-enter 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
   will-change: transform;

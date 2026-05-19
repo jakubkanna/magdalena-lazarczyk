@@ -14,24 +14,17 @@ type BioContactPanelProps = {
   textColorClass?: "text-black/75" | "text-black/90";
 };
 
-const tooltipClass =
-  "absolute right-0 top-full z-[9999] mt-1 rounded-full bg-[#eee4d5] px-2 py-1 text-xs leading-none shadow-[0_2px_8px_rgba(0,0,0,0.16)]";
 const infoLabelClass = "text-sm font-normal leading-none";
 
 export function BioContactPanel({
   bioOpen,
   contactOpen,
-  copiedContact,
   onClose,
-  onCopyContact,
   siteContent,
   textColorClass = "text-black/75",
 }: BioContactPanelProps) {
   const panelRef = useRef<HTMLElement | null>(null);
   const { bio, contact } = siteContent;
-  const portraitSrc = bio.portrait.src.startsWith("http")
-    ? bio.portrait.src
-    : `${import.meta.env.BASE_URL}${bio.portrait.src}`;
   const isOpen = bioOpen || contactOpen;
 
   useEffect(() => {
@@ -67,47 +60,15 @@ export function BioContactPanel({
             key="bio"
             className={`info-panel-fade bio-scroll-fade h-full overflow-y-auto pb-12 pr-2 text-lg leading-[1.2] ${textColorClass} [scrollbar-color:#9a9a9a_transparent] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-[#e8dfd0] [&::-webkit-scrollbar-thumb]:bg-[#9a9a9a] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-2.5`}
           >
-            <div className="grid grid-cols-[minmax(0,1fr)_calc(100vw/12)] gap-5 max-md:grid-cols-1">
-              <div className="columns-2 gap-5 max-lg:columns-1">
-                <h2 className={`mb-2 mt-0 ${infoLabelClass} ${textColorClass}`}>
-                  Bio
-                </h2>
-                {bio.paragraphs.map((paragraph) => (
-                  <div
-                    key={paragraph.slice(0, 20)}
-                    className="mb-3 mt-0 break-inside-avoid"
-                    dangerouslySetInnerHTML={{
-                      __html: sanitizeContentHtml(paragraph),
-                    }}
-                  />
-                ))}
-              </div>
-              <img
-                className="block h-auto w-full self-start object-cover"
-                src={portraitSrc}
-                alt={bio.portrait.alt}
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
-            <div className="mt-5 grid grid-cols-3 gap-5 pt-4 max-md:grid-cols-1">
-              {bio.exhibitionColumns.map((column) => (
-                <section key={column.title}>
-                  <h2
-                    className={`mb-2 mt-0 ${infoLabelClass} ${textColorClass}`}
-                  >
-                    {column.title}
-                  </h2>
-                  <ul className="m-0 list-none p-0">
-                    {column.items.map((item) => (
-                      <li key={item} className="mb-2">
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              ))}
-            </div>
+            <h2 className={`mb-2 mt-0 ${infoLabelClass} ${textColorClass}`}>
+              Bio
+            </h2>
+            <div
+              className="wp-block-content wp-block-content-bio"
+              dangerouslySetInnerHTML={{
+                __html: sanitizeContentHtml(bio.html),
+              }}
+            />
           </div>
         ) : null}
         {contactOpen ? (
@@ -118,38 +79,12 @@ export function BioContactPanel({
             <h2 className={`mb-2 mt-0 ${infoLabelClass} ${textColorClass}`}>
               Kontakt
             </h2>
-            <button
-              type="button"
-              className={`relative w-fit cursor-pointer appearance-none border-0 bg-transparent p-0 text-right underline transition-colors duration-200 hover:text-black ${textColorClass}`}
-              onClick={() => onCopyContact(contact.email, "email")}
-            >
-              {contact.email}
-              {copiedContact === "email" ? (
-                <span className={`${tooltipClass} ${textColorClass}`}>
-                  skopiowano
-                </span>
-              ) : null}
-            </button>
-            <button
-              type="button"
-              className={`relative w-fit cursor-pointer appearance-none border-0 bg-transparent p-0 text-right underline transition-colors duration-200 hover:text-black ${textColorClass}`}
-              onClick={() => onCopyContact(contact.phone, "phone")}
-            >
-              {contact.phone}
-              {copiedContact === "phone" ? (
-                <span className={`${tooltipClass} ${textColorClass}`}>
-                  skopiowano
-                </span>
-              ) : null}
-            </button>
-            <a
-              className={`w-fit underline transition-colors duration-200 hover:text-black ${textColorClass}`}
-              href={contact.instagramUrl}
-              target="_blank"
-              rel="noreferrer"
-            >
-              instagram
-            </a>
+            <div
+              className="wp-block-content wp-block-content-contact"
+              dangerouslySetInnerHTML={{
+                __html: sanitizeContentHtml(contact.html),
+              }}
+            />
           </div>
         ) : null}
       </div>

@@ -9,8 +9,7 @@
     "build": "react-router build && node scripts/prepare-github-pages.mjs",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
-    "typecheck": "react-router typegen && tsc",
-    "validate:html": "node scripts/validate-html-content.mjs"
+    "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
     "@react-router/node": "7.14.0",

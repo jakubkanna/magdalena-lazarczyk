@@ -9,6 +9,32 @@ npm install
 npm run dev
 ```
 
+## Local WordPress Backend
+
+This repository includes a fresh local WordPress container for headless CMS work.
+
+Start WordPress and MySQL:
+
+```bash
+docker compose up -d
+```
+
+WordPress will be available at:
+
+```text
+http://localhost:8081
+```
+
+Complete the WordPress installer in the browser, then use the REST API from the React app with:
+
+```bash
+VITE_WORDPRESS_API_URL=http://localhost:8081 npm run dev
+```
+
+In local development the frontend defaults to `http://localhost:8081` when `VITE_WORDPRESS_API_URL` is not set.
+
+The containers use Docker volumes named `magdalena-lazarczyk_wordpress_data` and `magdalena-lazarczyk_wordpress_db_data`, so CMS files, uploads, plugins, and database content persist between restarts.
+
 ## Build
 
 ```bash
@@ -61,30 +87,27 @@ For client-side routes such as `/post/example`, add an `.htaccess` file in the s
 
 If using a different folder, update `RewriteBase` and the `RewriteRule` target to match it. Do not replace the main WordPress `.htaccess` unless the app is intentionally hosted at the domain root.
 
-To use WordPress as the editable CMS for bio/contact content, set this before building:
+Set the WordPress REST API base URL before building for production:
 
 ```bash
 VITE_WORDPRESS_API_URL=https://example.com npm run build
 ```
 
-Then create a WordPress page with slug `bio` and expose the expected ACF fields through the REST API. If that environment variable is not set, the app uses `app/data/wordpress-site-content.json` as fallback content.
+The backend should expose:
 
-## Supported WordPress Blocks
+- pages with slugs `bio` and `contact`; their WordPress block content is rendered in the info panels
+- project posts assigned to the `Teatr`, `Sztuka`, or `Warsztaty` categories
+- featured images for project cards and project hero images
+- ACF fields on posts for `project_venue`, `project_place`, `project_year`, `project_credits`, `project_gallery`, and `project_external_url`
+- ACF fields on the `contact` page for `contact_email`, `contact_phone`, and `contact_instagram_url`
 
-The post page currently supports these mocked WordPress block shapes:
+## WordPress Blocks
 
-- `paragraph`: single text block.
-- `columns`: multi-column text content.
-- `quote`: right-aligned pull quote.
-- `grid`: structured metadata/credits grid.
-- `image`: single image block.
-- `gallery`: multiple images in one row on desktop, stacked on mobile.
-
-Post images open in an image preview gallery on click. The preview supports close, previous/next navigation, and keyboard controls: `Escape`, `ArrowLeft`, `ArrowRight`.
+Project, bio, and contact body content is loaded from WordPress block HTML via the REST API. Project images and gallery images inside post blocks open in an image preview gallery on click. The preview supports close, previous/next navigation, and keyboard controls: `Escape`, `ArrowLeft`, `ArrowRight`.
 
 ## Editable Bio And Contact Content
 
-Bio and contact content is loaded through `app/data/site-content.ts`. In development it falls back to `app/data/wordpress-site-content.json`; in WordPress-backed environments set `VITE_WORDPRESS_API_URL` and expose a WordPress page with slug `bio` whose ACF fields match either the nested `bio`/`contact` shape or the flat field names used in that loader.
+Bio and contact content is loaded through `app/data/site-content.ts` from WordPress pages. Edit those pages with normal WordPress blocks.
 
 ## GitHub Pages
 
