@@ -167,7 +167,7 @@ function PostBlocks({
           return (
             <div
               key={`${block.type}-${index}`}
-              className="col-span-8 m-0 text-lg leading-[1.2] max-lg:col-span-10 max-md:col-span-12"
+              className="col-span-8 m-0 text-md leading-[1.2] max-lg:col-span-10 max-md:col-span-12"
               dangerouslySetInnerHTML={{
                 __html: sanitizeContentHtml(block.content),
               }}
@@ -179,7 +179,7 @@ function PostBlocks({
           return (
             <div
               key={`${block.type}-${index}`}
-              className="col-span-12 columns-2 gap-4 text-lg leading-[1.2] max-md:columns-1"
+              className="col-span-12 columns-2 gap-4 text-md leading-[1.2] max-md:columns-1"
             >
               {block.columns.map((column) => (
                 <div
@@ -585,8 +585,14 @@ export default function Post() {
               className="post-scrollbar absolute inset-0 overflow-y-auto bg-white px-2 md:px-4 pb-4 pt-5 text-black/90"
             >
               {isLoading ? (
-                <div className="grid h-full place-items-center">
-                  <span className="h-7 w-7 animate-spin rounded-full border-2 border-black/20 border-t-black" />
+                <div className="grid h-full place-items-center" role="status">
+                  <img
+                    className="block size-8 animate-spin"
+                    src={`${import.meta.env.BASE_URL}1455.png`}
+                    alt=""
+                    aria-hidden="true"
+                  />
+                  <span className="sr-only">Ładowanie</span>
                 </div>
               ) : post ? (
                 <>

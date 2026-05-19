@@ -175,9 +175,7 @@ function SidebarInfoButtons({
       <button
         type="button"
         className={`inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#eee4d5] p-1 text-base leading-none text-black/75 shadow-[0_2px_8px_rgba(0,0,0,0.2)] transition-[background-color,color] duration-200 hover:bg-[#e0d6c7] hover:text-black ${
-          compact
-            ? "size-7 max-md:size-8"
-            : "size-7 justify-self-end"
+          compact ? "size-7 max-md:size-8" : "size-7 justify-self-end"
         } ${contactOpen ? "bg-[#dfd5c6] hover:bg-[#d2c7b8]" : ""}`}
         onClick={onContactClick}
         aria-label="Kontakt"
@@ -266,7 +264,7 @@ export function Sidebar({
           <div className="flex w-full flex-col items-center gap-2 max-md:w-auto max-md:min-w-0 max-md:flex-row max-md:flex-nowrap max-md:justify-between">
             <button
               type="button"
-              className={`sidebar-mini-logo flex size-7 shrink-0 cursor-pointer appearance-none items-center justify-center rounded-full bg-transparent p-0 text-center text-xl font-normal leading-none transition-[background-color,color,box-shadow,transform] duration-500 max-md:size-8 max-md:text-3xl ${sidebarTextClass} ${sidebarHoverClass}`}
+              className={`sidebar-mini-logo flex size-11 shrink-0 cursor-pointer appearance-none items-center justify-center rounded-full bg-[#eee4d5] p-3 text-center text-2xl font-normal leading-none shadow-[0_2px_8px_rgba(0,0,0,0.2)] transition-[background-color,color,box-shadow,transform] duration-500 max-md:size-14 max-md:text-4xl ${sidebarTextClass} ${sidebarHoverClass}`}
               onClick={onHomeClick}
               onMouseEnter={() => setLogoAnimating(true)}
               onMouseLeave={() => setLogoAnimating(false)}
@@ -293,7 +291,12 @@ export function Sidebar({
               className="mt-14 flex size-7 shrink-0 items-center justify-center max-md:mt-0 max-md:size-8"
               aria-label="Ładowanie"
             >
-              <span className="block size-4 animate-spin rounded-full border-2 border-[#202020]/25 border-t-[#202020]" />
+              <img
+                className="block size-5 animate-spin max-md:size-6"
+                src={`${import.meta.env.BASE_URL}1455.png`}
+                alt=""
+                aria-hidden="true"
+              />
             </span>
           ) : (
             <button

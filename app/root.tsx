@@ -82,8 +82,10 @@ export default function App() {
           className="pointer-events-none fixed inset-0 z-[1500] flex items-center justify-center"
           role="status"
         >
-          <span
-            className="h-7 w-7 animate-spin rounded-full border-2 border-black/20 border-t-black"
+          <img
+            className="block size-8 animate-spin"
+            src={`${import.meta.env.BASE_URL}1455.png`}
+            alt=""
             aria-hidden="true"
           />
           <span className="sr-only">Ładowanie</span>
@@ -95,9 +97,9 @@ export default function App() {
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   const navigate = useNavigate();
-  const [sidebarVariant, setSidebarVariant] = useState<
-    "default" | "minimized"
-  >(() => (isMobileViewport() ? "minimized" : "default"));
+  const [sidebarVariant, setSidebarVariant] = useState<"default" | "minimized">(
+    () => (isMobileViewport() ? "minimized" : "default"),
+  );
   let message = "Błąd";
   let details = "Wystąpił nieoczekiwany błąd.";
   let stack: string | undefined;

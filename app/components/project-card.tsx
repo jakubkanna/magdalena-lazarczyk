@@ -84,8 +84,10 @@ export function ProjectCard({ post, imageSrc }: ProjectCardProps) {
               className="pointer-events-none absolute inset-0 z-20 grid place-items-center bg-white/35"
               role="status"
             >
-              <span
-                className="size-7 animate-spin rounded-full border-2 border-black/20 border-t-black"
+              <img
+                className="block size-8 animate-spin"
+                src={`${import.meta.env.BASE_URL}1455.png`}
+                alt=""
                 aria-hidden="true"
               />
               <span className="sr-only">Ładowanie</span>
