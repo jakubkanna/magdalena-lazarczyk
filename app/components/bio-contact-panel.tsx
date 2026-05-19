@@ -5,11 +5,9 @@ import { sanitizeContentHtml } from "../utils/html-content";
 type CopiedContact = "email" | "phone" | null;
 
 type BioContactPanelProps = {
-  bioExpanded: boolean;
   bioOpen: boolean;
   contactOpen: boolean;
   copiedContact: CopiedContact;
-  onBioExpand: () => void;
   onClose: () => void;
   onCopyContact: (value: string, key: Exclude<CopiedContact, null>) => void;
   siteContent: SiteContent;
@@ -21,11 +19,9 @@ const tooltipClass =
 const infoLabelClass = "text-sm font-normal leading-none";
 
 export function BioContactPanel({
-  bioExpanded,
   bioOpen,
   contactOpen,
   copiedContact,
-  onBioExpand,
   onClose,
   onCopyContact,
   siteContent,
@@ -33,12 +29,10 @@ export function BioContactPanel({
 }: BioContactPanelProps) {
   const panelRef = useRef<HTMLElement | null>(null);
   const { bio, contact } = siteContent;
-  const firstBioParagraph = bio.paragraphs[0] ?? "";
   const portraitSrc = bio.portrait.src.startsWith("http")
     ? bio.portrait.src
     : `${import.meta.env.BASE_URL}${bio.portrait.src}`;
   const isOpen = bioOpen || contactOpen;
-  const isExtended = bioExpanded || contactOpen;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -64,34 +58,14 @@ export function BioContactPanel({
     <section
       ref={panelRef}
       className={`overflow-hidden bg-[#e8dfd0] px-2.5 transition-all duration-500 ease-out ${
-        isOpen ? (isExtended ? "h-svh py-2.5" : "h-auto py-2.5") : "h-0 py-0"
+        isOpen ? "h-svh py-2.5" : "h-0 py-0"
       }`}
     >
       <div className="flex h-full flex-col p-4">
-        {bioOpen && !bioExpanded ? (
+        {bioOpen ? (
           <div
-            key="bio-preview"
-            className="info-panel-fade flex h-full flex-col"
-          >
-            <div
-              className={`m-0 text-lg italic leading-[1.2] ${textColorClass}`}
-              dangerouslySetInnerHTML={{
-                __html: sanitizeContentHtml(firstBioParagraph),
-              }}
-            />
-            <button
-              type="button"
-              className={`mb-0 ml-auto mt-auto cursor-pointer ${infoLabelClass} transition-colors duration-200 hover:text-black ${textColorClass}`}
-              onClick={onBioExpand}
-            >
-              <span className="button-text-shake">czytaj dalej</span>
-            </button>
-          </div>
-        ) : null}
-        {bioExpanded ? (
-          <div
-            key="bio-expanded"
-            className={`info-panel-fade bio-scroll-fade mt-2 overflow-y-auto pb-12 pr-2 text-lg leading-[1.2] ${textColorClass} [scrollbar-color:#9a9a9a_transparent] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-[#e8dfd0] [&::-webkit-scrollbar-thumb]:bg-[#9a9a9a] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-2.5`}
+            key="bio"
+            className={`info-panel-fade bio-scroll-fade h-full overflow-y-auto pb-12 pr-2 text-lg leading-[1.2] ${textColorClass} [scrollbar-color:#9a9a9a_transparent] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-[#e8dfd0] [&::-webkit-scrollbar-thumb]:bg-[#9a9a9a] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-2.5`}
           >
             <div className="grid grid-cols-[minmax(0,1fr)_calc(100vw/12)] gap-5 max-md:grid-cols-1">
               <div className="columns-2 gap-5 max-lg:columns-1">

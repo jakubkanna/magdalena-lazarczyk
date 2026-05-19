@@ -257,7 +257,7 @@ export function Sidebar({
     <aside
       ref={sidebarRef}
       className={`relative z-[5] h-full shrink-0 overflow-x-hidden overflow-y-auto bg-[#e8dfd0] transition-[width,height] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] max-md:w-full max-md:overflow-hidden ${
-        variant === "minimized" ? "w-20" : "w-[calc(100vw/6)]"
+        variant === "minimized" ? "w-[10vw]" : "w-[calc(100vw/6)]"
       } ${variant === "minimized" ? "max-md:h-auto" : "max-md:h-svh"}`}
       aria-label="Nawigacja"
     >

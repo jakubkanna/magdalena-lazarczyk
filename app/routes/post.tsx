@@ -82,7 +82,17 @@ type PreviewImage = {
 function createMockBlocks(
   post: PortfolioPostViewModel,
   imageSrc: string,
+  galleryImageSrcs: string[],
 ): MockBlock[] {
+  const galleryImages = [imageSrc, ...galleryImageSrcs].map((src, index) => ({
+    src,
+    alt: `${post.title} - zdjęcie ${index + 1}`,
+    description:
+      index === 0
+        ? "Opis zdjęcia z bloku galerii WordPress."
+        : "Opis zdjęcia przekazany z danych WordPress.",
+  }));
+
   return [
     {
       type: "paragraph",
@@ -117,18 +127,7 @@ Sed condimentum diam id quam feugiat lacinia. Sed ante velit, congue gravida nul
     },
     {
       type: "gallery",
-      images: [
-        {
-          src: imageSrc,
-          alt: `${post.title} - zdjęcie 1`,
-          description: "Opis zdjęcia z bloku galerii WordPress.",
-        },
-        {
-          src: imageSrc,
-          alt: `${post.title} - zdjęcie 2`,
-          description: "Drugi opis zdjęcia przekazany z danych WordPress.",
-        },
-      ],
+      images: galleryImages,
     },
     {
       type: "paragraph",
@@ -225,7 +224,7 @@ function PostBlocks({
           return (
             <div
               key={`${block.type}-${index}`}
-              className="col-span-9 grid grid-cols-2 gap-2 max-lg:col-span-10 max-md:col-span-12 max-md:grid-cols-1"
+              className="col-span-12 grid grid-cols-3 gap-2 max-lg:grid-cols-2 max-md:grid-cols-1"
             >
               {block.images.map((image) => (
                 <button
@@ -235,7 +234,7 @@ function PostBlocks({
                   onClick={() => onImageOpen(image)}
                 >
                   <img
-                    className="block h-auto w-full"
+                    className="block aspect-square w-full object-cover"
                     src={image.src}
                     alt={image.alt}
                     loading="lazy"
@@ -300,12 +299,12 @@ export default function Post() {
     : "";
   const [post, setPost] = useState<PortfolioPostViewModel | null>(initialPost);
   const [imageSrc, setImageSrc] = useState(initialImageSrc);
+  const [galleryImageSrcs, setGalleryImageSrcs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(!initialPost || !initialImageSrc);
   const [sidebarVariant, setSidebarVariant] = useState<"default" | "minimized">(
     "minimized",
   );
   const [bioOpen, setBioOpen] = useState(false);
-  const [bioExpanded, setBioExpanded] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const [copiedContact, setCopiedContact] = useState<"email" | "phone" | null>(
     null,
@@ -336,10 +335,18 @@ export default function Post() {
       const nextImageSrc = nextPost
         ? await loadPortfolioImageSrc(nextPost.image)
         : "";
+      const nextGalleryImageSrcs = nextPost?.gallery
+        ? (
+            await Promise.all(
+              nextPost.gallery.map((image) => loadPortfolioImageSrc(image)),
+            )
+          ).filter(Boolean)
+        : [];
 
       if (!mounted) return;
       setPost(nextPost);
       setImageSrc(nextImageSrc);
+      setGalleryImageSrcs(nextGalleryImageSrcs);
       setIsLoading(false);
     }
 
@@ -380,7 +387,8 @@ export default function Post() {
     };
   }, []);
 
-  const blocks = post && imageSrc ? createMockBlocks(post, imageSrc) : [];
+  const blocks =
+    post && imageSrc ? createMockBlocks(post, imageSrc, galleryImageSrcs) : [];
   const previewImages: PreviewImage[] = [
     ...(post && imageSrc
       ? [
@@ -463,7 +471,6 @@ export default function Post() {
     if (isCategoryTransitioning) return;
     setSidebarVariant("minimized");
     setBioOpen(false);
-    setBioExpanded(false);
     setContactOpen(false);
     setPendingCategory(category);
     setIsCategoryTransitioning(true);
@@ -482,7 +489,6 @@ export default function Post() {
 
   const closeBio = () => {
     setBioOpen(false);
-    setBioExpanded(false);
   };
 
   const closeContact = () => {
@@ -543,7 +549,6 @@ export default function Post() {
               setContactOpen(false);
               setCopiedContact(null);
               setBioOpen(true);
-              setBioExpanded(false);
             }
             if (isMobileViewport()) setSidebarVariant("minimized");
           }}
@@ -552,7 +557,6 @@ export default function Post() {
               closeContact();
             } else {
               setBioOpen(false);
-              setBioExpanded(false);
               setContactOpen(true);
             }
             if (isMobileViewport()) setSidebarVariant("minimized");
@@ -562,12 +566,10 @@ export default function Post() {
         <div className="relative z-[6] h-full min-h-0 min-w-0 flex flex-1 flex-col bg-[#e8dfd0] shadow-[-12px_0_18px_rgba(0,0,0,0.22)]">
           <BioContactPanel
             bioOpen={bioOpen}
-            bioExpanded={bioExpanded}
             contactOpen={contactOpen}
             copiedContact={copiedContact}
             siteContent={siteContent}
             textColorClass="text-black/90"
-            onBioExpand={() => setBioExpanded(true)}
             onClose={() => {
               closeBio();
               closeContact();
@@ -580,7 +582,7 @@ export default function Post() {
               animationKey={`post-${params.slug ?? "missing"}`}
               animate
               ready={!isLoading}
-              className="post-scrollbar absolute inset-0 overflow-y-auto bg-white p-4 text-black/90"
+              className="post-scrollbar absolute inset-0 overflow-y-auto bg-white px-2 md:px-4 pb-4 pt-5 text-black/90"
             >
               {isLoading ? (
                 <div className="grid h-full place-items-center">
@@ -588,11 +590,11 @@ export default function Post() {
                 </div>
               ) : post ? (
                 <>
-                  <header className="grid grid-cols-12 gap-2 pb-2 pt-3">
-                    <h1 className="post-title col-span-12 m-0 text-7xl leading-[0.94] font-normal text-black/90">
+                  <header className="grid grid-cols-12 gap-2 pb-2">
+                    <h1 className="post-title col-span-12 m-0 text-2xl leading-[0.94] font-normal italic text-black/90">
                       {post.title}
                     </h1>
-                    <div className="col-span-12 grid pb-2 text-right text-sm leading-tight">
+                    <div className="col-span-12 grid py-12 px-2 text-right text-xs leading-tight">
                       <span>{post.venue}</span>
                       <span>
                         {post.place}, {post.year}

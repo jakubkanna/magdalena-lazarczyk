@@ -80,7 +80,6 @@ export default function Home() {
     },
   );
   const [bioOpen, setBioOpen] = useState(false);
-  const [bioExpanded, setBioExpanded] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const [copiedContact, setCopiedContact] = useState<"email" | "phone" | null>(
     null,
@@ -170,7 +169,6 @@ export default function Home() {
 
   const closeBio = () => {
     setBioOpen(false);
-    setBioExpanded(false);
   };
 
   const closeContact = () => {
@@ -230,7 +228,7 @@ export default function Home() {
     posts.filter((post) => post.category === (category as PortfolioCategory));
 
   const getContainerColor = (category: (typeof sections)[number] | null) =>
-    category ? categoryColors[category] : "#e8dfd0";
+    category ? categoryColors[category] : "#85BBEB";
 
   const copyContactValue = async (value: string, key: "email" | "phone") => {
     try {
@@ -253,11 +251,18 @@ export default function Home() {
     }, 1400);
   };
 
-  const renderMainContent = (
-    category: (typeof sections)[number] | null,
-  ) => {
+  const renderMainContent = (category: (typeof sections)[number] | null) => {
     if (!category) {
-      return null;
+      return (
+        <div className="grid h-full w-full place-items-center">
+          <img
+            className="block w-[10%] max-w-full"
+            src={`${import.meta.env.BASE_URL}1455.png`}
+            alt=""
+            aria-hidden="true"
+          />
+        </div>
+      );
     }
 
     return (
@@ -300,7 +305,6 @@ export default function Home() {
               setContactOpen(false);
               setCopiedContact(null);
               setBioOpen(true);
-              setBioExpanded(false);
             }
             if (isMobileViewport()) setSidebarVariant("minimized");
           }}
@@ -309,21 +313,18 @@ export default function Home() {
               closeContact();
             } else {
               setBioOpen(false);
-              setBioExpanded(false);
               setContactOpen(true);
             }
             if (isMobileViewport()) setSidebarVariant("minimized");
           }}
         />
 
-        <div className="relative z-[6] h-full min-h-0 min-w-0 flex flex-1 flex-col bg-[#e8dfd0] shadow-[-12px_0_18px_rgba(0,0,0,0.22)]">
+        <div className="relative z-[6] h-full min-h-0 min-w-0 flex flex-1 flex-col bg-[#85BBEB] shadow-[-12px_0_18px_rgba(0,0,0,0.22)]">
           <BioContactPanel
             bioOpen={bioOpen}
-            bioExpanded={bioExpanded}
             contactOpen={contactOpen}
             copiedContact={copiedContact}
             siteContent={siteContent}
-            onBioExpand={() => setBioExpanded(true)}
             onClose={closeInfoPanels}
             onCopyContact={(value, key) => void copyContactValue(value, key)}
           />

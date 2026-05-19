@@ -8,6 +8,7 @@ export type PortfolioPost = {
   year: string;
   credits: string[];
   image: string;
+  gallery?: string[];
   category?: PortfolioCategory;
   content?: string;
   externalUrl?: string;
