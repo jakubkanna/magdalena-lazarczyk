@@ -264,7 +264,7 @@ export function Sidebar({
           <div className="flex w-full flex-col items-center gap-2 max-md:w-auto max-md:min-w-0 max-md:flex-row max-md:flex-nowrap max-md:justify-between">
             <button
               type="button"
-              className={`sidebar-mini-logo flex size-11 shrink-0 cursor-pointer appearance-none items-center justify-center rounded-full bg-[#eee4d5] p-3 text-center text-2xl font-normal leading-none shadow-[0_2px_8px_rgba(0,0,0,0.2)] transition-[background-color,color,box-shadow,transform] duration-500 max-md:size-14 max-md:text-4xl ${sidebarTextClass} ${sidebarHoverClass}`}
+              className={`sidebar-mini-logo flex size-11 shrink-0 cursor-pointer appearance-none items-center justify-center rounded-full bg-[#eee4d5] p-3 text-center text-2xl font-normal leading-none  transition-[background-color,color,box-shadow,transform] duration-500 max-md:size-14 max-md:text-4xl ${sidebarTextClass} ${sidebarHoverClass}`}
               onClick={onHomeClick}
               onMouseEnter={() => setLogoAnimating(true)}
               onMouseLeave={() => setLogoAnimating(false)}
