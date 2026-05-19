@@ -8,6 +8,14 @@
   src: url("/ABCDiatypeRoundedVariable-Trial.ttf") format("truetype");
 }
 
+@font-face {
+  font-family: "ABCDiatypePlain";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/ABCDiatypeVariable-Trial.ttf") format("truetype");
+}
+
 @theme {
   --font-sans:
     "ABCDiatype", "Nunito", ui-sans-serif, system-ui, sans-serif,
@@ -67,6 +75,12 @@ body {
 .post-scrollbar::-webkit-scrollbar-thumb {
   background: rgb(0 0 0 / 0.3);
   border-radius: 999px;
+}
+
+.post-title {
+  font-family:
+    "ABCDiatypePlain", "ABCDiatype", "Nunito", ui-sans-serif, system-ui,
+    sans-serif;
 }
 
 .page-container-enter {

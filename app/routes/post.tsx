@@ -589,7 +589,7 @@ export default function Post() {
               ) : post ? (
                 <>
                   <header className="grid grid-cols-12 gap-2 pb-2 pt-3">
-                    <h1 className="col-span-12 m-0 text-7xl leading-[0.94] font-normal text-black/90">
+                    <h1 className="post-title col-span-12 m-0 text-7xl leading-[0.94] font-normal text-black/90">
                       {post.title}
                     </h1>
                     <div className="col-span-12 grid pb-2 text-right text-sm leading-tight">

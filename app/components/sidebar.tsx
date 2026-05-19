@@ -92,7 +92,7 @@ function CategoryList({
             <button
               type="button"
               onClick={() => onCategorySelect(section)}
-              className={`relative cursor-pointer border transition-colors duration-200 ${compact ? "bg-transparent px-2 text-sm [writing-mode:vertical-rl] [transform:rotate(180deg)]" : "flex h-full w-full items-center justify-end bg-[#eee4d5] px-3 py-4 text-right text-base shadow-[0_4px_16px_rgba(0,0,0,0.18)] hover:bg-[#e0d6c7] max-md:justify-center max-md:text-center"} appearance-none font-normal leading-none ${inactiveHoverClass} ${compact ? "" : "max-md:text-xl max-md:[writing-mode:horizontal-tb] max-md:[transform:none]"} ${
+              className={`relative cursor-pointer border transition-colors duration-200 ${compact ? "bg-transparent px-2 text-sm [writing-mode:vertical-rl] [transform:rotate(180deg)]" : "flex h-full w-full items-center justify-center bg-[#eee4d5] px-3 py-4 text-center text-base shadow-[0_4px_16px_rgba(0,0,0,0.18)] hover:bg-[#e0d6c7]"} appearance-none font-normal leading-none ${inactiveHoverClass} ${compact ? "" : "max-md:text-xl max-md:[writing-mode:horizontal-tb] max-md:[transform:none]"} ${
                 isActive
                   ? compact
                     ? "rounded-full border-current px-3 py-2 shadow-[0_2px_8px_rgba(0,0,0,0.2)]"
