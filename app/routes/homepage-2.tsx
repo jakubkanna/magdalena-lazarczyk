@@ -7,10 +7,11 @@ import { defaultSiteContent, fetchSiteContent } from "../data/site-content";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Homepage 2 | Magdalena Łazarczyk" },
+    { title: "Magdalena Łazarczyk" },
     {
       name: "description",
-      content: "Testowa strona główna Magdalena Łazarczyk.",
+      content:
+        "Portfolio Magdaleny Łazarczyk - scenografia, kostiumy, teatr, sztuka i warsztaty.",
     },
   ];
 }
@@ -149,7 +150,7 @@ export default function Homepage2() {
           showSpinner={false}
           bioOpen={bioOpen}
           contactOpen={contactOpen}
-          onHomeClick={() => navigate("/")}
+          onHomeClick={() => navigate("/kolaz")}
           onCategoryHover={setHoveredCategory}
           onCategorySelect={(category) =>
             navigate(`/${categoryToSlug[category as (typeof sections)[number]]}`)

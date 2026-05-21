@@ -216,7 +216,7 @@ export default function Home() {
   };
 
   const goHome = async () => {
-    await runContentTransition(null, "/");
+    await runContentTransition(null, "/kolaz");
   };
 
   const selectCategory = async (category: (typeof sections)[number]) => {

@@ -255,9 +255,7 @@ export default function Post() {
     setPreviewIndex(nextIndex >= 0 ? nextIndex : 0);
   };
 
-  const openPostContentImagePreview = (
-    event: MouseEvent<HTMLDivElement>,
-  ) => {
+  const openPostContentImagePreview = (event: MouseEvent<HTMLDivElement>) => {
     const target = event.target;
     if (!(target instanceof Element)) return;
 
@@ -457,7 +455,7 @@ export default function Post() {
               ) : post ? (
                 <>
                   <header className="grid grid-cols-12 gap-2 pb-2">
-                    <h1 className="post-title col-span-12 m-0 text-2xl leading-[0.94] font-normal italic text-black/90">
+                    <h1 className="post-title col-span-12 m-0 text-5xl leading-[0.94] font-normal italic text-black/90">
                       {post.title}
                     </h1>
                     <div className="col-span-12 grid py-12 px-2 text-right text-xs leading-tight">
